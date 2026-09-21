@@ -231,7 +231,7 @@ dialog.sheet{max-width:660px;width:100%;margin:auto auto 0;border-radius:26px 26
       <ul class="threadlist" id="threadList"></ul>
     </div>
     <div id="threadView" hidden>
-      <div class="thhead"><button class="btn small" id="thBack" aria-label="Back to chats">Back</button><div style="flex:1;min-width:0"><h2 id="thTitle" style="font-size:1.25rem;margin:0"></h2><small id="thSub"></small></div><button class="btn small" id="thTrace" hidden>Trace route</button></div>
+      <div class="thhead"><button class="btn small" id="thBack" aria-label="Back to chats">Back</button><div style="flex:1;min-width:0"><h2 id="thTitle" style="font-size:1.25rem;margin:0"></h2><small id="thSub"></small><select id="thCh" hidden aria-label="Channel for this conversation" style="width:auto;min-height:34px;margin-top:6px;font-size:.85rem"></select></div><button class="btn small" id="thTrace" hidden>Trace route</button></div>
       <div id="thBody"></div>
       <div class="composer">
         <div class="attachbar"><button class="btn small" id="atVoice">Voice</button><button class="btn small" id="atPic">Picture</button><button class="btn small" id="atFile">File</button></div>
@@ -265,6 +265,7 @@ dialog.sheet{max-width:660px;width:100%;margin:auto auto 0;border-radius:26px 26
       <div class="field"><label for="selPreset">Modem preset</label><select id="selPreset"></select><small id="presetHint"></small></div>
       <div class="field"><label for="selPace">Sending pace</label><select id="selPace"><option value="0.1">Gentle</option><option value="0.25" selected>Balanced</option><option value="0.5">Fast</option></select><small id="paceHint">Time between packets. Nearby nodes repeat every packet you send, so sending the next one too soon makes them collide and get lost. If packets keep going missing, choose Gentle or lower the hop limit.</small></div>
       <label class="check"><input type="checkbox" id="chkAck"><span><strong>Ask the mesh to confirm each packet</strong><small>The board watches for a neighbour repeating each packet and retries if it doesn't. The Log then shows a confirmation, or the reason it failed. Costs a little airtime.</small></span></label>
+      <div class="field"><label for="selCs">Packet size</label><select id="selCs"><option value="60">Tiny: 60 bytes, most robust</option><option value="100" selected>Small: 100 bytes</option><option value="160">Medium: 160 bytes</option><option value="200">Large: 200 bytes, fastest on strong links</option></select><small>Smaller packets spend less time on the air, so they survive weak links much better, but you need more of them. The size travels with each packet, so the other side needs no matching setting.</small></div>
       <div class="field"><label for="selHops">Hop limit</label><select id="selHops"><option>1</option><option>2</option><option selected>3</option><option>4</option></select><small>How many relays may repeat your packets. Lower keeps the airwaves freer.</small></div>
     </div>
     <div class="group"><h3>Error protection</h3>
@@ -282,7 +283,7 @@ dialog.sheet{max-width:660px;width:100%;margin:auto auto 0;border-radius:26px 26
       <label class="check" id="repairRow"><input type="checkbox" id="chkRepair" checked><span><strong>Resend what's missing</strong><small id="repairHint"></small></span></label>
     </div>
     <div class="group"><h3>Notes</h3>
-      <div class="field"><label for="selMax">Longest voice note</label><select id="selMax"><option value="5">5 seconds</option><option value="8" selected>8 seconds</option><option value="12">12 seconds</option><option value="20">20 seconds</option><option value="30">30 seconds</option></select><small>Each 2.3 seconds costs one packet, plus spares. A 30 second note is about 14 packets.</small></div>
+      <div class="field"><label for="selMax">Longest voice note</label><select id="selMax"><option value="5">5 seconds</option><option value="8" selected>8 seconds</option><option value="12">12 seconds</option><option value="20">20 seconds</option><option value="30">30 seconds</option></select><small>Voice takes about 88 bytes a second, so a 30 second note is 2.6 kB: about 27 packets at 100 bytes, plus spares.</small></div>
       <label class="check"><input type="checkbox" id="chkAuto" checked><span>Play incoming voice notes automatically</span></label>
       <p class="hint">Everything travels on Meshtastic's private app port (256), so the regular Meshtastic app ignores it.</p>
     </div>
@@ -9936,6 +9937,9 @@ var MESH = {
 /* Our voice-note packet: 4-byte header + up to CHUNK bytes of Codec2 bitstream. */
 var VOICE = { MAGIC: 0xA1, MAGIC_IMG: 0xA2, HEADER: 4, CHUNK: 200, RATE: 8000, FRAME_BITS: 28, FRAME_SECONDS: 0.04 };
 
+/* Packet (chunk) size is chosen by the sender and carried in every packet header. */
+function withChunk(cs, fn) { var old = VOICE.CHUNK; VOICE.CHUNK = cs; try { return fn(); } finally { VOICE.CHUNK = old; } }
+
 /* ---------- Minimal protobuf ---------- */
 var pb = {
   varint: function (n) {
@@ -10084,7 +10088,7 @@ function parseFromRadio(buf) {
       var ni = pb.parse(e.value), u = pb.get(ni, 2), user = u ? pb.parse(u) : [];
       var ln = pb.get(user, 2), sn = pb.get(user, 3);
       var dm = pb.get(ni, 6);
-      return { kind: 'nodeInfo', num: pb.get(ni, 1) >>> 0, longName: ln ? utf8(ln) : '', shortName: sn ? utf8(sn) : '', snr: f32opt(pb.get(ni, 4)), lastHeard: pb.get(ni, 5) || 0, hops: pb.get(ni, 9), metrics: dm ? parseMetrics(dm) : null };
+      return { kind: 'nodeInfo', num: pb.get(ni, 1) >>> 0, longName: ln ? utf8(ln) : '', shortName: sn ? utf8(sn) : '', channel: pb.get(ni, 7) || 0, snr: f32opt(pb.get(ni, 4)), lastHeard: pb.get(ni, 5) || 0, hops: pb.get(ni, 9), metrics: dm ? parseMetrics(dm) : null };
     }
     if (e.field === 7 && e.wire === 0) return { kind: 'configComplete', id: e.value };
     if (e.field === 10 && e.wire === 2) {
@@ -10198,7 +10202,7 @@ function decodeVoice(codec, stream, chunkPresent) {
    parity/repair symbol = sum(coeff[i] * chunk[i]). Reed-Solomon uses a Cauchy matrix (any k symbols
    recover the data). The fountain uses pseudo-random 0/1 coefficients derived from idx, so the sender
    can keep producing fresh symbols forever (needs about k+1 or k+2 on average). */
-var FEC = { NONE: 0, RS: 1, FOUNTAIN: 2, MAGIC_VOICE: 0xB1, MAGIC_IMG: 0xB2, MAGIC_NACK: 0xB3, HEADER: 7 };
+var FEC = { NONE: 0, RS: 1, FOUNTAIN: 2, MAGIC_VOICE: 0xB1, MAGIC_IMG: 0xB2, MAGIC_NACK: 0xB3, HEADER: 8 };
 var GF_EXP = new Uint8Array(512), GF_LOG = new Uint8Array(256);
 (function () { var x = 1, i; for (i = 0; i < 255; i++) { GF_EXP[i] = x; GF_LOG[x] = i; x <<= 1; if (x & 256) x ^= 0x11d; } for (i = 255; i < 512; i++) GF_EXP[i] = GF_EXP[i - 255]; })();
 function gfMul(a, b) { return a && b ? GF_EXP[GF_LOG[a] + GF_LOG[b]] : 0; }
@@ -10246,15 +10250,22 @@ function fecSolve(mode, k, syms) {
 function dataLen(streamLen, k, idx) { return Math.min(VOICE.CHUNK, streamLen - idx * VOICE.CHUNK); }
 
 /* Sender session: k plain packets, then `extra` protection packets; more can be made later on request. */
-function makeSession(stream, msgId, kind, mode, extra) {
+function makeSession(stream, msgId, kind, mode, extra, cs) {
+  cs = cs || VOICE.CHUNK;
+  return withChunk(cs, function () { return makeSessionInner(stream, msgId, kind, mode, extra, cs); });
+}
+function makeSessionInner(stream, msgId, kind, mode, extra, cs) {
   var k = Math.max(1, Math.ceil(stream.length / VOICE.CHUNK)), chunks = [], i;
   for (i = 0; i < k; i++) chunks.push(padChunk(stream.subarray(i * VOICE.CHUNK, (i + 1) * VOICE.CHUNK)));
   var s = { stream: stream, msgId: msgId & 255, kind: kind, mode: mode, k: k, chunks: chunks, next: k, repairs: 0, packets: [] };
+  s.cs = cs;
   s.packet = function (idx) {
-    var body = idx < k ? stream.subarray(idx * VOICE.CHUNK, (idx + 1) * VOICE.CHUNK) : fecSymbol(mode, k, chunks, idx);
-    var p = new Uint8Array(FEC.HEADER + body.length);
-    p[0] = kind === 'img' ? FEC.MAGIC_IMG : FEC.MAGIC_VOICE; p[1] = s.msgId; p[2] = mode; p[3] = k; p[4] = idx; p[5] = stream.length >> 8; p[6] = stream.length & 255;
-    p.set(body, FEC.HEADER); return p;
+    return withChunk(cs, function () {
+      var body = idx < k ? stream.subarray(idx * cs, (idx + 1) * cs) : fecSymbol(mode, k, chunks, idx);
+      var p = new Uint8Array(FEC.HEADER + body.length);
+      p[0] = kind === 'img' ? FEC.MAGIC_IMG : FEC.MAGIC_VOICE; p[1] = s.msgId; p[2] = mode; p[3] = k; p[4] = idx; p[5] = stream.length >> 8; p[6] = stream.length & 255; p[7] = cs;
+      p.set(body, FEC.HEADER); return p;
+    });
   };
   for (i = 0; i < k + extra && i < 255; i++) { s.packets.push(s.packet(i)); }
   s.next = s.packets.length;
@@ -10280,17 +10291,24 @@ function airtimeMs(presetKey, appBytes) {
 }
 
 /* ---------- File transfer: blocks of up to 16 chunks, each block erasure-coded on its own ---------- */
-var FILE = { MAGIC: 0xC1, NACK: 0xC2, HEADER: 8, BLOCK: 16, MAX: 61440 };
+var FILE = { MAGIC: 0xC1, NACK: 0xC2, HEADER: 9, BLOCK: 16, MAX: 61440 };
 function fileLayout(L) {
   var chunks = Math.ceil(L / VOICE.CHUNK), blocks = Math.ceil(chunks / FILE.BLOCK);
   return { chunks: chunks, blocks: blocks, kb: function (b) { return Math.min(FILE.BLOCK, chunks - b * FILE.BLOCK); } };
 }
 /* stream: bytes to send. Returns {packets, layout, repair(block, n)}. */
-function makeFileSender(stream, id, compressed, mode, parityPct) {
+function makeFileSender(stream, id, compressed, mode, parityPct, cs) {
+  cs = cs || VOICE.CHUNK;
+  var out = withChunk(cs, function () { return makeFileSenderInner(stream, id, compressed, mode, parityPct, cs); });
+  var rawRepair = out.repair;
+  out.repair = function (bl, n) { return withChunk(cs, function () { return rawRepair(bl, n); }); };
+  out.cs = cs; return out;
+}
+function makeFileSenderInner(stream, id, compressed, mode, parityPct, cs) {
   var L = stream.length, lay = fileLayout(L), flags = (compressed ? 1 : 0) | (mode << 1), blocks = [], packets = [], b, i;
   function pack(bl, idx, body) {
     var p = new Uint8Array(FILE.HEADER + body.length);
-    p[0] = FILE.MAGIC; p[1] = id & 255; p[2] = flags; p[3] = (L >> 16) & 255; p[4] = (L >> 8) & 255; p[5] = L & 255; p[6] = bl; p[7] = idx;
+    p[0] = FILE.MAGIC; p[1] = id & 255; p[2] = flags; p[3] = (L >> 16) & 255; p[4] = (L >> 8) & 255; p[5] = L & 255; p[6] = bl; p[7] = idx; p[8] = cs;
     p.set(body, FILE.HEADER); return p;
   }
   function symbol(bl, idx) {
@@ -10320,11 +10338,11 @@ function makeFileSender(stream, id, compressed, mode, parityPct) {
 }
 function parseFilePacket(p) {
   if (!p || p.length <= FILE.HEADER || p[0] !== FILE.MAGIC) return null;
-  var flags = p[2], mode = (flags >> 1) & 3, L = (p[3] << 16) | (p[4] << 8) | p[5];
-  if (mode > 2 || L < 1) return null;
-  var lay = fileLayout(L);
+  var flags = p[2], mode = (flags >> 1) & 3, L = (p[3] << 16) | (p[4] << 8) | p[5], cs = p[8];
+  if (mode > 2 || L < 1 || cs < 16 || cs > 230) return null;
+  var lay = withChunk(cs, function () { return fileLayout(L); });
   if (p[6] >= lay.blocks) return null;
-  return { id: p[1], compressed: !!(flags & 1), mode: mode, L: L, block: p[6], idx: p[7], body: p.subarray(FILE.HEADER) };
+  return { id: p[1], compressed: !!(flags & 1), mode: mode, L: L, cs: cs, block: p[6], idx: p[7], body: p.subarray(FILE.HEADER) };
 }
 function fileNackPacket(id, targetNode, needs) {   // needs: [{block, need}]
   var n = Math.min(needs.length, 24), out = [FILE.NACK, id & 255, targetNode & 255, (targetNode >>> 8) & 255, (targetNode >>> 16) & 255, (targetNode >>> 24) & 255, n];
@@ -10337,11 +10355,12 @@ function parseFileNack(p) {
   for (var i = 0; i < n && 7 + 2 * i + 1 < p.length; i++) needs.push({ block: p[7 + 2 * i], need: p[8 + 2 * i] });
   return { id: p[1], target: (p[2] | (p[3] << 8) | (p[4] << 16) | (p[5] << 24)) >>> 0, needs: needs };
 }
-function FileReceiver(L, mode) {
-  this.L = L; this.mode = mode; this.lay = fileLayout(L); this.blk = []; this.count = 0;
+function FileReceiver(L, mode, cs) {
+  this.cs = cs || VOICE.CHUNK; var self = this;
+  this.L = L; this.mode = mode; this.lay = withChunk(this.cs, function () { return fileLayout(L); }); this.blk = []; this.count = 0;
   for (var b = 0; b < this.lay.blocks; b++) this.blk.push({ kb: this.lay.kb(b), syms: new Map(), data: null, rank: 0 });
 }
-FileReceiver.prototype.add = function (b, idx, body) {
+FileReceiver.prototype.addRaw = function (b, idx, body) {
   var B = this.blk[b];
   if (!B || B.data || B.syms.has(idx)) return;
   B.syms.set(idx, padChunk(body)); this.count++;
@@ -10358,7 +10377,7 @@ FileReceiver.prototype.complete = function () { return this.blk.every(function (
 FileReceiver.prototype.needs = function () {
   var out = []; this.blk.forEach(function (B, i) { if (!B.data) out.push({ block: i, need: Math.max(1, B.kb - B.rank) }); }); return out;
 };
-FileReceiver.prototype.result = function () {
+FileReceiver.prototype.resultRaw = function () {
   if (!this.complete()) return null;
   var out = new Uint8Array(this.L);
   this.blk.forEach(function (B, b) { B.data.forEach(function (d, i) { var off = (b * FILE.BLOCK + i) * VOICE.CHUNK; out.set(d.subarray(0, Math.min(VOICE.CHUNK, this.L - off)), off); }, this); }, this);
@@ -10379,12 +10398,12 @@ function makeChunks(stream, msgId, magic) {
 }
 
 function parseChunk(payload) {
-  if (payload && payload.length >= FEC.HEADER && payload[0] === FEC.MAGIC_NACK)
+  if (payload && payload.length >= 7 && payload[0] === FEC.MAGIC_NACK)
     return { type: 'nack', msgId: payload[1], need: payload[2], target: (payload[3] | (payload[4] << 8) | (payload[5] << 16) | (payload[6] << 24)) >>> 0 };
   if (payload && payload.length > FEC.HEADER && (payload[0] === FEC.MAGIC_VOICE || payload[0] === FEC.MAGIC_IMG)) {
-    var mode = payload[2], k = payload[3], idx = payload[4], len = (payload[5] << 8) | payload[6];
-    if ((mode !== FEC.RS && mode !== FEC.FOUNTAIN) || k < 1 || len < 1 || len > k * VOICE.CHUNK || len <= (k - 1) * VOICE.CHUNK) return null;
-    return { type: payload[0] === FEC.MAGIC_IMG ? 'img' : 'voice', msgId: payload[1], idx: idx, total: k, body: payload.subarray(FEC.HEADER), fec: { mode: mode, k: k, len: len } };
+    var mode = payload[2], k = payload[3], idx = payload[4], len = (payload[5] << 8) | payload[6], cs = payload[7];
+    if (mode > 2 || k < 1 || cs < 16 || cs > 230 || len < 1 || len > k * cs || len <= (k - 1) * cs) return null;
+    return { type: payload[0] === FEC.MAGIC_IMG ? 'img' : 'voice', msgId: payload[1], idx: idx, total: k, body: payload.subarray(FEC.HEADER), fec: { mode: mode, k: k, len: len, cs: cs } };
   }
   if (!payload || payload.length <= VOICE.HEADER || (payload[0] !== VOICE.MAGIC && payload[0] !== VOICE.MAGIC_IMG)) return null;
   var idx = payload[2], total = payload[3];
@@ -10444,7 +10463,7 @@ function packImage(px, size) {
 }
 /* Unknown pixels (packet never arrived) come back as 255. */
 function decodeImage(stream, present, totalChunks) {
-  var size = totalChunks > 1 ? 32 : 16, px = new Uint8Array(size * size).fill(255);
+  var size = stream.length > 200 ? 32 : 16, px = new Uint8Array(size * size).fill(255);
   for (var i = 0; i < size * size; i++) {
     var b = 1 + (i >> 1);
     if (b >= stream.length || (present && !present[Math.floor(b / VOICE.CHUNK)])) continue;
@@ -10454,11 +10473,14 @@ function decodeImage(stream, present, totalChunks) {
 }
 
 if (typeof module !== 'undefined') {
-  module.exports = { parseRouteDiscovery: parseRouteDiscovery, PORT_NAMES: PORT_NAMES, REGIONS: REGIONS, PRESET_ENUM: PRESET_ENUM, ROUTING_ERRORS: ROUTING_ERRORS, routingError: routingError, parseMetrics: parseMetrics, MESH: MESH, VOICE: VOICE, pb: pb, buildWantConfig: buildWantConfig, buildSendPacket: buildSendPacket,
+  module.exports = { withChunk: withChunk, parseRouteDiscovery: parseRouteDiscovery, PORT_NAMES: PORT_NAMES, REGIONS: REGIONS, PRESET_ENUM: PRESET_ENUM, ROUTING_ERRORS: ROUTING_ERRORS, routingError: routingError, parseMetrics: parseMetrics, MESH: MESH, VOICE: VOICE, pb: pb, buildWantConfig: buildWantConfig, buildSendPacket: buildSendPacket,
     parseFromRadio: parseFromRadio, makeCodec: makeCodec, packFrames: packFrames, unpackFrame: unpackFrame,
     encodeVoice: encodeVoice, decodeVoice: decodeVoice, makeChunks: makeChunks, parseChunk: parseChunk,
     VoiceAssembly: VoiceAssembly, PRESETS: PRESETS, airtimeMs: airtimeMs, FILE: FILE, makeFileSender: makeFileSender, parseFilePacket: parseFilePacket, fileNackPacket: fileNackPacket, parseFileNack: parseFileNack, FileReceiver: FileReceiver, FEC: FEC, makeSession: makeSession, fecSolve: fecSolve, padChunk: padChunk, dataLen: dataLen, nackPacket: nackPacket, packImage: packImage, decodeImage: decodeImage, PALETTE: PALETTE, chunkSizes: chunkSizes, ampsFromPcm: ampsFromPcm };
 }
+
+FileReceiver.prototype.add = function (b, idx, body) { var s = this; return withChunk(s.cs, function () { return s.addRaw(b, idx, body); }); };
+FileReceiver.prototype.result = function () { var s = this; return withChunk(s.cs, function () { return s.resultRaw(); }); };
 
 /* ===== App: UI, Bluetooth, audio ===== */
 (function () {
@@ -10471,7 +10493,7 @@ if (typeof module !== 'undefined') {
     nodes: new Map(), channels: [], channelIndex: 0,
     maxSec: 8, hops: 3, autoplay: true, 
     clip: null, recording: false, sending: false,
-    inbox: new Map(), sessions: new Map(), preset: 'LONG_FAST', wantAck: false, pending: new Map(), hw: { queue: null, meta: null, lora: null, net: {}, pollMs: null, poll: { n: 0, sum: 0, max: 0, last: 0 }, putMs: null }, stats: { tx: 0, rx: 0, txB: 0, rxB: 0, acks: 0, fails: 0 }, xfer: null, traces: new Map(), view: 'chat', threads: new Map(), thread: null, target: null, sheet: null, liveBub: null, mode: 'ble', http: null, poll: null, fec: 1, extra: 0.25, repair: true
+    inbox: new Map(), sessions: new Map(), preset: 'LONG_FAST', wantAck: false, pending: new Map(), hw: { queue: null, meta: null, lora: null, net: {}, pollMs: null, poll: { n: 0, sum: 0, max: 0, last: 0 }, putMs: null }, stats: { tx: 0, rx: 0, txB: 0, rxB: 0, acks: 0, fails: 0 }, cs: 100, xfer: null, traces: new Map(), view: 'chat', threads: new Map(), thread: null, target: null, sheet: null, liveBub: null, mode: 'ble', http: null, poll: null, fec: 1, extra: 0.25, repair: true
   };
   var CHUNK_SECONDS = VOICE.CHUNK * 8 / VOICE.FRAME_BITS * VOICE.FRAME_SECONDS; // ~2.29 s per packet
   var SIM_NODE = 0x00c0ffee;
@@ -10772,7 +10794,7 @@ if (typeof module !== 'undefined') {
   function handleFromRadio(m) {
     try { logFrom(m); } catch (e) { console.warn('log failed', e); }
     if (m.kind === 'myInfo') S.myNum = m.num;
-    else if (m.kind === 'nodeInfo') { S.nodes.set(m.num, { longName: m.longName, shortName: m.shortName, snr: m.snr, hops: m.hops, metrics: m.metrics, lastHeard: m.lastHeard }); refreshThreadTitles(); if ($('dlgNode').open) fillNodeList(); if (S.view === 'log') fillTraceNodes(); }
+    else if (m.kind === 'nodeInfo') { S.nodes.set(m.num, { longName: m.longName, shortName: m.shortName, channel: m.channel, snr: m.snr, hops: m.hops, metrics: m.metrics, lastHeard: m.lastHeard }); refreshThreadTitles(); if ($('dlgNode').open) fillNodeList(); if (S.view === 'log') fillTraceNodes(); }
     else if (m.kind === 'channel') {
       S.channels = S.channels.filter(function (c) { return c.index !== m.index; });
       if (m.role > 0) S.channels.push(m);
@@ -10974,7 +10996,7 @@ if (typeof module !== 'undefined') {
       S.inbox.set(key, n);
       attachNote(n, from, meta, 'Voice note');
     }
-    absorb(n, c); noteArrival(n, c, meta); n.last = Date.now(); n.stalled = false; n.meta = meta || n.meta;
+    n.cs = n.cs || (c.fec ? c.fec.cs : 200); withChunk(n.cs, function () { absorb(n, c); }); noteArrival(n, c, meta); n.last = Date.now(); n.stalled = false; n.meta = meta || n.meta;
     var wasComplete = n.complete;
     n.complete = n.asm.complete();
     decodeNote(n);
@@ -10986,13 +11008,15 @@ if (typeof module !== 'undefined') {
       try { playPcm(n.pcm, n.li.querySelector('.play')); } catch (e) { console.warn('autoplay blocked', e); }
     }
   }
-  function decodeNote(n) {
+  function decodeNote(n) { return withChunk(n.cs || 200, function () { return decodeNoteInner(n); }); }
+  function decodeNoteInner(n) {
     var r = n.asm.build();
     n.pcm = withCodec(function (cd) { return decodeVoice(cd, r.stream, r.present); });
     n.amps = ampsFromPcm(n.pcm);
     n.seconds = n.pcm.length / VOICE.RATE;
   }
-  function renderNote(n) {
+  function renderNote(n) { return withChunk(n.cs || 200, function () { return renderNoteInner(n); }); }
+  function renderNoteInner(n) {
     var got = n.asm.got(), i;
     var segs = [];
     for (i = 0; i < n.total; i++) {
@@ -11103,12 +11127,13 @@ if (typeof module !== 'undefined') {
       n = { key: key, from: from, total: c.total, asm: new VoiceAssembly(c.total), li: document.createElement('li'), stalled: false, timer: null, meta: meta, isImg: true };
       S.inbox.set(key, n); attachNote(n, from, meta, 'Picture');
     }
-    absorb(n, c); noteArrival(n, c, meta); n.stalled = false; n.meta = meta || n.meta;
+    n.cs = n.cs || (c.fec ? c.fec.cs : 200); withChunk(n.cs, function () { absorb(n, c); }); noteArrival(n, c, meta); n.stalled = false; n.meta = meta || n.meta;
     renderImageNote(n);
     clearTimeout(n.timer); scheduleNack(n);
     if (!n.asm.complete()) n.timer = setTimeout(function () { n.stalled = true; renderImageNote(n); }, 45000);
   }
-  function renderImageNote(n) {
+  function renderImageNote(n) { return withChunk(n.cs || 200, function () { return renderImageNoteInner(n); }); }
+  function renderImageNoteInner(n) {
     var r = n.asm.build(), img = decodeImage(r.stream, r.present, n.total), got = n.asm.got();
     var status = recvStatus(n, 'Picture');
     status += fecNote(n);
@@ -11120,13 +11145,11 @@ if (typeof module !== 'undefined') {
 
   /* ---------- Error protection: build, absorb, repair ---------- */
   function buildSession(stream, id, kind) {
-    if (S.fec === FEC.NONE) {
-      var ch = makeChunks(stream, id, kind === 'img' ? VOICE.MAGIC_IMG : VOICE.MAGIC);
-      return { packets: ch, k: ch.length };
+    var kk = Math.max(1, Math.ceil(stream.length / VOICE.CHUNK)), s = makeSession(stream, id, kind, S.fec, spareCount(kk), VOICE.CHUNK);
+    if (S.fec !== FEC.NONE) {
+      s.target = { to: S.target ? S.target.to : MESH.BROADCAST, ch: S.channelIndex }; S.sessions.set(s.msgId, s);
+      if (S.sessions.size > 8) S.sessions.delete(S.sessions.keys().next().value);
     }
-    var kk = Math.max(1, Math.ceil(stream.length / VOICE.CHUNK)), s = makeSession(stream, id, kind, S.fec, spareCount(kk));
-    s.target = { to: S.target ? S.target.to : MESH.BROADCAST, ch: S.channelIndex }; S.sessions.set(s.msgId, s);
-    if (S.sessions.size > 8) S.sessions.delete(S.sessions.keys().next().value);
     return s;
   }
   function absorb(n, c) {
@@ -11397,9 +11420,9 @@ if (typeof module !== 'undefined') {
   function addFileChunk(from, f, meta) {
     if (!f) return;
     var key = 'f:' + from + ':' + f.id, n = S.inbox.get(key);
-    if (n && (n.L !== f.L || n.mode !== f.mode)) n = null;
+    if (n && (n.L !== f.L || n.mode !== f.mode || n.rx.cs !== f.cs)) n = null;
     if (!n) {
-      n = { key: key, from: from, id: f.id, L: f.L, mode: f.mode, compressed: f.compressed, rx: new FileReceiver(f.L, f.mode), li: document.createElement('li'),
+      n = { key: key, from: from, id: f.id, L: f.L, mode: f.mode, compressed: f.compressed, rx: new FileReceiver(f.L, f.mode, f.cs), li: document.createElement('li'),
             gaps: [], lastAt: 0, nacks: 0, done: false, timer: null, meta: meta, note: '', t0: Date.now() };
       S.inbox.set(key, n); attachNote(n, from, meta, 'File');
     }
@@ -11478,7 +11501,7 @@ if (typeof module !== 'undefined') {
     if (m === VOICE.MAGIC || m === VOICE.MAGIC_IMG) return ', ' + (m === VOICE.MAGIC ? 'voice' : 'postcard') + id + ' packet ' + (p[2] + 1) + ' of ' + p[3] + ' (no protection)';
     if (m === FEC.MAGIC_VOICE || m === FEC.MAGIC_IMG) {
       var k = p[3], idx = p[4];
-      return ', ' + (m === FEC.MAGIC_VOICE ? 'voice' : 'postcard') + id + (idx < k ? ' data packet ' + (idx + 1) + ' of ' + k : ' spare ' + (idx - k + 1) + ' for ' + k + ' packets') + (p[2] === FEC.RS ? ', Reed-Solomon' : ', fountain');
+      return ', ' + (m === FEC.MAGIC_VOICE ? 'voice' : 'postcard') + id + (idx < k ? ' data packet ' + (idx + 1) + ' of ' + k : ' spare ' + (idx - k + 1) + ' for ' + k + ' packets') + (p[2] === FEC.RS ? ', Reed-Solomon' : p[2] === FEC.FOUNTAIN ? ', fountain' : ', no protection');
     }
     if (m === FEC.MAGIC_NACK) return ', repair request for msg ' + hex2(p[1]) + ', needs ' + p[2] + ' more';
     if (m === FILE.MAGIC) return ', file transfer ' + hex2(p[1]) + ' block ' + p[6] + (p[7] >= 0 ? ' symbol ' + p[7] : '') + ((p[2] & 1) ? ', compressed' : '');
@@ -11607,7 +11630,7 @@ if (typeof module !== 'undefined') {
   }
   function threadFor(from, meta) {
     var dm = !!(from && meta && meta.to && meta.to !== MESH.BROADCAST && meta.to === S.myNum);
-    return dm ? mkThread('dm:' + from, true, from, 0) : mkThread('ch:' + ((meta && meta.channel) || 0), false, null, (meta && meta.channel) || 0);
+    return dm ? mkThread('dm:' + from, true, from, (meta && meta.channel) || 0) : mkThread('ch:' + ((meta && meta.channel) || 0), false, null, (meta && meta.channel) || 0);
   }
   function targetOf(th) { return { to: th.dm ? th.node : MESH.BROADCAST, ch: th.ch }; }
   function updateBadge() { var n = 0; S.threads.forEach(function (t) { n += t.unread; }); var b = $('badge'); b.textContent = n; b.hidden = !n; }
@@ -11640,8 +11663,10 @@ if (typeof module !== 'undefined') {
   function updateThreadHead() {
     var th = S.threads.get(S.thread); if (!th) return;
     $('thTitle').textContent = thTitle(th); $('thTrace').hidden = !th.dm;
+    var sel = $('thCh'); sel.hidden = !th.dm;
+    if (th.dm) { var opts = S.channels.length ? S.channels : [{ index: th.ch }]; sel.innerHTML = opts.map(function (x) { return '<option value="' + x.index + '">' + esc(chTitle(x.index)) + '</option>'; }).join(''); sel.value = String(th.ch); }
     var c = S.channels.filter(function (x) { return x.index === th.ch; })[0];
-    $('thSub').textContent = th.dm ? 'Direct message. Only they receive it.' : (c && c.pskLen <= 1 ? 'Default key: anyone in range can read this channel.' : (c ? 'Private channel. Everyone with the key sees it.' : 'Channel ' + th.ch));
+    $('thSub').textContent = th.dm ? 'Direct message, sent on ' + chTitle(th.ch) + '. Only they receive it.' : (c && c.pskLen <= 1 ? 'Default key: anyone in range can read this channel.' : (c ? 'Private channel. Everyone with the key sees it.' : 'Channel ' + th.ch));
   }
   function refreshThreadTitles() { if (S.thread) updateThreadHead(); else renderThreadList(); }
   function openThread(key) {
@@ -11728,7 +11753,7 @@ if (typeof module !== 'undefined') {
       b.className = 'thcard'; b.innerHTML = '<span class="thav"></span><span class="thmain"><strong></strong><span></span></span>';
       b.querySelector('.thav').textContent = initials(nm); b.querySelector('strong').textContent = nm;
       b.querySelector('.thmain span').textContent = '!' + hex8(num) + (info.hops !== undefined ? ', ' + info.hops + ' hops away' : '');
-      b.addEventListener('click', function () { closeSheet('dlgNode'); var th = mkThread('dm:' + num, true, num, 0); showView('chat'); openThread(th.key); });
+      b.addEventListener('click', function () { closeSheet('dlgNode'); var th = mkThread('dm:' + num, true, num, info.channel || 0); showView('chat'); openThread(th.key); });
       li.appendChild(b); ul.appendChild(li);
     });
     $('nodeEmpty').hidden = n > 0;
@@ -11755,6 +11780,7 @@ if (typeof module !== 'undefined') {
     mkThread('ch:0', false, null, 0); renderThreadList();
     $('btnNew').addEventListener('click', openNodePicker);
     $('thBack').addEventListener('click', closeThread);
+    $('thCh').addEventListener('change', function (e) { var th = S.threads.get(S.thread); if (!th) return; th.ch = parseInt(e.target.value, 10) || 0; S.channelIndex = th.ch; S.target = targetOf(th); updateThreadHead(); });
     $('thTrace').addEventListener('click', function () { var th = S.threads.get(S.thread); if (th && th.dm) runTrace(th.node, th); });
     $('atVoice').addEventListener('click', function () { openSheet('shVoice', 'voice'); });
     $('atPic').addEventListener('click', function () { openSheet('shPic', 'pic'); });
@@ -11788,6 +11814,14 @@ if (typeof module !== 'undefined') {
     });
     return h + '</div>';
   }
+  var SNR_LIMIT = { 7: -7.5, 8: -10, 9: -12.5, 10: -15, 11: -17.5, 12: -20 };
+  function weakNote(rd) {
+    var v = rd.snrTowards.concat(rd.snrBack).filter(function (x) { return x !== -128; }).map(function (x) { return x / 4; });
+    if (!v.length) return '';
+    var min = Math.min.apply(null, v), lim = SNR_LIMIT[PRESETS[S.preset].sf], margin = min - lim;
+    if (margin >= 8) return '';
+    return ' Weakest link: ' + min.toFixed(1) + ' dB, only ' + margin.toFixed(1) + ' dB above what ' + PRESETS[S.preset].name + ' can decode (about ' + lim + ' dB). Long packets are much likelier to be lost than short ones on a link like this, so use a smaller packet size in Settings.';
+  }
   function renderTrace(t) {
     var tn = nodeName(t.node), h = '<div class="notehead"><strong>Route to ' + esc(tn) + '</strong><span class="when">' + nowLabel() + '</span></div>';
     if (t.error) h += '<p class="hint">' + esc(t.error) + '</p>';
@@ -11796,7 +11830,7 @@ if (typeof module !== 'undefined') {
       h += '<p class="hint">There</p>' + chainHtml(['You'].concat(rd.route.map(nodeName), [tn]), rd.snrTowards);
       h += '<p class="hint">Back</p>' + ((rd.routeBack.length || rd.snrBack.length) ? chainHtml([tn].concat(rd.routeBack.map(nodeName), ['You']), rd.snrBack) : '<p class="hint">The reply carried no return path.</p>');
       h += '<p class="notestat">' + (n ? n + (n === 1 ? ' repeater' : ' repeaters') + ' between you and ' + esc(tn) : 'Direct, nothing repeated it') + '. ' +
-        (t.from === t.node ? 'The reply came from ' + esc(tn) + ' itself after ' + (t.dt / 1000).toFixed(1) + ' s, so the target really received the request.' : 'The reply came from ' + esc(nodeName(t.from)) + ', not from ' + esc(tn) + '.') + '</p>';
+        (t.from === t.node ? 'The reply came from ' + esc(tn) + ' itself after ' + (t.dt / 1000).toFixed(1) + ' s, so the target really received the request.' : 'The reply came from ' + esc(nodeName(t.from)) + ', not from ' + esc(tn) + '.') + esc(weakNote(rd)) + '</p>';
     } else if (t.timeout) h += '<p class="hint">No reply after ' + Math.round(TR_WAIT / 1000) + ' s. The target may be out of range, the path may need more hops than the limit (' + t.hops + '), or a packet was lost. A traceroute is one packet with no retries, so try again before concluding.</p>';
     else h += '<p class="hint">Request sent. Waiting for the reply, up to ' + Math.round(TR_WAIT / 1000) + ' s…</p>';
     t.els.forEach(function (el) { el.innerHTML = h; });
@@ -11813,7 +11847,7 @@ if (typeof module !== 'undefined') {
     trLast = Date.now(); askNodes();
     S.traces.set(t.id, t); renderTrace(t);
     t.timer = setTimeout(function () { if (!t.done) { t.timeout = true; renderTrace(t); } }, TR_WAIT);
-    sendPacket(70, new Uint8Array(0), { to: node, ch: 0, id: t.id, wantResponse: true, wantAck: false }).catch(function (e) { t.error = 'Could not send the request: ' + (e.message || e.name); clearTimeout(t.timer); renderTrace(t); });
+    sendPacket(70, new Uint8Array(0), { to: node, ch: th ? th.ch : ((S.nodes.get(node) || {}).channel || 0), id: t.id, wantResponse: true, wantAck: false }).catch(function (e) { t.error = 'Could not send the request: ' + (e.message || e.name); clearTimeout(t.timer); renderTrace(t); });
   }
   function handleTrace(m, rd) {
     if (m.from === S.myNum) return;
@@ -11869,8 +11903,14 @@ if (typeof module !== 'undefined') {
     $('btnDiscard').addEventListener('click', discardClip);
     $('btnSim').addEventListener('click', simulate);
     $('selMax').addEventListener('change', function (e) { S.maxSec = parseInt(e.target.value, 10); if (!S.clip && !S.recording) { renderIdleStrip(); $('stripMeta').textContent = idleHint(); } });
+    $('selCs').addEventListener('change', function (e) {
+      S.cs = parseInt(e.target.value, 10); VOICE.CHUNK = S.cs;
+      CHUNK_SECONDS = VOICE.CHUNK * 8 / VOICE.FRAME_BITS * VOICE.FRAME_SECONDS;
+      updateTiming(); if (!S.clip && !S.recording) { renderIdleStrip(); $('stripMeta').textContent = idleHint(); }
+    });
     $('selHops').addEventListener('change', function (e) { S.hops = parseInt(e.target.value, 10); });
     $('chkAuto').addEventListener('change', function (e) { S.autoplay = e.target.checked; });
+    VOICE.CHUNK = S.cs; CHUNK_SECONDS = VOICE.CHUNK * 8 / VOICE.FRAME_BITS * VOICE.FRAME_SECONDS;
     initShell();
     initChat();
     initLog();
