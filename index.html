@@ -143,6 +143,15 @@ dialog::backdrop{background:rgba(10,9,30,.6)}
 .dlg ol{padding-left:1.2em;margin:8px 0 14px;color:var(--muted);font-size:.92rem}
 .dlgnote{margin:12px 0;padding:10px 12px;border-radius:12px;background:var(--card);font-size:.9rem}
 .dlgclose{float:right}
+.opt{display:flex;gap:12px;align-items:flex-start;padding:14px;margin-bottom:10px;border:1.5px solid var(--rule);border-radius:16px;background:var(--card);cursor:pointer;max-width:520px}
+.opt:has(input:checked){border-color:var(--accent);background:rgba(139,114,255,.12)}
+.opt input{width:20px;height:20px;margin-top:2px;accent-color:var(--accent);flex:none}
+.opt strong,.check strong{display:block}
+.opt small,.check small{display:block;margin-top:2px}
+.fecdemo{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 8px}
+.pk{min-width:78px;padding:8px 10px;border-radius:12px;border:2px solid var(--ok);text-align:center;font-weight:600;font-size:.85rem;background:var(--card)}
+.pk small{display:block;font-weight:400;color:var(--muted)}
+.pk.lost{border-style:dashed;border-color:var(--bad)} .pk.spare{border-color:var(--accent)} .pk.fixed{background:rgba(47,211,154,.16)}
 @media (prefers-reduced-motion:reduce){.rec.on{animation:none}.recicon,.fill{transition:none}}
 </style>
 </head>
@@ -207,7 +216,6 @@ dialog::backdrop{background:rgba(10,9,30,.6)}
         <div><dt>Packets</dt><dd id="fPk">-</dd></div><div><dt>Airtime</dt><dd id="fAir">-</dd></div><div><dt>Time at this pace</dt><dd id="fEta">-</dd></div>
       </dl>
       <div class="opts">
-        <div class="field" style="margin:0"><label for="selPace">Pace</label><select id="selPace"><option value="0.1">Gentle: 10% airtime</option><option value="0.25" selected>Balanced: 25% airtime</option><option value="0.5">Fast: 50% airtime</option></select><small id="paceHint"></small></div>
         <div class="field" style="margin:0"><label for="selParity">Protection</label><select id="selParity"><option value="0">No extra packets</option><option value="0.125">12% extra</option><option value="0.25" selected>25% extra</option><option value="0.5">50% extra</option></select><small>Uses the method chosen in Settings.</small></div>
       </div>
       <label class="check" style="margin-top:0"><input type="checkbox" id="chkZip" checked><span>Compress first when it makes the file smaller</span></label>
@@ -229,15 +237,25 @@ dialog::backdrop{background:rgba(10,9,30,.6)}
     <div class="group"><h3>Radio</h3>
       <div class="field"><label for="selPreset">Modem preset</label><select id="selPreset"></select><small id="presetHint"></small></div>
       <div class="field"><label for="selChannel">Send on channel</label><select id="selChannel"><option value="0">Primary channel (slot 0)</option></select><small id="channelHint"></small></div>
+      <div class="field"><label for="selPace">Sending pace</label><select id="selPace"><option value="0.1">Gentle</option><option value="0.25" selected>Balanced</option><option value="0.5">Fast</option></select><small id="paceHint">Time between packets. Nearby nodes repeat every packet you send, so sending the next one too soon makes them collide and get lost. If packets keep going missing, choose Gentle or lower the hop limit.</small></div>
       <div class="field"><label for="selHops">Hop limit</label><select id="selHops"><option>1</option><option>2</option><option selected>3</option><option>4</option></select><small>How many relays may repeat your packets. Lower keeps the airwaves freer.</small></div>
     </div>
     <div class="group"><h3>Error protection</h3>
-      <div class="field"><label for="selFec">Method</label><select id="selFec"><option value="1" selected>Reed-Solomon</option><option value="2">Fountain</option><option value="0">None</option></select><small id="fecHint"></small></div>
-      <div class="field" id="extraField"><label for="selExtra">Extra packets for notes and postcards</label><select id="selExtra"><option>1</option><option>2</option><option>3</option><option>4</option></select><small>Each can stand in for one lost packet. Files choose their own share on the Files tab.</small></div>
-      <label class="check"><input type="checkbox" id="chkRepair" checked><span>Ask for, and send, missing pieces automatically</span></label>
+      <p class="hint">Radio packets sometimes vanish on the way. Protection sends a few spare packets along with the real ones, so a lost packet can be rebuilt instead of leaving a gap.</p>
+      <div style="margin-top:14px" role="radiogroup" aria-label="Error protection method">
+        <label class="opt"><input type="radio" name="fec" value="1" checked><span><strong>Reed-Solomon</strong><small>Any spare can replace any lost packet. The most protection for the airtime. The number of spares is fixed when you send.</small></span></label>
+        <label class="opt"><input type="radio" name="fec" value="2"><span><strong>Fountain</strong><small>Spares are mixed a little differently, so now and then one extra is needed. In return the sender can keep making new spares for as long as you ask.</small></span></label>
+        <label class="opt"><input type="radio" name="fec" value="0"><span><strong>None</strong><small>Nothing extra is sent. A lost packet leaves a hole in the audio or picture.</small></span></label>
+      </div>
+      <div class="fecdemo" id="fecDemo" aria-hidden="true"></div>
+      <p class="hint" id="fecCap"></p>
+      <div class="field" id="extraField"><label for="selExtra">How many spares</label>
+        <select id="selExtra"><option value="0.17">Light: 1 spare for every 6 packets</option><option value="0.25" selected>Normal: 1 for every 4 packets</option><option value="0.5">Strong: 1 for every 2 packets</option></select>
+        <small>Always at least one spare. Longer notes get more spares automatically. Files pick their own share on the Files tab.</small></div>
+      <label class="check" id="repairRow"><input type="checkbox" id="chkRepair" checked><span><strong>Resend what's missing</strong><small id="repairHint"></small></span></label>
     </div>
     <div class="group"><h3>Notes</h3>
-      <div class="field"><label for="selMax">Longest voice note</label><select id="selMax"><option value="3">3 seconds</option><option value="5" selected>5 seconds</option><option value="8">8 seconds</option></select><small>Each 2.3 seconds costs one packet.</small></div>
+      <div class="field"><label for="selMax">Longest voice note</label><select id="selMax"><option value="5">5 seconds</option><option value="8" selected>8 seconds</option><option value="12">12 seconds</option><option value="20">20 seconds</option><option value="30">30 seconds</option></select><small>Each 2.3 seconds costs one packet, plus spares. A 30 second note is about 14 packets.</small></div>
       <label class="check"><input type="checkbox" id="chkAuto" checked><span>Play incoming voice notes automatically</span></label>
       <label class="check"><input type="checkbox" id="chkText" checked><span>Send a short text first, so the board's screen shows a message</span></label>
       <p class="hint">Everything travels on Meshtastic's private app port (256), so the regular Meshtastic app ignores it.</p>
@@ -10300,11 +10318,10 @@ if (typeof module !== 'undefined') {
     dev: null, toRadio: null, fromRadio: null, fromNum: null,
     connected: false, ready: false, myNum: null,
     nodes: new Map(), channels: [], channelIndex: 0,
-    maxSec: 5, hops: 3, autoplay: true, textNotice: true,
+    maxSec: 8, hops: 3, autoplay: true, textNotice: true,
     clip: null, recording: false, sending: false,
-    inbox: new Map(), sessions: new Map(), preset: 'LONG_FAST', xfer: null, view: 'voice', unread: 0, mode: 'ble', http: null, poll: null, fec: 1, extra: 1, repair: true
+    inbox: new Map(), sessions: new Map(), preset: 'LONG_FAST', xfer: null, view: 'voice', unread: 0, mode: 'ble', http: null, poll: null, fec: 1, extra: 0.25, repair: true
   };
-  var GAP_MS = 2600;                 // pause between packets so the board's queue stays short
   var CHUNK_SECONDS = VOICE.CHUNK * 8 / VOICE.FRAME_BITS * VOICE.FRAME_SECONDS; // ~2.29 s per packet
   var SIM_NODE = 0x00c0ffee;
 
@@ -10372,7 +10389,8 @@ if (typeof module !== 'undefined') {
     var labels = '';
     for (k = 0; k < o.segs.length; k++) {
       var s = o.segs[k];
-      labels += '<div style="flex:' + s.weight.toFixed(3) + '"><span class="segname">' + esc(s.name) + '</span><span class="segsub">' + esc(s.sub) + '</span></div>';
+      var many = o.segs.length > 6;
+      labels += '<div style="flex:' + s.weight.toFixed(3) + '"><span class="segname">' + esc(many ? String(k + 1) : s.name) + '</span>' + (many ? '' : '<span class="segsub">' + esc(s.sub) + '</span>') + '</div>';
     }
     return '<svg viewBox="0 0 ' + W + ' 100" preserveAspectRatio="none" role="img" aria-label="' + esc(o.label || 'Voice note split into radio packets') + '">' + bars + divs + '</svg><div class="seglabels">' + labels + '</div>';
   }
@@ -10475,7 +10493,7 @@ if (typeof module !== 'undefined') {
       var el = (Date.now() - t0) / 1000;
       $('stripMeta').textContent = el.toFixed(1) + ' s of ' + S.maxSec + ' s';
       if (levels.length > S.maxSec * 20) levels.length = S.maxSec * 20;
-      renderIdleStrip(levels);
+      if (S.maxSec <= 8 || levels.length % 2 === 0) renderIdleStrip(levels);
       if (el >= S.maxSec) stopRecording();
     }, 50);
     mr.onstop = async function () {
@@ -10516,12 +10534,19 @@ if (typeof module !== 'undefined') {
   function showClip() {
     var sizes = chunkSizes(S.clip.stream.length);
     renderClipStrip();
-    $('stripMeta').textContent = S.clip.seconds.toFixed(1) + ' s squeezed into ' + S.clip.stream.length + ' bytes, ' + sizes.length + (sizes.length === 1 ? ' packet' : ' packets');
+    updateClipMeta();
     $('clipActions').hidden = false;
     $('btnSend').disabled = !S.ready || S.sending;
     $('btnSend').title = S.ready ? '' : 'Connect a board first';
     $('btnSim').hidden = false;
     setStatus(S.ready ? '' : 'Connect a board to send this. You can still play it back and test it here.', S.ready ? '' : 'note');
+  }
+  function spareCount(k) { return S.fec ? Math.max(1, Math.ceil(k * S.extra)) : 0; }
+  function updateClipMeta() {
+    if (!S.clip || S.recording) return;
+    var k = chunkSizes(S.clip.stream.length).length, sp = spareCount(k);
+    $('stripMeta').textContent = S.clip.seconds.toFixed(1) + ' s squeezed into ' + S.clip.stream.length + ' bytes: ' + k + (k === 1 ? ' packet' : ' packets') +
+      (sp ? ' plus ' + sp + (sp === 1 ? ' spare' : ' spares') : '') + ', about ' + fmtTime((k + sp) * paceMs()) + ' to send';
   }
   function idleHint() { return 'Tap the red button, speak, tap again to stop. Up to ' + S.maxSec + ' s.'; }
   function discardClip() {
@@ -10699,14 +10724,14 @@ if (typeof module !== 'undefined') {
       if (S.textNotice) {
         setStatus('Sending a text notice first…');
         await sendPacket(MESH.PORT_TEXT, new TextEncoder().encode('[voice note ' + S.clip.seconds.toFixed(1) + 's]'));
-        await sleep(GAP_MS);
+        await sleep(paceMs());
       }
       for (k = 0; k < chunks.length; k++) {
         states[k] = 'sending'; renderClipStrip(states);
         setStatus('Sending packet ' + (k + 1) + ' of ' + chunks.length + '…');
         await sendPacket(MESH.PORT_PRIVATE, chunks[k]);
         states[k] = 'sent'; renderClipStrip(states);
-        if (k < chunks.length - 1) await sleep(GAP_MS);
+        if (k < chunks.length - 1) await sleep(paceMs());
       }
       setStatus('Handed to the board. It transmits each packet when the channel is clear. The other side needs this page open and connected to hear it.', 'ok');
     } catch (e) {
@@ -10854,11 +10879,11 @@ if (typeof module !== 'undefined') {
     S.sending = true; refreshPx();
     var sess = buildSession(packImage(pad.px, pad.n), Math.floor(Math.random() * 256), 'img'), chunks = sess.packets, k = 0, st = $('pxStatus');
     try {
-      if (S.textNotice) { st.textContent = 'Sending a text notice first…'; await sendPacket(MESH.PORT_TEXT, new TextEncoder().encode('[pixel postcard]')); await sleep(GAP_MS); }
+      if (S.textNotice) { st.textContent = 'Sending a text notice first…'; await sendPacket(MESH.PORT_TEXT, new TextEncoder().encode('[pixel postcard]')); await sleep(paceMs()); }
       for (k = 0; k < chunks.length; k++) {
         st.textContent = 'Sending packet ' + (k + 1) + ' of ' + chunks.length + '…';
         await sendPacket(MESH.PORT_PRIVATE, chunks[k]);
-        if (k < chunks.length - 1) await sleep(GAP_MS);
+        if (k < chunks.length - 1) await sleep(paceMs());
       }
       st.textContent = 'Handed to the board. The other side needs this page open and connected.'; st.className = 'status ok';
     } catch (e) { console.warn(e); st.textContent = 'Sending stopped at packet ' + (k + 1) + '. Check the connection and try again.'; st.className = 'status err'; }
@@ -10898,7 +10923,7 @@ if (typeof module !== 'undefined') {
       var ch = makeChunks(stream, id, kind === 'img' ? VOICE.MAGIC_IMG : VOICE.MAGIC);
       return { packets: ch, k: ch.length };
     }
-    var s = makeSession(stream, id, kind, S.fec, S.extra);
+    var kk = Math.max(1, Math.ceil(stream.length / VOICE.CHUNK)), s = makeSession(stream, id, kind, S.fec, spareCount(kk));
     S.sessions.set(s.msgId, s);
     if (S.sessions.size > 8) S.sessions.delete(S.sessions.keys().next().value);
     return s;
@@ -10924,7 +10949,7 @@ if (typeof module !== 'undefined') {
   function scheduleNack(n) {
     clearTimeout(n.nackTimer);
     if (!n.fec || n.asm.complete() || !S.repair || (n.nacks || 0) >= 2) return;
-    n.nackTimer = setTimeout(function () { sendNack(n); }, n.nacks ? 8 * GAP_MS : 5 * GAP_MS);
+    n.nackTimer = setTimeout(function () { sendNack(n); }, (n.nacks ? 4 : 2.5) * paceMs());
   }
   async function sendNack(n) {
     if (!S.ready || n.asm.complete()) return;
@@ -10947,19 +10972,35 @@ if (typeof module !== 'undefined') {
         for (var i = 0; i < count; i++) {
           setStatus(nodeName(from) + ' asked for more. Sending extra packet ' + (i + 1) + ' of ' + count + '…');
           await sendPacket(MESH.PORT_PRIVATE, s.packet(s.next++));
-          if (i < count - 1) await sleep(GAP_MS);
+          if (i < count - 1) await sleep(paceMs());
         }
         setStatus('Sent ' + count + ' extra ' + (count === 1 ? 'packet' : 'packets') + ' because ' + nodeName(from) + ' asked for more.', 'ok');
       } catch (e) { console.warn(e); }
       S.sending = false; refreshPx();
     })();
   }
-  var FEC_HINTS = {
-    1: 'Reed-Solomon: any set of packets as large as the original rebuilds everything, so each extra packet can replace any lost one. Best value per packet.',
-    2: 'Fountain: repair packets are made on demand and never run out. A receiver may need one or two more than the minimum, but it can always ask for more.',
-    0: 'None: a lost packet leaves a gap in the voice note or picture, and nothing can be requested again.'
-  };
-  function updateFecUi() { $('fecHint').textContent = FEC_HINTS[S.fec]; $('extraField').hidden = S.fec === FEC.NONE; }
+  function fecDemo() {
+    var sp = S.fec ? Math.max(1, Math.ceil(3 * S.extra)) : 0, i;
+    function box(c, t, s) { return '<div class="pk ' + c + '">' + t + '<small>' + s + '</small></div>'; }
+    var h = box('', 'Packet 1', 'arrived') + (sp ? box('fixed', 'Packet 2', 'rebuilt') : box('lost', 'Packet 2', 'lost')) + box('', 'Packet 3', 'arrived');
+    for (i = 0; i < sp; i++) h += box('spare', 'Spare ' + (i + 1), i === 0 ? 'used' : 'not needed');
+    return h;
+  }
+  function updateFecUi() {
+    Array.prototype.forEach.call(document.querySelectorAll('input[name=fec]'), function (r) { r.checked = parseInt(r.value, 10) === S.fec; });
+    $('extraField').hidden = S.fec === FEC.NONE;
+    $('fecDemo').innerHTML = fecDemo();
+    var sp = S.fec ? Math.max(1, Math.ceil(3 * S.extra)) : 0;
+    var cap = 'Example: a 3-packet note goes out as ' + (sp ? '3 + ' + sp + (sp === 1 ? ' spare' : ' spares') + ' = ' + (3 + sp) + ' packets' : '3 packets') + '. ';
+    cap += S.fec === FEC.RS ? 'If packet 2 is lost, a spare rebuilds it exactly. If more packets go missing than you have spares, the gap comes back unless resending is on.'
+      : S.fec === FEC.FOUNTAIN ? 'If packet 2 is lost, a spare rebuilds it. Occasionally a spare turns out to overlap with what you already have, and one more is needed. The sender can always make another.'
+      : 'If packet 2 is lost, the audio or picture has a hole there, and nothing can be requested again.';
+    $('fecCap').textContent = cap;
+    var rp = $('chkRepair'); rp.disabled = S.fec === FEC.NONE;
+    $('repairHint').textContent = S.fec === FEC.NONE
+      ? 'Needs Reed-Solomon or Fountain, because a repair is a fresh spare packet. Turn one of those on to use this.'
+      : 'If something is still missing about ' + Math.round(2.5 * paceMs() / 1000) + ' s after the last packet arrived, your device asks the sender for more spares. When someone asks you, your device sends them. It costs a little extra airtime, and both people need it on.';
+  }
 
 
   /* ---------- Shell: views, dialog, timing ---------- */
@@ -10973,9 +11014,13 @@ if (typeof module !== 'undefined') {
   }
   function updateTiming() {
     var full = airtimeMs(S.preset, VOICE.CHUNK + FEC.HEADER);
-    GAP_MS = Math.round(full * 1.35);
     $('presetHint').textContent = 'Match your boards. A full packet takes about ' + (full / 1000).toFixed(1) + ' s on the air at this setting.';
-    if (S.view === 'files') showFileInfo();
+    updatePaceUi();
+  }
+  function updatePaceUi() {
+    var names = { '0.1': 'Gentle', '0.25': 'Balanced', '0.5': 'Fast' };
+    Array.prototype.forEach.call($('selPace').options, function (o) { o.textContent = names[o.value] + ': about ' + Math.round(fullAir() / parseFloat(o.value) / 1000) + ' s between packets'; });
+    updateFecUi(); updateClipMeta(); if (S.view === 'files') showFileInfo();
   }
   function initShell() {
     Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (t) { t.addEventListener('click', function () { showView(t.dataset.view); }); });
@@ -11001,7 +11046,7 @@ if (typeof module !== 'undefined') {
     ['dragover', 'dragenter'].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add('over'); }); });
     ['dragleave', 'drop'].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.remove('over'); }); });
     drop.addEventListener('drop', function (e) { var f = e.dataTransfer && e.dataTransfer.files[0]; if (f) pickFile(f); });
-    $('selPace').addEventListener('change', showFileInfo); $('selParity').addEventListener('change', showFileInfo);
+    $('selPace').addEventListener('change', updatePaceUi); $('selParity').addEventListener('change', showFileInfo);
     $('chkZip').addEventListener('change', function () { if (F.file) pickFile(F.file); });
     $('btnFileSend').addEventListener('click', startFile);
     $('btnFilePause').addEventListener('click', function () { if (S.xfer) { S.xfer.paused = !S.xfer.paused; renderXfer(); } });
@@ -11070,7 +11115,6 @@ if (typeof module !== 'undefined') {
     $('fPk').textContent = p.total + (p.par ? ' (' + p.par + ' extra)' : '');
     $('fAir').textContent = fmtTime(p.total * fullAir());
     $('fEta').textContent = fmtTime(p.total * paceMs());
-    $('paceHint').textContent = 'One packet about every ' + fmtTime(paceMs()) + '.';
     if (!S.xfer) $('xstat').textContent = big ? 'This file is too big for the mesh (limit ' + fmtBytes(FILE.MAX) + ' after compression).' : (S.fec ? '' : 'Protection is off, so a lost packet cannot be repaired. Turn it on in Settings.');
     renderXfer(); refreshFile();
   }
@@ -11220,8 +11264,10 @@ if (typeof module !== 'undefined') {
     $('chkText').addEventListener('change', function (e) { S.textNotice = e.target.checked; });
     initShell();
     initPad();
-    $('selFec').addEventListener('change', function (e) { S.fec = parseInt(e.target.value, 10); updateFecUi(); });
-    $('selExtra').addEventListener('change', function (e) { S.extra = parseInt(e.target.value, 10); });
+    Array.prototype.forEach.call(document.querySelectorAll('input[name=fec]'), function (r) {
+      r.addEventListener('change', function () { S.fec = parseInt(r.value, 10); updateFecUi(); updateClipMeta(); if (S.view === 'files') showFileInfo(); });
+    });
+    $('selExtra').addEventListener('change', function (e) { S.extra = parseFloat(e.target.value); updateFecUi(); updateClipMeta(); });
     $('chkRepair').addEventListener('change', function (e) { S.repair = e.target.checked; });
     updateFecUi();
     initCodec().then(function () { envChecks(); }, function (e) {
