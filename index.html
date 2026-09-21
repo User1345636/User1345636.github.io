@@ -28,7 +28,7 @@ button,select,input{font:inherit;color:inherit}
 
 /* shell: bottom tab bar on phones, left rail on tablets */
 .app{min-height:100dvh}
-.tabs{position:fixed;left:0;right:0;bottom:0;z-index:5;display:grid;grid-template-columns:repeat(6,1fr);background:var(--panel);color:var(--panel-muted);padding:6px 6px calc(env(safe-area-inset-bottom,0px) + 6px);border-radius:22px 22px 0 0}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:5;display:grid;grid-template-columns:repeat(3,1fr);background:var(--panel);color:var(--panel-muted);padding:6px 6px calc(env(safe-area-inset-bottom,0px) + 6px);border-radius:22px 22px 0 0}
 .tab{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 2px 6px;border:0;background:none;border-radius:16px;font-size:.74rem;font-weight:600;cursor:pointer;color:inherit}
 .tab svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .tab[aria-selected="true"]{color:var(--panel-text);background:rgba(103,234,148,.2)}
@@ -108,17 +108,13 @@ h3{font:800 1.05rem/1.2 var(--f-display);margin:0 0 4px}
 .bar.done .fill{background:var(--ok)}
 .xstat{margin:8px 0 14px;font-variant-numeric:tabular-nums}
 
-/* inbox */
-#inbox{list-style:none;margin:0;padding:0}
-#inbox li{padding:16px 0;border-top:1px solid var(--rule)}
-.notehead{display:flex;justify-content:space-between;gap:12px;margin-bottom:6px}
-.when{color:var(--muted);font-size:.88rem}
-#inbox p{margin:0}
+.notehead{display:flex;justify-content:space-between;gap:12px;margin-bottom:4px}
+.when{color:var(--muted);font-size:.82rem}
 .inbox svg{height:64px} .inbox .b{fill:var(--accent-ink)} .inbox .s-wait{fill:var(--rule)} .inbox .s-sent{fill:var(--accent-ink)}
 .inbox .div{stroke:var(--muted)} .inbox .seglabels>div{border-left-color:var(--muted)} .inbox .segsub{color:var(--muted)}
-.noterow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:10px}
-.notestat{font-size:.92rem} .sig{font-size:.86rem;color:var(--muted)}
-.fileicon{font:800 1.05rem var(--f-display)} .filepv{max-width:100%;max-height:200px;border-radius:8px;display:block;margin-top:8px}
+.noterow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:8px}
+.notestat{font-size:.9rem} .sig{font-size:.82rem;color:var(--muted)}
+.fileicon{font:800 1.05rem var(--f-display);overflow-wrap:anywhere} .filepv{max-width:100%;max-height:200px;border-radius:8px;display:block;margin-top:8px}
 .empty{color:var(--muted);max-width:50ch}
 
 /* settings */
@@ -172,16 +168,39 @@ h1{display:flex;align-items:center;gap:10px}
 .lx{grid-column:1/-1;margin:0;display:none;font:.76rem/1.4 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--muted);white-space:pre-wrap;word-break:break-all}
 .hex-on .lx{display:block}
 .loglist[data-f="tx"] .lg:not(.tx),.loglist[data-f="rx"] .lg:not(.rx),.loglist[data-f="board"] .lg:not(.board),.loglist[data-f="ours"] .lg:not(.ours),.loglist[data-f="err"] .lg:not(.bad):not(.err){display:none}
+.threadlist{list-style:none;margin:0;padding:0}
+.thcard{display:flex;gap:12px;align-items:center;padding:14px 0;border:0;border-top:1px solid var(--rule);background:none;width:100%;text-align:left;cursor:pointer;color:inherit}
+.thav{width:44px;height:44px;border-radius:50%;background:var(--panel);color:var(--accent);display:grid;place-items:center;font:800 1rem var(--f-display);flex:none}
+.thmain{flex:1;min-width:0} .thmain strong{display:block}
+.thmain span{display:block;color:var(--muted);font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.thmeta{text-align:right;font-size:.8rem;color:var(--muted)}
+.unread{display:inline-block;min-width:22px;padding:0 6px;border-radius:11px;background:var(--rec);color:#fff;font-weight:700;margin-top:4px;text-align:center}
+.thhead{display:flex;align-items:center;gap:12px;margin:8px 0 12px}
+#threadView{display:flex;flex-direction:column;height:calc(100dvh - 290px);min-height:330px}
+#thBody{flex:1;overflow-y:auto;padding:4px 2px 10px}
+.thread{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.bubble{max-width:90%;padding:10px 14px;border-radius:18px 18px 18px 6px;background:var(--card);border:1px solid var(--rule);align-self:flex-start}
+.bubble p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.bubble.out{align-self:flex-end;background:var(--accent);color:#10261A;border-color:transparent;border-radius:18px 18px 6px 18px}
+.bubble.out .when,.bubble.out .notestat,.bubble.out .hint{color:rgba(16,38,26,.72)}
+.bubble.out .bar{background:rgba(16,38,26,.2)} .bubble.out .fill{background:#10261A}
+.bubble.bad{border:1.5px solid var(--bad)}
+.ohead{font-weight:600;overflow-wrap:anywhere}
+.composer{border-top:1px solid var(--rule);padding-top:10px}
+.attachbar{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.msgrow{display:flex;gap:8px;align-items:flex-end}
+textarea{flex:1;min-height:44px;max-height:120px;padding:10px 14px;border-radius:22px;border:1px solid var(--rule);background:var(--card);resize:none;font:inherit;color:inherit}
+dialog.sheet{max-width:660px;width:100%;margin:auto auto 0;border-radius:26px 26px 0 0;max-height:94dvh;overflow:auto}
+@media (min-width:860px){dialog.sheet{margin:auto;border-radius:26px}}
+.shhead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:14px}
+.shhead h2{font-size:1.4rem}
 @media (prefers-reduced-motion:reduce){.rec.on{animation:none}.recicon,.fill{transition:none}}
 </style>
 </head>
 <body>
 <div class="app">
 <nav class="tabs" role="tablist" aria-label="Sections">
-  <button class="tab" role="tab" data-view="voice" aria-selected="true"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>Voice</button>
-  <button class="tab" role="tab" data-view="draw" aria-selected="false"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 12h16M12 4v16"/></svg>Draw</button>
-  <button class="tab" role="tab" data-view="files" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>Files</button>
-  <button class="tab" role="tab" data-view="inbox" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M3 13l3-8h12l3 8v6H3z"/><path d="M3 13h5l1 3h6l1-3h5"/></svg>Inbox<span class="badge" id="badge" hidden>0</span></button>
+  <button class="tab" role="tab" data-view="chat" aria-selected="true"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg>Chats<span class="badge" id="badge" hidden>0</span></button>
   <button class="tab" role="tab" data-view="log" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h13"/><circle cx="19" cy="12" r="1.2"/></svg>Log</button>
   <button class="tab" role="tab" data-view="settings" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Settings</button>
 </nav>
@@ -193,63 +212,20 @@ h1{display:flex;align-items:center;gap:10px}
   </header>
   <div class="warn" id="envWarn" hidden></div>
 
-  <section class="view" id="v-voice">
-    <div class="viewhead"><h2>Voice note</h2><p>Speak for a few seconds. Codec2 squeezes it to about 90 bytes a second.</p></div>
-    <div class="stage">
-      <div class="strip" id="strip"></div>
-      <div class="stripmeta" id="stripMeta" aria-live="polite"></div>
-      <div class="controls"><button class="rec" id="btnRec" aria-label="Start recording"><span class="recicon"></span></button></div>
-      <div class="actions" id="clipActions" hidden>
-        <button class="btn" id="btnPlayClip" data-idle="Hear it as they will">Hear it as they will</button>
-        <button class="btn primary" id="btnSend">Send to mesh</button>
-        <button class="btn ghost" id="btnDiscard">Discard</button>
-      </div>
-      <div class="simrow"><button class="btn small" id="btnSim" hidden>Test receiving it here</button><label><input type="checkbox" id="chkDrop"> lose one packet on the way</label></div>
-      <div class="status" id="sendStatus" role="status"></div>
+  <section class="view" id="v-chat">
+    <div id="threadsPane">
+      <div class="viewhead row" style="justify-content:space-between"><div><h2>Chats</h2><p>Channels and direct messages.</p></div><button class="btn small primary" id="btnNew">New message</button></div>
+      <ul class="threadlist" id="threadList"></ul>
     </div>
-  </section>
-
-  <section class="view" id="v-draw" hidden>
-    <div class="viewhead"><h2>Pixel postcard</h2><p>Draw something small. A 16 by 16 picture fits in a single packet.</p></div>
-    <div class="drawgrid">
-      <canvas id="pad" class="pad" aria-label="Drawing pad"></canvas>
-      <div class="drawtools">
-        <div class="palette" id="palette" role="group" aria-label="Colours"></div>
-        <p class="hint" id="pxMeta"></p>
-        <div class="row" style="margin-top:12px">
-          <select id="selPx" aria-label="Picture size" style="width:auto"><option value="16">16 by 16</option><option value="32">32 by 32</option></select>
-          <button class="btn small" id="btnPxClear">Clear</button>
-          <button class="btn small primary" id="btnPxSend" disabled>Send postcard</button>
-        </div>
-        <div class="row" style="margin-top:10px"><button class="btn small" id="btnPxSim">Test receiving it here</button><small>uses the “lose one packet” option on the Voice tab</small></div>
-        <div class="status" id="pxStatus" role="status"></div>
+    <div id="threadView" hidden>
+      <div class="thhead"><button class="btn small" id="thBack" aria-label="Back to chats">Back</button><div><h2 id="thTitle" style="font-size:1.25rem;margin:0"></h2><small id="thSub"></small></div></div>
+      <div id="thBody"></div>
+      <div class="composer">
+        <div class="attachbar"><button class="btn small" id="atVoice">Voice</button><button class="btn small" id="atPic">Picture</button><button class="btn small" id="atFile">File</button></div>
+        <div class="msgrow"><textarea id="msgIn" rows="1" placeholder="Connect a board to send" aria-label="Message"></textarea><button class="btn primary" id="btnMsg" disabled>Send</button></div>
+        <small id="msgCount">0 of 200 bytes</small>
       </div>
     </div>
-  </section>
-
-  <section class="view" id="v-files" hidden>
-    <div class="viewhead"><h2>Send a file</h2><p>For small files. Bigger ones are trickled out slowly so the mesh stays usable for everyone else.</p></div>
-    <label class="drop" id="drop" for="fileIn"><strong id="dropTitle">Choose a file</strong><span class="hint" id="dropSub">Up to 60 kB after compression: notes, small images, configs.</span></label>
-    <input type="file" id="fileIn" hidden>
-    <div id="fileInfo" hidden>
-      <dl class="facts">
-        <div><dt>File</dt><dd id="fName">-</dd></div><div><dt>On the air</dt><dd id="fSize">-</dd></div>
-        <div><dt>Packets</dt><dd id="fPk">-</dd></div><div><dt>Airtime</dt><dd id="fAir">-</dd></div><div><dt>Time at this pace</dt><dd id="fEta">-</dd></div>
-      </dl>
-      <div class="opts">
-        <div class="field" style="margin:0"><label for="selParity">Protection</label><select id="selParity"><option value="0">No extra packets</option><option value="0.125">12% extra</option><option value="0.25" selected>25% extra</option><option value="0.5">50% extra</option></select><small>Uses the method chosen in Settings.</small></div>
-      </div>
-      <label class="check" style="margin-top:0"><input type="checkbox" id="chkZip" checked><span>Compress first when it makes the file smaller</span></label>
-      <div class="bar" id="xbar"><div class="fill" id="xfill"></div></div>
-      <p class="xstat" id="xstat" aria-live="polite"></p>
-      <div class="row"><button class="btn primary" id="btnFileSend" disabled>Send file</button><button class="btn" id="btnFilePause" hidden>Pause</button><button class="btn ghost" id="btnFileCancel" hidden>Cancel</button></div>
-    </div>
-  </section>
-
-  <section class="view" id="v-inbox" hidden>
-    <div class="viewhead"><h2>Inbox</h2><p>Voice notes, postcards, files and plain text from other boards.</p></div>
-    <ul id="inbox"></ul>
-    <p class="empty" id="inboxEmpty">Nothing yet. Anything sent to your channel lands here.</p>
   </section>
 
   <section class="view" id="v-log" hidden>
@@ -258,7 +234,7 @@ h1{display:flex;align-items:center;gap:10px}
     <div class="logbar">
       <select id="logFilter" aria-label="Filter the log"><option value="all">Everything</option><option value="ours">Our notes, files and acks</option><option value="tx">Sent</option><option value="rx">Received</option><option value="board">Board reports</option><option value="err">Problems only</option></select>
       <label class="check"><input type="checkbox" id="logHex"><span>Hex dumps</span></label>
-      <button class="btn small" id="logPause">Pause</button><button class="btn small" id="logCopy">Copy</button><button class="btn small ghost" id="logClear">Clear</button>
+      <button class="btn small" id="logTest" hidden>Wi-Fi test</button><button class="btn small" id="logPause">Pause</button><button class="btn small" id="logCopy">Copy</button><button class="btn small ghost" id="logClear">Clear</button>
     </div>
     <ul class="loglist" id="logList" data-f="all"></ul>
     <p class="empty" id="logEmpty">Nothing logged yet. Connect a board and the conversation with it appears here, newest first.</p>
@@ -269,7 +245,6 @@ h1{display:flex;align-items:center;gap:10px}
     <div class="group"><h3>Connection</h3><p class="hint">Talk to your board over Bluetooth or over your local Wi-Fi.</p><div class="row" style="margin-top:12px"><button class="btn small" id="btnDlg">Connection options</button></div></div>
     <div class="group"><h3>Radio</h3>
       <div class="field"><label for="selPreset">Modem preset</label><select id="selPreset"></select><small id="presetHint"></small></div>
-      <div class="field"><label for="selChannel">Send on channel</label><select id="selChannel"><option value="0">Primary channel (slot 0)</option></select><small id="channelHint"></small></div>
       <div class="field"><label for="selPace">Sending pace</label><select id="selPace"><option value="0.1">Gentle</option><option value="0.25" selected>Balanced</option><option value="0.5">Fast</option></select><small id="paceHint">Time between packets. Nearby nodes repeat every packet you send, so sending the next one too soon makes them collide and get lost. If packets keep going missing, choose Gentle or lower the hop limit.</small></div>
       <label class="check"><input type="checkbox" id="chkAck"><span><strong>Ask the mesh to confirm each packet</strong><small>The board watches for a neighbour repeating each packet and retries if it doesn't. The Log then shows a confirmation, or the reason it failed. Costs a little airtime.</small></span></label>
       <div class="field"><label for="selHops">Hop limit</label><select id="selHops"><option>1</option><option>2</option><option selected>3</option><option>4</option></select><small>How many relays may repeat your packets. Lower keeps the airwaves freer.</small></div>
@@ -298,6 +273,65 @@ h1{display:flex;align-items:center;gap:10px}
   </section>
 </div>
 </div>
+
+<dialog class="sheet" id="shVoice" aria-label="Voice note"><div class="dlg">
+  <div class="shhead"><div><h2>Voice note</h2><p class="hint">Speak for a few seconds. Codec2 squeezes it to about 90 bytes a second.</p></div><button class="btn ghost small" data-close>Close</button></div>
+  
+    <div class="stage">
+      <div class="strip" id="strip"></div>
+      <div class="stripmeta" id="stripMeta" aria-live="polite"></div>
+      <div class="controls"><button class="rec" id="btnRec" aria-label="Start recording"><span class="recicon"></span></button></div>
+      <div class="actions" id="clipActions" hidden>
+        <button class="btn" id="btnPlayClip" data-idle="Hear it as they will">Hear it as they will</button>
+        <button class="btn primary" id="btnSend">Send to mesh</button>
+        <button class="btn ghost" id="btnDiscard">Discard</button>
+      </div>
+      <div class="simrow"><button class="btn small ghost" id="btnSim" hidden>Test it here</button><label><input type="checkbox" id="chkDrop"> lose one packet on the way</label></div>
+      <div class="status" id="sendStatus" role="status"></div>
+    </div>
+</div></dialog>
+<dialog class="sheet" id="shPic" aria-label="Picture"><div class="dlg">
+  <div class="shhead"><div><h2>Picture</h2><p class="hint">Pixel art or a pixelated photo. 16 by 16 fits in a single packet.</p></div><button class="btn ghost small" data-close>Close</button></div>
+  
+    <div class="drawgrid">
+      <canvas id="pad" class="pad" aria-label="Drawing pad"></canvas>
+      <div class="drawtools">
+        <div class="palette" id="palette" role="group" aria-label="Colours"></div>
+        <p class="hint" id="pxMeta"></p>
+        <div class="row" style="margin-top:12px">
+          <select id="selPx" aria-label="Picture size" style="width:auto"><option value="16">16 by 16</option><option value="32">32 by 32</option></select>
+          <button class="btn small" id="btnPxClear">Clear</button>
+          <button class="btn small primary" id="btnPxSend" disabled>Send postcard</button>
+        </div>
+        <div class="row" style="margin-top:10px"><button class="btn small" id="btnPhoto">Load a photo</button><input type="file" id="photoIn" accept="image/*" hidden><button class="btn small ghost" id="btnPxSim">Test it here</button></div>
+        <div class="status" id="pxStatus" role="status"></div>
+      </div>
+    </div>
+</div></dialog>
+<dialog class="sheet" id="shFile" aria-label="File"><div class="dlg">
+  <div class="shhead"><div><h2>File</h2><p class="hint">Anything else, up to about 60 kB. Big ones trickle out slowly so the mesh stays usable.</p></div><button class="btn ghost small" data-close>Close</button></div>
+  
+    <label class="drop" id="drop" for="fileIn"><strong id="dropTitle">Choose a file</strong><span class="hint" id="dropSub">Up to 60 kB after compression: notes, small images, configs.</span></label>
+    <input type="file" id="fileIn" hidden>
+    <div id="fileInfo" hidden>
+      <dl class="facts">
+        <div><dt>File</dt><dd id="fName">-</dd></div><div><dt>On the air</dt><dd id="fSize">-</dd></div>
+        <div><dt>Packets</dt><dd id="fPk">-</dd></div><div><dt>Airtime</dt><dd id="fAir">-</dd></div><div><dt>Time at this pace</dt><dd id="fEta">-</dd></div>
+      </dl>
+      <div class="opts">
+        <div class="field" style="margin:0"><label for="selParity">Protection</label><select id="selParity"><option value="0">No extra packets</option><option value="0.125">12% extra</option><option value="0.25" selected>25% extra</option><option value="0.5">50% extra</option></select><small>Uses the method chosen in Settings.</small></div>
+      </div>
+      <label class="check" style="margin-top:0"><input type="checkbox" id="chkZip" checked><span>Compress first when it makes the file smaller</span></label>
+      <p class="dlgnote" id="imgHint" hidden>Photos are large for LoRa. <button class="btn small" id="btnToPic">Send it as a tiny picture instead</button></p>
+      <div class="bar" id="xbar"><div class="fill" id="xfill"></div></div>
+      <p class="xstat" id="xstat" aria-live="polite"></p>
+      <div class="row"><button class="btn primary" id="btnFileSend" disabled>Send file</button><button class="btn" id="btnFilePause" hidden>Pause</button><button class="btn ghost" id="btnFileCancel" hidden>Cancel</button></div>
+    </div>
+</div></dialog>
+<dialog class="sheet" id="dlgNode" aria-label="New message"><div class="dlg">
+  <div class="shhead"><div><h2>New message</h2><p class="hint">Pick a node your board has heard. Only that node gets the message.</p></div><button class="btn ghost small" data-close>Close</button></div>
+  <ul class="threadlist" id="nodeList"></ul><p class="empty" id="nodeEmpty">No nodes yet. They appear a few seconds after you connect.</p>
+</div></dialog>
 
 <dialog id="dlg" aria-labelledby="dlgTitle"><div class="dlg">
   <button class="btn ghost small dlgclose" id="dlgClose">Close</button>
@@ -10399,7 +10433,7 @@ if (typeof module !== 'undefined') {
     nodes: new Map(), channels: [], channelIndex: 0,
     maxSec: 8, hops: 3, autoplay: true, textNotice: true,
     clip: null, recording: false, sending: false,
-    inbox: new Map(), sessions: new Map(), preset: 'LONG_FAST', wantAck: false, pending: new Map(), hw: { queue: null, meta: null, lora: null, net: {}, pollMs: null }, stats: { tx: 0, rx: 0, txB: 0, rxB: 0, acks: 0, fails: 0 }, xfer: null, view: 'voice', unread: 0, mode: 'ble', http: null, poll: null, fec: 1, extra: 0.25, repair: true
+    inbox: new Map(), sessions: new Map(), preset: 'LONG_FAST', wantAck: false, pending: new Map(), hw: { queue: null, meta: null, lora: null, net: {}, pollMs: null, poll: { n: 0, sum: 0, max: 0, last: 0 }, putMs: null }, stats: { tx: 0, rx: 0, txB: 0, rxB: 0, acks: 0, fails: 0 }, xfer: null, view: 'chat', threads: new Map(), thread: null, target: null, sheet: null, liveBub: null, mode: 'ble', http: null, poll: null, fec: 1, extra: 0.25, repair: true
   };
   var CHUNK_SECONDS = VOICE.CHUNK * 8 / VOICE.FRAME_BITS * VOICE.FRAME_SECONDS; // ~2.29 s per packet
   var SIM_NODE = 0x00c0ffee;
@@ -10419,6 +10453,7 @@ if (typeof module !== 'undefined') {
   function setStatus(msg, kind) {
     var el = $('sendStatus');
     el.textContent = msg || '';
+    if (S.liveBub && msg) S.liveBub.set(msg, kind === 'err');
     el.className = 'status' + (kind ? ' ' + kind : '');
   }
 
@@ -10643,20 +10678,25 @@ if (typeof module !== 'undefined') {
   function gatt(fn) { var p = gattChain.then(fn); gattChain = p.then(function () {}, function () {}); return p; }
   function writeToRadio(bytes) {
     if (S.mode === 'http') {
+      var p0 = performance.now();
       return fetch(S.http.base + '/api/v1/toradio', { method: 'PUT', headers: { 'Content-Type': 'application/x-protobuf' }, body: bytes })
-        .then(function (r) { if (!r.ok) throw new Error('The board answered ' + r.status); });
+        .then(function (r) {
+          S.hw.putMs = Math.round(performance.now() - p0);
+          if (S.hw.putMs > 1500) logEvt('err', 'Sending to the board over Wi-Fi took ' + S.hw.putMs + ' ms. The board’s web server is slow.', null, 'bad');
+          if (!r.ok) throw new Error('The board answered ' + r.status);
+        });
     }
     return gatt(function () { return S.toRadio.writeValueWithResponse ? S.toRadio.writeValueWithResponse(bytes) : S.toRadio.writeValue(bytes); });
   }
   async function readOne() {
     if (S.mode === 'http') {
-      var t0 = performance.now();
-      var r = await fetch(S.http.base + '/api/v1/fromradio?all=false');
-      S.hw.pollMs = Math.round(performance.now() - t0);
-      if (S.hw.pollMs > 1500) logEvt('err', 'The board took ' + S.hw.pollMs + ' ms to answer a Wi-Fi poll. That is slow.', null, 'bad');
+      var t0 = performance.now(), r = await fetch(S.http.base + '/api/v1/fromradio?all=false');
       if (!r.ok) throw new Error('The board answered ' + r.status);
-      S.http.fails = 0;
-      return new Uint8Array(await r.arrayBuffer());
+      var out = new Uint8Array(await r.arrayBuffer()), ms = Math.round(performance.now() - t0), P = S.hw.poll;
+      P.n++; P.sum += ms; P.last = ms; if (ms > P.max) P.max = ms;
+      S.hw.pollMs = ms; S.http.fails = 0;
+      if (ms > 1500) logEvt('err', (out.length ? 'A Wi-Fi poll that returned ' + out.length + ' bytes' : 'An empty Wi-Fi poll') + ' took ' + ms + ' ms. The board’s web server is slow.', null, 'bad');
+      return out;
     }
     var v = await gatt(function () { return S.fromRadio.readValue(); });
     return new Uint8Array(v.buffer.slice(v.byteOffset, v.byteOffset + v.byteLength));
@@ -10681,7 +10721,7 @@ if (typeof module !== 'undefined') {
   function handleFromRadio(m) {
     try { logFrom(m); } catch (e) { console.warn('log failed', e); }
     if (m.kind === 'myInfo') S.myNum = m.num;
-    else if (m.kind === 'nodeInfo') S.nodes.set(m.num, { longName: m.longName, shortName: m.shortName, snr: m.snr, hops: m.hops, metrics: m.metrics, lastHeard: m.lastHeard });
+    else if (m.kind === 'nodeInfo') { S.nodes.set(m.num, { longName: m.longName, shortName: m.shortName, snr: m.snr, hops: m.hops, metrics: m.metrics, lastHeard: m.lastHeard }); refreshThreadTitles(); if ($('dlgNode').open) fillNodeList(); }
     else if (m.kind === 'channel') {
       S.channels = S.channels.filter(function (c) { return c.index !== m.index; });
       if (m.role > 0) S.channels.push(m);
@@ -10689,7 +10729,7 @@ if (typeof module !== 'undefined') {
       renderChannels();
     }
     else if (m.kind === 'configComplete') setReady(true);
-    else if (m.kind === 'packet' && m.port !== null && m.from !== S.myNum) onIncoming(m.from, m.port, m.payload, { snr: m.snr, rssi: m.rssi });
+    else if (m.kind === 'packet' && m.port !== null && m.from !== S.myNum) onIncoming(m.from, m.port, m.payload, { snr: m.snr, rssi: m.rssi, channel: m.channel, to: m.to });
   }
 
   function setLink(state, title, sub) {
@@ -10698,6 +10738,7 @@ if (typeof module !== 'undefined') {
     $('linkSub').textContent = sub;
     logEvt(state === 'bad' ? 'err' : 'sys', title + '. ' + sub, null, state === 'bad' ? 'bad' : '');
     $('connectOptions').hidden = S.connected; $('connectedRow').hidden = !S.connected;
+    $('logTest').hidden = !(S.connected && S.mode === 'http');
   }
   function setReady(on) {
     S.ready = on;
@@ -10713,24 +10754,11 @@ if (typeof module !== 'undefined') {
     return c.name ? '“' + c.name + '”' : (idx === 0 ? 'the primary channel' : 'channel ' + idx);
   }
   function renderChannels() {
-    var sel = $('selChannel'), html = '';
-    S.channels.forEach(function (c) {
-      var nm = c.name || (c.index === 0 ? 'Primary channel' : 'Channel ' + c.index);
-      html += '<option value="' + c.index + '">' + esc(nm) + ' (slot ' + c.index + ')</option>';
-    });
-    sel.innerHTML = html || '<option value="0">Primary channel (slot 0)</option>';
-    sel.value = String(S.channelIndex);
-    if (sel.value !== String(S.channelIndex)) { S.channelIndex = parseInt(sel.value, 10) || 0; }
-    updateChannelHint();
+    S.channels.forEach(function (c) { mkThread('ch:' + c.index, false, null, c.index); });
+    refreshThreadTitles();
     if (S.ready) setReady(true);
   }
-  function updateChannelHint() {
-    var c = S.channels.filter(function (x) { return x.index === S.channelIndex; })[0];
-    var el = $('channelHint');
-    if (c && c.pskLen <= 1) el.textContent = 'This channel uses the default shared key, so any Meshtastic node in range can receive your notes. A private channel keeps them between your boards.';
-    else if (c) el.textContent = 'Both boards need this same channel and key.';
-    else el.textContent = 'Channels appear after you connect.';
-  }
+  function updateChannelHint() { updateThreadHead(); }
 
   function btError(e) {
     var n = e && e.name, m = (e && e.message) || '';
@@ -10795,12 +10823,14 @@ if (typeof module !== 'undefined') {
 
   /* ---------- Sending ---------- */
   function randomId() { var a = new Uint32Array(1); crypto.getRandomValues(a); return (a[0] || 1) >>> 0; }
-  function sendPacket(port, payload) {
+  function sendPacket(port, payload, opt) {
+    opt = opt || {};
+    var to = opt.to !== undefined ? opt.to : (S.target ? S.target.to : MESH.BROADCAST), ch = opt.ch !== undefined ? opt.ch : S.channelIndex, ack = opt.wantAck !== undefined ? opt.wantAck : S.wantAck;
     var id = randomId(), t0 = performance.now();
-    var bytes = buildSendPacket({ to: MESH.BROADCAST, channel: S.channelIndex, port: port, payload: payload, id: id, hopLimit: S.hops, wantAck: S.wantAck });
-    var base = 'TX #' + hex8(id) + ' to everyone on channel ' + S.channelIndex + ', ' + (PORT_NAMES[port] || 'port ' + port) + ' ' + payload.length + ' B, hop limit ' + S.hops + (S.wantAck ? ', ack requested' : '') + describeApp(port, payload);
+    var bytes = buildSendPacket({ to: to, channel: ch, port: port, payload: payload, id: id, hopLimit: S.hops, wantAck: ack });
+    var base = 'TX #' + hex8(id) + ' to ' + toName(to) + ' on channel ' + ch + ', ' + (PORT_NAMES[port] || 'port ' + port) + ' ' + payload.length + ' B, hop limit ' + S.hops + (ack ? ', ack requested' : '') + describeApp(port, payload);
     var li = logEvt('tx', base, bytes, 'ours');
-    S.pending.set(id, { t: Date.now(), li: li, base: base });
+    S.pending.set(id, { t: Date.now(), li: li, base: base, cb: opt.onAck });
     if (S.pending.size > 60) S.pending.delete(S.pending.keys().next().value);
     return writeToRadio(bytes).then(function () {
       var ms = Math.round(performance.now() - t0);
@@ -10816,6 +10846,7 @@ if (typeof module !== 'undefined') {
   async function sendClip() {
     if (!S.clip || !S.ready || S.sending) return;
     S.sending = true; stopPlayback();
+    var bub = addOutVoice(); S.liveBub = bub; S.clip.sent = true; closeSheet('shVoice');
     $('btnSend').disabled = true; $('btnDiscard').disabled = true; $('btnRec').disabled = true;
     var sess = buildSession(S.clip.stream, Math.floor(Math.random() * 256), 'voice'), chunks = sess.packets;
     var states = chunks.map(function () { return 'ready'; }), k = 0;
@@ -10838,7 +10869,7 @@ if (typeof module !== 'undefined') {
       states[k] = 'lost'; renderClipStrip(states);
       setStatus('Sending stopped at packet ' + (k + 1) + '. Check the connection and tap Send to try again.', 'err');
     }
-    S.sending = false;
+    S.liveBub = null; S.sending = false;
     $('btnDiscard').disabled = false; $('btnRec').disabled = false; $('btnSend').disabled = !S.ready;
   }
 
@@ -10854,16 +10885,17 @@ if (typeof module !== 'undefined') {
       addText(from, utf8(payload), meta);
     }
   }
-  function inboxEmptyCheck() {
-    $('inboxEmpty').hidden = $('inbox').children.length > 0;
-    if (S.view !== 'inbox') { S.unread++; updateBadge(); }
-  }
-  function updateBadge() { var b = $('badge'); b.textContent = S.unread; b.hidden = !S.unread; }
   function addText(from, text, meta) {
-    var li = document.createElement('li');
-    li.className = 'text';
+    if (/^\[(voice note|pixel postcard)[^\]]*\]$/.test(text)) return;   // notice sent ahead of a note; the real item follows
+    var th = threadFor(from, meta), li = document.createElement('li');
+    li.className = 'bubble in';
     li.innerHTML = '<div class="notehead"><strong>' + esc(nodeName(from)) + '</strong><span class="when">' + nowLabel() + '</span></div><p>' + esc(text) + '</p>';
-    $('inbox').prepend(li); inboxEmptyCheck();
+    place(li, th, text, true);
+  }
+  function attachNote(n, from, meta, label) {
+    var th = threadFor(from, meta);
+    n.th = th; n.target = targetOf(th); n.li.className = 'note bubble in';
+    place(n.li, th, label, true);
   }
   function addVoiceChunk(from, c, meta) {
     var key = from + ':' + c.msgId, n = S.inbox.get(key);
@@ -10871,9 +10903,8 @@ if (typeof module !== 'undefined') {
     if (!n) {
       n = { key: key, from: from, total: c.total, asm: new VoiceAssembly(c.total), complete: false, stalled: false,
             pcm: null, amps: null, seconds: 0, last: Date.now(), meta: meta, li: document.createElement('li'), timer: null, played: false };
-      n.li.className = 'note';
       S.inbox.set(key, n);
-      $('inbox').prepend(n.li); inboxEmptyCheck();
+      attachNote(n, from, meta, 'Voice note');
     }
     absorb(n, c); n.last = Date.now(); n.stalled = false; n.meta = meta || n.meta;
     var wasComplete = n.complete;
@@ -10918,8 +10949,10 @@ if (typeof module !== 'undefined') {
   }
 
   /* Test path: run the recorded clip through the chunker and the receive code, no radio involved. */
+  function showSimThread() { closeSheet('shVoice'); closeSheet('shPic'); showView('chat'); openThread(threadFor(SIM_NODE, {}).key); }
   async function simulate() {
     if (!S.clip) return;
+    showSimThread();
     var sess = buildSession(S.clip.stream, Math.floor(Math.random() * 256), 'voice'), chunks = sess.packets;
     var drop = $('chkDrop').checked && chunks.length > 1 ? Math.floor(Math.random() * sess.k) : -1;
     $('btnSim').disabled = true;
@@ -10929,7 +10962,6 @@ if (typeof module !== 'undefined') {
       await sleep(500);
     }
     $('btnSim').disabled = false;
-    $('inbox').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
 
@@ -10952,7 +10984,7 @@ if (typeof module !== 'undefined') {
     if (x < 0 || y < 0 || x >= pad.n || y >= pad.n) return;
     pad.px[y * pad.n + x] = pad.color; drawPad();
   }
-  function refreshPx() { var b = $('btnPxSend'); if (b) b.disabled = !S.ready || S.sending; refreshFile(); }
+  function refreshPx() { var b = $('btnPxSend'); if (b) b.disabled = !S.ready || S.sending; refreshFile(); refreshMsg(); }
   function initPad() {
     var pal = $('palette'), html = '';
     PALETTE.forEach(function (c, i) { html += '<button class="sw' + (i === 0 ? ' on' : '') + '" data-i="' + i + '" style="background:' + c + '" aria-label="Colour ' + (i + 1) + '"></button>'; });
@@ -10976,7 +11008,8 @@ if (typeof module !== 'undefined') {
   async function sendPostcard() {
     if (!S.ready || S.sending) return;
     S.sending = true; refreshPx();
-    var sess = buildSession(packImage(pad.px, pad.n), Math.floor(Math.random() * 256), 'img'), chunks = sess.packets, k = 0, st = $('pxStatus');
+    var sess = buildSession(packImage(pad.px, pad.n), Math.floor(Math.random() * 256), 'img'), chunks = sess.packets, k = 0, bub = addOutPic(), st = { set textContent(v) { $('pxStatus').textContent = v; bub.set(v); }, set className(v) { $('pxStatus').className = v; } };
+    pad.sent = true; closeSheet('shPic');
     try {
       if (S.textNotice) { st.textContent = 'Sending a text notice first…'; await sendPacket(MESH.PORT_TEXT, new TextEncoder().encode('[pixel postcard]')); await sleep(paceMs()); }
       for (k = 0; k < chunks.length; k++) {
@@ -10989,6 +11022,7 @@ if (typeof module !== 'undefined') {
     S.sending = false; refreshPx();
   }
   async function simulatePostcard() {
+    showSimThread();
     var sess = buildSession(packImage(pad.px, pad.n), Math.floor(Math.random() * 256), 'img'), chunks = sess.packets;
     var drop = $('chkDrop').checked && chunks.length > 1 ? Math.floor(Math.random() * sess.k) : -1;
     for (var k = 0; k < chunks.length; k++) { if (k !== drop) onIncoming(SIM_NODE, MESH.PORT_PRIVATE, chunks[k], {}); await sleep(600); }
@@ -10998,7 +11032,7 @@ if (typeof module !== 'undefined') {
     if (n && n.total !== c.total) n = null;
     if (!n) {
       n = { key: key, from: from, total: c.total, asm: new VoiceAssembly(c.total), li: document.createElement('li'), stalled: false, timer: null, meta: meta, isImg: true };
-      n.li.className = 'note'; S.inbox.set(key, n); $('inbox').prepend(n.li); inboxEmptyCheck();
+      S.inbox.set(key, n); attachNote(n, from, meta, 'Picture');
     }
     absorb(n, c); n.stalled = false; n.meta = meta || n.meta;
     renderImageNote(n);
@@ -11023,7 +11057,7 @@ if (typeof module !== 'undefined') {
       return { packets: ch, k: ch.length };
     }
     var kk = Math.max(1, Math.ceil(stream.length / VOICE.CHUNK)), s = makeSession(stream, id, kind, S.fec, spareCount(kk));
-    S.sessions.set(s.msgId, s);
+    s.target = { to: S.target ? S.target.to : MESH.BROADCAST, ch: S.channelIndex }; S.sessions.set(s.msgId, s);
     if (S.sessions.size > 8) S.sessions.delete(S.sessions.keys().next().value);
     return s;
   }
@@ -11056,7 +11090,7 @@ if (typeof module !== 'undefined') {
     n.nacks = (n.nacks || 0) + 1;
     n.nackNote = ', asked the sender for ' + need + ' more';
     (n.isImg ? renderImageNote : renderNote)(n);
-    try { await sendPacket(MESH.PORT_PRIVATE, nackPacket(n.msgId, need, n.from)); } catch (e) { console.warn(e); }
+    try { await sendPacket(MESH.PORT_PRIVATE, nackPacket(n.msgId, need, n.from), n.target); } catch (e) { console.warn(e); }
     scheduleNack(n);
   }
   function handleNack(from, c) {
@@ -11070,7 +11104,7 @@ if (typeof module !== 'undefined') {
       try {
         for (var i = 0; i < count; i++) {
           setStatus(nodeName(from) + ' asked for more. Sending extra packet ' + (i + 1) + ' of ' + count + '…');
-          await sendPacket(MESH.PORT_PRIVATE, s.packet(s.next++));
+          await sendPacket(MESH.PORT_PRIVATE, s.packet(s.next++), s.target);
           if (i < count - 1) await sleep(paceMs());
         }
         setStatus('Sent ' + count + ' extra ' + (count === 1 ? 'packet' : 'packets') + ' because ' + nodeName(from) + ' asked for more.', 'ok');
@@ -11107,9 +11141,8 @@ if (typeof module !== 'undefined') {
     S.view = name;
     Array.prototype.forEach.call(document.querySelectorAll('.view'), function (v) { v.hidden = v.id !== 'v-' + name; });
     Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (t) { t.setAttribute('aria-selected', t.dataset.view === name ? 'true' : 'false'); });
-    if (name === 'inbox') { S.unread = 0; updateBadge(); }
-    if (name === 'files') showFileInfo();
     if (name === 'log') renderHw();
+    if (name === 'chat') { var th = S.threads.get(S.thread); if (th) { th.unread = 0; updateBadge(); } else renderThreadList(); }
     window.scrollTo(0, 0);
   }
   function updateTiming() {
@@ -11120,7 +11153,7 @@ if (typeof module !== 'undefined') {
   function updatePaceUi() {
     var names = { '0.1': 'Gentle', '0.25': 'Balanced', '0.5': 'Fast' };
     Array.prototype.forEach.call($('selPace').options, function (o) { o.textContent = names[o.value] + ': about ' + Math.round(fullAir() / parseFloat(o.value) / 1000) + ' s between packets'; });
-    updateFecUi(); updateClipMeta(); if (S.view === 'files') showFileInfo();
+    updateFecUi(); updateClipMeta(); if (S.sheet === 'file') showFileInfo();
   }
   function initShell() {
     Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (t) { t.addEventListener('click', function () { showView(t.dataset.view); }); });
@@ -11163,7 +11196,8 @@ if (typeof module !== 'undefined') {
       try { ensureAudio(); } catch (e) { /* audio is optional for connecting */ }
       setLink('busy', 'Contacting ' + host + '…', 'Waiting for the board to answer.');
       S.mode = 'http'; S.http = { base: base, fails: 0 };
-      await writeToRadio(buildWantConfig(1 + Math.floor(Math.random() * 0x7ffffff0)));
+      logEvt('sys', 'Asking for settings only, not the whole node list, to keep the Wi-Fi handshake short.');
+      await writeToRadio(buildWantConfig(69420));
       S.connected = true; S.ready = false; S.channels = [];
       setLink('busy', host, 'Reading the board’s settings…');
       await drain();
@@ -11196,6 +11230,7 @@ if (typeof module !== 'undefined') {
       try { var z = await pipe(body, new CompressionStream('deflate-raw')); if (z.length < body.length) { stream = z; comp = true; } } catch (e) { console.warn(e); }
     }
     F = { file: file, stream: stream, compressed: comp, rawLen: raw.length, id: Math.floor(Math.random() * 256) };
+    $('imgHint').hidden = !/^image\//.test(file.type);
     S.xfer = null; showFileInfo();
   }
   function plan() {
@@ -11234,6 +11269,7 @@ if (typeof module !== 'undefined') {
     $('xstat').textContent = T.cancelled ? 'Cancelled after ' + T.i + ' packets.' : done
       ? 'All ' + T.queue.length + ' packets handed to the board. Staying ready to send repairs if the receiver asks.' + T.note
       : (T.error ? T.error + ' ' : '') + (T.paused ? 'Paused. ' : '') + 'Sent ' + T.i + ' of ' + T.queue.length + ' packets, about ' + fmtTime(left) + ' left.' + T.note;
+    if (T.bub) { T.bub.set($('xstat').textContent); T.bub.progress(pct); }
     refreshFile();
   }
   async function startFile() {
@@ -11241,6 +11277,7 @@ if (typeof module !== 'undefined') {
     F.id = Math.floor(Math.random() * 256);
     var snd = makeFileSender(F.stream, F.id, F.compressed, S.fec, parseFloat($('selParity').value));
     S.xfer = { snd: snd, id: F.id, queue: snd.packets.slice(), i: 0, paused: false, cancelled: false, running: false, error: '', note: '' };
+    S.xfer.target = S.target; S.xfer.bub = addOutFile(); closeSheet('shFile');
     runXfer(S.xfer);
   }
   async function runXfer(T) {
@@ -11248,7 +11285,7 @@ if (typeof module !== 'undefined') {
     T.running = true; T.error = '';
     while (T.i < T.queue.length && !T.cancelled) {
       if (T.paused || !S.ready) { if (!S.ready && !T.paused) { T.paused = true; T.error = 'Connection lost.'; renderXfer(); } await sleep(300); continue; }
-      try { await sendPacket(MESH.PORT_PRIVATE, T.queue[T.i]); }
+      try { await sendPacket(MESH.PORT_PRIVATE, T.queue[T.i], T.target); }
       catch (e) { console.warn(e); T.paused = true; T.error = 'A send failed.'; renderXfer(); continue; }
       T.i++; T.error = ''; renderXfer();
       if (T.i < T.queue.length) { var end = Date.now() + paceMs(); while (Date.now() < end && !T.cancelled) await sleep(Math.min(250, end - Date.now())); }
@@ -11273,7 +11310,7 @@ if (typeof module !== 'undefined') {
     if (!n) {
       n = { key: key, from: from, id: f.id, L: f.L, mode: f.mode, compressed: f.compressed, rx: new FileReceiver(f.L, f.mode), li: document.createElement('li'),
             gaps: [], lastAt: 0, nacks: 0, done: false, timer: null, meta: meta, note: '', t0: Date.now() };
-      n.li.className = 'note'; S.inbox.set(key, n); $('inbox').prepend(n.li); inboxEmptyCheck();
+      S.inbox.set(key, n); attachNote(n, from, meta, 'File');
     }
     var now = Date.now(); if (n.lastAt) n.gaps.push(now - n.lastAt); n.lastAt = now;
     n.meta = meta || n.meta; n.note = '';
@@ -11302,7 +11339,7 @@ if (typeof module !== 'undefined') {
     if (n.done || !S.ready) return;
     n.nacks++;
     var needs = n.rx.needs(), tot = needs.reduce(function (s, x) { return s + x.need; }, 0);
-    try { await sendPacket(MESH.PORT_PRIVATE, fileNackPacket(n.id, n.from, needs)); n.note = ', asked the sender for ' + tot + ' more packets'; } catch (e) { console.warn(e); }
+    try { await sendPacket(MESH.PORT_PRIVATE, fileNackPacket(n.id, n.from, needs), n.target); n.note = ', asked the sender for ' + tot + ' more packets'; } catch (e) { console.warn(e); }
     renderFile(n); scheduleFileNack(n);
   }
   function renderFile(n) {
@@ -11368,6 +11405,7 @@ if (typeof module !== 'undefined') {
         var er = routingError(m.payload), pend = S.pending.get(m.requestId), lat = pend ? ' after ' + (Date.now() - pend.t) + ' ms' : '';
         txt = (er === 0 ? 'ACK: the mesh confirmed TX #' + hex8(m.requestId) + lat + ' (from ' + nodeName(m.from) + ')' : 'FAILED: TX #' + hex8(m.requestId) + ' ' + (ROUTING_ERRORS[er] || 'routing error ' + er));
         if (er === 0) S.stats.acks++; else { bad = true; S.stats.fails++; }
+        if (pend && pend.cb) pend.cb(er);
         if (pend && pend.li) pend.li.querySelector('.lm').textContent = pend.base + (er === 0 ? '. Confirmed' + lat + '.' : '. FAILED: ' + (ROUTING_ERRORS[er] || er) + '.');
       }
       if (!own) { S.stats.rx++; S.stats.rxB += m.payload ? m.payload.length : 0; }
@@ -11415,7 +11453,7 @@ if (typeof module !== 'undefined') {
     var link = S.mode === 'http' ? 'Wi-Fi, ' + (S.http && S.http.base) : (S.dev ? 'Bluetooth, ' + (S.dev.name || 'board') : 'not connected');
     var duty = L && [2, 3, 14, 15].indexOf(L.region) >= 0 ? 'about 10% airtime per hour' : '';
     var boxes = [
-      ['Link', kv([['Connection', S.connected ? link : 'not connected'], ['Ready', S.ready ? 'yes' : 'no'], ['Wi-Fi poll time', S.mode === 'http' && H.pollMs !== null ? H.pollMs + ' ms' : '', H.pollMs > 1500 ? 'badv' : (H.pollMs > 600 ? 'warnv' : '')], ['Sending on channel', S.channelIndex]])],
+      ['Link', kv([['Connection', S.connected ? link : 'not connected'], ['Ready', S.ready ? 'yes' : 'no'], ['Wi-Fi poll time', S.mode === 'http' && H.poll.n ? H.poll.last + ' ms (average ' + Math.round(H.poll.sum / H.poll.n) + ', worst ' + H.poll.max + ')' : '', H.poll.last > 1500 ? 'badv' : (H.poll.last > 600 ? 'warnv' : '')], ['Last Wi-Fi send', S.mode === 'http' && H.putMs !== null ? H.putMs + ' ms' : '', H.putMs > 1500 ? 'badv' : (H.putMs > 600 ? 'warnv' : '')], ['Sending on channel', S.channelIndex]])],
       ['Board', kv([['Node', S.myNum ? '!' + hex8(S.myNum) : ''], ['Name', me.longName || me.shortName], ['Firmware', H.meta && H.meta.firmware], ['Hardware model', H.meta ? '#' + H.meta.hwModel : ''], ['Has Wi-Fi', H.meta ? (H.meta.hasWifi ? 'yes' : 'no') : ''], ['Wi-Fi setting', H.net.wifi === undefined ? '' : (H.net.wifi ? 'on' : 'off')], ['Bluetooth setting', H.net.bt === undefined ? '' : (H.net.bt ? 'on' : 'off')]])],
       ['Radio', kv([['Region', L && (REGIONS[L.region] || L.region)], ['Modem preset', L && (L.usePreset ? (PRESET_ENUM[L.preset] || L.preset) : 'custom')], ['Hop limit on board', L && (L.hopLimit || 'default (3)')], ['TX power', L && (L.txPower ? L.txPower + ' dBm' : 'default')], ['Regional limit', duty], ['Airtime model here', PRESETS[S.preset].name + ', ' + (airtimeMs(S.preset, 208) / 1000).toFixed(2) + ' s per full packet']])],
       ['Airwaves', kv([['Channel busy', mm.chUtil != null ? mm.chUtil.toFixed(1) + '%' : '', mm.chUtil > 25 ? 'warnv' : ''], ['Our TX airtime', mm.airUtilTx != null ? mm.airUtilTx.toFixed(1) + '%' : ''], ['TX queue free', q ? q.free + ' of ' + q.max : '', q && q.free <= 2 ? 'badv' : ''], ['Battery', mm.battery != null ? mm.battery + '%' : ''], ['Uptime', mm.uptime ? Math.round(mm.uptime / 60) + ' min' : '']])],
@@ -11425,6 +11463,24 @@ if (typeof module !== 'undefined') {
     nodes.sort(function (x, y) { return (y[1].lastHeard || 0) - (x[1].lastHeard || 0); });
     boxes.push(['Nodes heard (' + nodes.length + ')', kv(nodes.slice(0, 8).map(function (x) { var n = x[1]; return [n.longName || n.shortName || '!' + hex8(x[0]), (n.hops !== undefined ? n.hops + ' hops' : '') + (n.snr !== null && n.snr !== undefined ? ', SNR ' + n.snr.toFixed(1) : '') + (n.lastHeard ? ', ' + ago(n.lastHeard) : '')]; }))]);
     $('hw').innerHTML = boxes.map(function (b) { return '<div class="hwbox"><h3>' + esc(b[0]) + '</h3>' + b[1] + '</div>'; }).join('');
+  }
+
+  async function wifiTest() {
+    if (!(S.connected && S.mode === 'http')) return;
+    $('logTest').disabled = true;
+    var times = [], i, put = null, putErr = '';
+    logEvt('sys', 'Wi-Fi test: five polls, then one small send…');
+    try {
+      for (i = 0; i < 5; i++) { var t0 = performance.now(), r = await fetch(S.http.base + '/api/v1/fromradio?all=false'); await r.arrayBuffer(); times.push(Math.round(performance.now() - t0)); await sleep(300); }
+    } catch (e) { logEvt('err', 'Wi-Fi test poll failed: ' + (e.message || e.name), null, 'bad'); }
+    try {
+      var p0 = performance.now(), pr = await fetch(S.http.base + '/api/v1/toradio', { method: 'PUT', headers: { 'Content-Type': 'application/x-protobuf' }, body: Uint8Array.from(pb.bytes(7, [])) });
+      put = Math.round(performance.now() - p0); if (!pr.ok) putErr = ' (the board answered ' + pr.status + ')';
+    } catch (e) { putErr = ' failed: ' + (e.message || e.name); }
+    var s = times.slice().sort(function (x, y) { return x - y; }), med = s[Math.floor(s.length / 2)] || 0, worst = s[s.length - 1] || 0;
+    var slow = worst > 1500 || (put || 0) > 1500;
+    logEvt('sys', 'Wi-Fi test: polls ' + times.join(', ') + ' ms (median ' + med + ', worst ' + worst + '). Small send: ' + (put === null ? 'no answer' : put + ' ms') + putErr + '. ' + (slow ? 'The board’s web server is slow, so the radio settings are not the problem.' : 'The Wi-Fi link looks healthy.'), null, slow ? 'bad' : '');
+    $('logTest').disabled = false;
   }
   function initLog() {
     $('logFilter').addEventListener('change', function (e) { $('logList').setAttribute('data-f', e.target.value); });
@@ -11436,8 +11492,177 @@ if (typeof module !== 'undefined') {
       var done = function (ok) { $('logCopy').textContent = ok ? 'Copied' : 'Could not copy'; setTimeout(function () { $('logCopy').textContent = 'Copy'; }, 1500); };
       if (navigator.clipboard) navigator.clipboard.writeText(txt).then(function () { done(true); }, function () { done(false); }); else done(false);
     });
+    $('logTest').addEventListener('click', wifiTest);
     $('chkAck').addEventListener('change', function (e) { S.wantAck = e.target.checked; logEvt('sys', 'Delivery confirmations ' + (S.wantAck ? 'requested' : 'not requested') + ' from now on.'); });
     renderHw();
+  }
+
+
+  /* ---------- Chats: threads, messages, attach sheets ---------- */
+  function chTitle(i) { var c = S.channels.filter(function (x) { return x.index === i; })[0]; return (c && c.name) || (i === 0 ? 'Primary channel' : 'Channel ' + i); }
+  function thTitle(th) { return th.dm ? nodeName(th.node) : chTitle(th.ch); }
+  function mkThread(key, dm, node, ch) {
+    var th = S.threads.get(key);
+    if (!th) { th = { key: key, dm: dm, node: node, ch: ch, ul: document.createElement('ul'), last: '', lastT: 0, unread: 0 }; th.ul.className = 'thread'; S.threads.set(key, th); }
+    return th;
+  }
+  function threadFor(from, meta) {
+    var dm = !!(from && meta && meta.to && meta.to !== MESH.BROADCAST && meta.to === S.myNum);
+    return dm ? mkThread('dm:' + from, true, from, 0) : mkThread('ch:' + ((meta && meta.channel) || 0), false, null, (meta && meta.channel) || 0);
+  }
+  function targetOf(th) { return { to: th.dm ? th.node : MESH.BROADCAST, ch: th.ch }; }
+  function updateBadge() { var n = 0; S.threads.forEach(function (t) { n += t.unread; }); var b = $('badge'); b.textContent = n; b.hidden = !n; }
+  function place(li, th, preview, incoming) {
+    th.ul.appendChild(li); th.last = preview; th.lastT = Date.now();
+    var open = S.view === 'chat' && S.thread === th.key;
+    if (incoming && !open) th.unread++;
+    updateBadge();
+    if (open) { var b = $('thBody'); b.scrollTop = b.scrollHeight; } else if (S.view === 'chat' && !S.thread) renderThreadList();
+  }
+  function initials(s) { return (s.replace(/[^A-Za-z0-9]/g, '').slice(0, 2) || '?').toUpperCase(); }
+  function renderThreadList() {
+    var list = []; S.threads.forEach(function (t) { list.push(t); });
+    list.sort(function (x, y) { return (y.lastT - x.lastT) || (x.ch - y.ch); });
+    var ul = $('threadList'); ul.innerHTML = '';
+    list.forEach(function (th) {
+      var li = document.createElement('li'), b = document.createElement('button'), title = thTitle(th);
+      b.className = 'thcard';
+      b.innerHTML = '<span class="thav"></span><span class="thmain"><strong></strong><span></span></span><span class="thmeta"></span>';
+      b.querySelector('.thav').textContent = th.dm ? initials(title) : '#';
+      b.querySelector('strong').textContent = title;
+      b.querySelector('.thmain span').textContent = th.last || (th.dm ? 'No messages yet' : 'Everyone on this channel');
+      var meta = b.querySelector('.thmeta');
+      meta.textContent = th.lastT ? new Date(th.lastT).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : '';
+      if (th.unread) { var u = document.createElement('div'); u.className = 'unread'; u.textContent = th.unread; meta.appendChild(u); }
+      b.addEventListener('click', function () { openThread(th.key); });
+      li.appendChild(b); ul.appendChild(li);
+    });
+  }
+  function updateThreadHead() {
+    var th = S.threads.get(S.thread); if (!th) return;
+    $('thTitle').textContent = thTitle(th);
+    var c = S.channels.filter(function (x) { return x.index === th.ch; })[0];
+    $('thSub').textContent = th.dm ? 'Direct message. Only they receive it.' : (c && c.pskLen <= 1 ? 'Default key: anyone in range can read this channel.' : (c ? 'Private channel. Everyone with the key sees it.' : 'Channel ' + th.ch));
+  }
+  function refreshThreadTitles() { if (S.thread) updateThreadHead(); else renderThreadList(); }
+  function openThread(key) {
+    var th = S.threads.get(key); if (!th) return;
+    S.thread = key; th.unread = 0; updateBadge();
+    S.channelIndex = th.ch; S.target = targetOf(th);
+    $('threadsPane').hidden = true; $('threadView').hidden = false;
+    $('thBody').innerHTML = ''; $('thBody').appendChild(th.ul);
+    updateThreadHead(); refreshMsg();
+    var b = $('thBody'); b.scrollTop = b.scrollHeight;
+  }
+  function closeThread() { S.thread = null; $('threadView').hidden = true; $('threadsPane').hidden = false; renderThreadList(); }
+
+  function outBubble(title, node, withBar, preview) {
+    var th = S.threads.get(S.thread);
+    if (!th) return { set: function () {}, progress: function () {} };
+    var li = document.createElement('li'); li.className = 'bubble out';
+    li.innerHTML = '<div class="notehead"><strong>You</strong><span class="when">' + nowLabel() + '</span></div><div class="ohead"></div><div class="obody"></div>' + (withBar ? '<div class="bar"><div class="fill"></div></div>' : '') + '<div class="notestat ostat"></div>';
+    li.querySelector('.ohead').textContent = title;
+    if (node) li.querySelector('.obody').appendChild(node);
+    place(li, th, 'You: ' + (preview || title), false);
+    return {
+      li: li,
+      set: function (t, bad) { li.querySelector('.ostat').textContent = t; li.classList.toggle('bad', !!bad); },
+      progress: function (p) { var f = li.querySelector('.fill'); if (f) f.style.width = Math.round(p * 100) + '%'; }
+    };
+  }
+  function addOutVoice() {
+    var c = S.clip, b = document.createElement('button');
+    b.className = 'btn small'; b.textContent = 'Play'; b.dataset.idle = 'Play';
+    b.addEventListener('click', function () { if (!c.preview) c.preview = withCodec(function (cd) { return decodeVoice(cd, c.stream, null); }); playPcm(c.preview, b); });
+    return outBubble('Voice note, ' + c.seconds.toFixed(1) + ' s', b, false, 'Voice note');
+  }
+  function addOutPic() { var cv = document.createElement('canvas'); cv.className = 'pix'; paintCanvas(cv, pad.n, pad.px); return outBubble('Picture, ' + pad.n + ' by ' + pad.n, cv, false, 'Picture'); }
+  function addOutFile() { return outBubble(F.file.name + ', ' + fmtBytes(F.stream.length), null, true, 'File: ' + F.file.name); }
+
+  function textBytes() { return new TextEncoder().encode($('msgIn').value.trim()).length; }
+  function refreshMsg() {
+    var n = textBytes(); $('btnMsg').disabled = !S.ready || !S.thread || !n || n > 200;
+    $('msgIn').placeholder = S.ready ? 'Message' : 'Connect a board to send';
+    $('msgCount').textContent = n + ' of 200 bytes'; $('msgCount').style.color = n > 200 ? 'var(--bad)' : '';
+  }
+  async function sendText() {
+    var v = $('msgIn').value.trim(), bytes = new TextEncoder().encode(v), th = S.threads.get(S.thread);
+    if (!v || bytes.length > 200 || !S.ready || !th) return;
+    var li = document.createElement('li'); li.className = 'bubble out';
+    li.innerHTML = '<div class="notehead"><strong>You</strong><span class="when">' + nowLabel() + '</span></div><p></p><div class="notestat ostat">Sending…</div>';
+    li.querySelector('p').textContent = v;
+    place(li, th, 'You: ' + v, false);
+    $('msgIn').value = ''; refreshMsg();
+    var stat = li.querySelector('.ostat'), settled = false;
+    function say(t, bad) { stat.textContent = t; li.classList.toggle('bad', !!bad); }
+    try {
+      await sendPacket(MESH.PORT_TEXT, bytes, { wantAck: true, onAck: function (er) { settled = true; say(er === 0 ? (th.dm ? 'Delivered' : 'Sent, and a neighbour repeated it') : 'Not delivered: ' + (ROUTING_ERRORS[er] || 'error ' + er), er !== 0); } });
+      if (!settled) say('Sent. Waiting for confirmation…');
+    } catch (e) { say('Could not send: ' + (e.message || e.name), true); }
+  }
+
+  function openSheet(id, name) {
+    S.sheet = name;
+    if (name === 'voice' && S.clip && S.clip.sent) discardClip();
+    if (name === 'pic' && pad.sent) { pad.sent = false; padClear(); $('pxStatus').textContent = ''; }
+    if (name === 'file') showFileInfo();
+    var d = $(id); if (d.showModal) d.showModal(); else d.setAttribute('open', '');
+    if (name === 'voice' && !S.clip) { renderIdleStrip(); $('stripMeta').textContent = idleHint(); }
+  }
+  function closeSheet(id) { var d = $(id); if (d.open) { if (d.close) d.close(); else d.removeAttribute('open'); } S.sheet = null; }
+  function openNodePicker() {
+    if (S.connected && S.mode === 'http' && !S.nodesAsked) { S.nodesAsked = true; logEvt('sys', 'Asking the board for its node list…'); writeToRadio(buildWantConfig(69421)).then(drain, function () {}); }
+    fillNodeList();
+    openSheet('dlgNode', 'node');
+  }
+  function fillNodeList() {
+    var ul = $('nodeList'), n = 0; ul.innerHTML = '';
+    S.nodes.forEach(function (info, num) {
+      if (num === S.myNum) return;
+      n++;
+      var li = document.createElement('li'), b = document.createElement('button'), nm = nodeName(num);
+      b.className = 'thcard'; b.innerHTML = '<span class="thav"></span><span class="thmain"><strong></strong><span></span></span>';
+      b.querySelector('.thav').textContent = initials(nm); b.querySelector('strong').textContent = nm;
+      b.querySelector('.thmain span').textContent = '!' + hex8(num) + (info.hops !== undefined ? ', ' + info.hops + ' hops away' : '');
+      b.addEventListener('click', function () { closeSheet('dlgNode'); var th = mkThread('dm:' + num, true, num, 0); showView('chat'); openThread(th.key); });
+      li.appendChild(b); ul.appendChild(li);
+    });
+    $('nodeEmpty').hidden = n > 0;
+  }
+  var PAL_RGB = null;
+  function loadPhoto(file) {
+    if (!PAL_RGB) PAL_RGB = PALETTE.map(function (h) { return [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)]; });
+    var img = new Image(), url = URL.createObjectURL(file);
+    img.onload = function () {
+      var c = document.createElement('canvas'); c.width = c.height = pad.n;
+      var g = c.getContext('2d'), s = Math.min(img.width, img.height);
+      g.drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, pad.n, pad.n);
+      var d = g.getImageData(0, 0, pad.n, pad.n).data;
+      for (var i = 0; i < pad.n * pad.n; i++) {
+        var best = 0, bd = 1e9;
+        for (var j = 0; j < 16; j++) { var dr = d[i * 4] - PAL_RGB[j][0], dg = d[i * 4 + 1] - PAL_RGB[j][1], db = d[i * 4 + 2] - PAL_RGB[j][2], dd = dr * dr + dg * dg + db * db; if (dd < bd) { bd = dd; best = j; } }
+        pad.px[i] = best;
+      }
+      drawPad(); URL.revokeObjectURL(url);
+    };
+    img.src = url;
+  }
+  function initChat() {
+    mkThread('ch:0', false, null, 0); renderThreadList();
+    $('btnNew').addEventListener('click', openNodePicker);
+    $('thBack').addEventListener('click', closeThread);
+    $('atVoice').addEventListener('click', function () { openSheet('shVoice', 'voice'); });
+    $('atPic').addEventListener('click', function () { openSheet('shPic', 'pic'); });
+    $('atFile').addEventListener('click', function () { openSheet('shFile', 'file'); });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-close]'), function (b) { b.addEventListener('click', function () { var d = b.closest('dialog'); if (d.close) d.close(); else d.removeAttribute('open'); S.sheet = null; }); });
+    Array.prototype.forEach.call(document.querySelectorAll('dialog.sheet'), function (d) { d.addEventListener('close', function () { S.sheet = null; if (S.recording) stopRecording(); stopPlayback(); }); });
+    $('msgIn').addEventListener('input', refreshMsg);
+    $('msgIn').addEventListener('keydown', function (e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendText(); } });
+    $('btnMsg').addEventListener('click', sendText);
+    $('btnPhoto').addEventListener('click', function () { $('photoIn').click(); });
+    $('photoIn').addEventListener('change', function (e) { if (e.target.files[0]) loadPhoto(e.target.files[0]); });
+    $('btnToPic').addEventListener('click', function () { var f = F.file; closeSheet('shFile'); openSheet('shPic', 'pic'); if (f) loadPhoto(f); });
+    refreshMsg();
   }
 
   /* ---------- Environment checks ---------- */
@@ -11477,16 +11702,16 @@ if (typeof module !== 'undefined') {
     $('btnSend').addEventListener('click', sendClip);
     $('btnDiscard').addEventListener('click', discardClip);
     $('btnSim').addEventListener('click', simulate);
-    $('selChannel').addEventListener('change', function (e) { S.channelIndex = parseInt(e.target.value, 10) || 0; updateChannelHint(); if (S.ready) setReady(true); });
     $('selMax').addEventListener('change', function (e) { S.maxSec = parseInt(e.target.value, 10); if (!S.clip && !S.recording) { renderIdleStrip(); $('stripMeta').textContent = idleHint(); } });
     $('selHops').addEventListener('change', function (e) { S.hops = parseInt(e.target.value, 10); });
     $('chkAuto').addEventListener('change', function (e) { S.autoplay = e.target.checked; });
     $('chkText').addEventListener('change', function (e) { S.textNotice = e.target.checked; });
     initShell();
+    initChat();
     initLog();
     initPad();
     Array.prototype.forEach.call(document.querySelectorAll('input[name=fec]'), function (r) {
-      r.addEventListener('change', function () { S.fec = parseInt(r.value, 10); updateFecUi(); updateClipMeta(); if (S.view === 'files') showFileInfo(); });
+      r.addEventListener('change', function () { S.fec = parseInt(r.value, 10); updateFecUi(); updateClipMeta(); if (S.sheet === 'file') showFileInfo(); });
     });
     $('selExtra').addEventListener('change', function (e) { S.extra = parseFloat(e.target.value); updateFecUi(); updateClipMeta(); });
     $('chkRepair').addEventListener('change', function (e) { S.repair = e.target.checked; });
