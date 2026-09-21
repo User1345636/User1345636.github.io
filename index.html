@@ -28,7 +28,7 @@ button,select,input{font:inherit;color:inherit}
 
 /* shell: bottom tab bar on phones, left rail on tablets */
 .app{min-height:100dvh}
-.tabs{position:fixed;left:0;right:0;bottom:0;z-index:5;display:grid;grid-template-columns:repeat(3,1fr);background:var(--panel);color:var(--panel-muted);padding:6px 6px calc(env(safe-area-inset-bottom,0px) + 6px);border-radius:22px 22px 0 0}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:5;display:grid;grid-template-columns:repeat(6,1fr);background:var(--panel);color:var(--panel-muted);padding:6px 6px calc(env(safe-area-inset-bottom,0px) + 6px);border-radius:22px 22px 0 0}
 .tab{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 2px 6px;border:0;background:none;border-radius:16px;font-size:.74rem;font-weight:600;cursor:pointer;color:inherit}
 .tab svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .tab[aria-selected="true"]{color:var(--panel-text);background:rgba(103,234,148,.2)}
@@ -108,13 +108,17 @@ h3{font:800 1.05rem/1.2 var(--f-display);margin:0 0 4px}
 .bar.done .fill{background:var(--ok)}
 .xstat{margin:8px 0 14px;font-variant-numeric:tabular-nums}
 
-.notehead{display:flex;justify-content:space-between;gap:12px;margin-bottom:4px}
-.when{color:var(--muted);font-size:.82rem}
+/* inbox */
+#inbox{list-style:none;margin:0;padding:0}
+#inbox li{padding:16px 0;border-top:1px solid var(--rule)}
+.notehead{display:flex;justify-content:space-between;gap:12px;margin-bottom:6px}
+.when{color:var(--muted);font-size:.88rem}
+#inbox p{margin:0}
 .inbox svg{height:64px} .inbox .b{fill:var(--accent-ink)} .inbox .s-wait{fill:var(--rule)} .inbox .s-sent{fill:var(--accent-ink)}
 .inbox .div{stroke:var(--muted)} .inbox .seglabels>div{border-left-color:var(--muted)} .inbox .segsub{color:var(--muted)}
-.noterow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:8px}
-.notestat{font-size:.9rem} .sig{font-size:.82rem;color:var(--muted)}
-.fileicon{font:800 1.05rem var(--f-display);overflow-wrap:anywhere} .filepv{max-width:100%;max-height:200px;border-radius:8px;display:block;margin-top:8px}
+.noterow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:10px}
+.notestat{font-size:.92rem} .sig{font-size:.86rem;color:var(--muted)}
+.fileicon{font:800 1.05rem var(--f-display)} .filepv{max-width:100%;max-height:200px;border-radius:8px;display:block;margin-top:8px}
 .empty{color:var(--muted);max-width:50ch}
 
 /* settings */
@@ -168,52 +172,16 @@ h1{display:flex;align-items:center;gap:10px}
 .lx{grid-column:1/-1;margin:0;display:none;font:.76rem/1.4 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--muted);white-space:pre-wrap;word-break:break-all}
 .hex-on .lx{display:block}
 .loglist[data-f="tx"] .lg:not(.tx),.loglist[data-f="rx"] .lg:not(.rx),.loglist[data-f="board"] .lg:not(.board),.loglist[data-f="ours"] .lg:not(.ours),.loglist[data-f="err"] .lg:not(.bad):not(.err){display:none}
-.threadlist{list-style:none;margin:0;padding:0}
-.thcard{display:flex;gap:12px;align-items:center;padding:14px 0;border:0;border-top:1px solid var(--rule);background:none;width:100%;text-align:left;cursor:pointer;color:inherit}
-.thav{width:44px;height:44px;border-radius:50%;background:var(--panel);color:var(--accent);display:grid;place-items:center;font:800 1rem var(--f-display);flex:none}
-.thmain{flex:1;min-width:0} .thmain strong{display:block}
-.thmain span{display:block;color:var(--muted);font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.thmeta{text-align:right;font-size:.8rem;color:var(--muted)}
-.unread{display:inline-block;min-width:22px;padding:0 6px;border-radius:11px;background:var(--rec);color:#fff;font-weight:700;margin-top:4px;text-align:center}
-.thhead{display:flex;align-items:center;gap:12px;margin:8px 0 12px}
-#threadView{display:flex;flex-direction:column;height:calc(100dvh - 290px);min-height:330px}
-#thBody{flex:1;overflow-y:auto;padding:4px 2px 10px}
-.thread{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
-.bubble{max-width:90%;padding:10px 14px;border-radius:18px 18px 18px 6px;background:var(--card);border:1px solid var(--rule);align-self:flex-start}
-.bubble p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
-.bubble.out{align-self:flex-end;background:var(--accent);color:#10261A;border-color:transparent;border-radius:18px 18px 6px 18px}
-.bubble.out .when,.bubble.out .notestat,.bubble.out .hint{color:rgba(16,38,26,.72)}
-.bubble.out .bar{background:rgba(16,38,26,.2)} .bubble.out .fill{background:#10261A}
-.bubble.bad{border:1.5px solid var(--bad)}
-.ohead{font-weight:600;overflow-wrap:anywhere}
-.composer{border-top:1px solid var(--rule);padding-top:10px}
-.attachbar{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap}
-.msgrow{display:flex;gap:8px;align-items:flex-end}
-textarea{flex:1;min-height:44px;max-height:120px;padding:10px 14px;border-radius:22px;border:1px solid var(--rule);background:var(--card);resize:none;font:inherit;color:inherit}
-dialog.sheet{max-width:660px;width:100%;margin:auto auto 0;border-radius:26px 26px 0 0;max-height:94dvh;overflow:auto}
-@media (min-width:860px){dialog.sheet{margin:auto;border-radius:26px}}
-.shhead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:14px}
-.shhead h2{font-size:1.4rem}
-.pkd summary{cursor:pointer;font-size:.86rem;color:var(--muted);margin-top:8px}
-.pklist{list-style:none;margin:6px 0 0;padding:0;font-size:.82rem}
-.pklist li{display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-top:1px solid var(--rule)}
-.pklist .miss span:last-child{color:#d9364a} .pklist .fix span:last-child{color:#13804A}
-.trtool{margin:0 0 22px}
-.trlist{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:10px}
-.trcard,.bubble.sys{padding:12px 14px;border-radius:16px;border:1.5px dashed var(--muted);background:var(--card)}
-.bubble.sys{align-self:center;max-width:96%;border-radius:16px}
-.trcard p,.bubble.sys p{margin:6px 0 0}
-.trpath{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;margin-top:4px}
-.trn{padding:3px 10px;border-radius:999px;border:1.5px solid var(--rule);font-weight:600;font-size:.88rem}
-.trn.end{background:var(--panel);color:var(--panel-text);border-color:transparent}
-.trl{color:var(--muted);font-size:.8rem;white-space:nowrap}
 @media (prefers-reduced-motion:reduce){.rec.on{animation:none}.recicon,.fill{transition:none}}
 </style>
 </head>
 <body>
 <div class="app">
 <nav class="tabs" role="tablist" aria-label="Sections">
-  <button class="tab" role="tab" data-view="chat" aria-selected="true"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg>Chats<span class="badge" id="badge" hidden>0</span></button>
+  <button class="tab" role="tab" data-view="voice" aria-selected="true"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>Voice</button>
+  <button class="tab" role="tab" data-view="draw" aria-selected="false"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 12h16M12 4v16"/></svg>Draw</button>
+  <button class="tab" role="tab" data-view="files" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>Files</button>
+  <button class="tab" role="tab" data-view="inbox" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M3 13l3-8h12l3 8v6H3z"/><path d="M3 13h5l1 3h6l1-3h5"/></svg>Inbox<span class="badge" id="badge" hidden>0</span></button>
   <button class="tab" role="tab" data-view="log" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h13"/><circle cx="19" cy="12" r="1.2"/></svg>Log</button>
   <button class="tab" role="tab" data-view="settings" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Settings</button>
 </nav>
@@ -225,34 +193,72 @@ dialog.sheet{max-width:660px;width:100%;margin:auto auto 0;border-radius:26px 26
   </header>
   <div class="warn" id="envWarn" hidden></div>
 
-  <section class="view" id="v-chat">
-    <div id="threadsPane">
-      <div class="viewhead row" style="justify-content:space-between"><div><h2>Chats</h2><p>Channels and direct messages.</p></div><button class="btn small primary" id="btnNew" hidden>New message</button></div>
-      <ul class="threadlist" id="threadList"></ul>
+  <section class="view" id="v-voice">
+    <div class="viewhead"><h2>Voice note</h2><p>Speak for a few seconds. Codec2 squeezes it to about 90 bytes a second.</p></div>
+    <div class="stage">
+      <div class="strip" id="strip"></div>
+      <div class="stripmeta" id="stripMeta" aria-live="polite"></div>
+      <div class="controls"><button class="rec" id="btnRec" aria-label="Start recording"><span class="recicon"></span></button></div>
+      <div class="actions" id="clipActions" hidden>
+        <button class="btn" id="btnPlayClip" data-idle="Hear it as they will">Hear it as they will</button>
+        <button class="btn primary" id="btnSend">Send to mesh</button>
+        <button class="btn ghost" id="btnDiscard">Discard</button>
+      </div>
+      <div class="simrow"><button class="btn small" id="btnSim" hidden>Test receiving it here</button><label><input type="checkbox" id="chkDrop"> lose one packet on the way</label></div>
+      <div class="status" id="sendStatus" role="status"></div>
     </div>
-    <div id="threadView" hidden>
-      <div class="thhead"><button class="btn small" id="thBack" aria-label="Back to chats">Back</button><div style="flex:1;min-width:0"><h2 id="thTitle" style="font-size:1.25rem;margin:0"></h2><small id="thSub"></small><select id="thCh" hidden aria-label="Channel for this conversation" style="width:auto;min-height:34px;margin-top:6px;font-size:.85rem"></select></div><button class="btn small" id="thTrace" hidden>Trace route</button></div>
-      <div id="thBody"></div>
-      <div class="composer">
-        <div class="attachbar"><button class="btn small" id="atVoice">Voice</button><button class="btn small" id="atPic">Picture</button><button class="btn small" id="atFile">File</button></div>
-        <div class="msgrow"><textarea id="msgIn" rows="1" placeholder="Connect a board to send" aria-label="Message"></textarea><button class="btn primary" id="btnMsg" disabled>Send</button></div>
-        <small id="msgCount">0 of 200 bytes</small>
+  </section>
+
+  <section class="view" id="v-draw" hidden>
+    <div class="viewhead"><h2>Pixel postcard</h2><p>Draw something small. A 16 by 16 picture fits in a single packet.</p></div>
+    <div class="drawgrid">
+      <canvas id="pad" class="pad" aria-label="Drawing pad"></canvas>
+      <div class="drawtools">
+        <div class="palette" id="palette" role="group" aria-label="Colours"></div>
+        <p class="hint" id="pxMeta"></p>
+        <div class="row" style="margin-top:12px">
+          <select id="selPx" aria-label="Picture size" style="width:auto"><option value="16">16 by 16</option><option value="32">32 by 32</option></select>
+          <button class="btn small" id="btnPxClear">Clear</button>
+          <button class="btn small primary" id="btnPxSend" disabled>Send postcard</button>
+        </div>
+        <div class="row" style="margin-top:10px"><button class="btn small" id="btnPxSim">Test receiving it here</button><small>uses the “lose one packet” option on the Voice tab</small></div>
+        <div class="status" id="pxStatus" role="status"></div>
       </div>
     </div>
+  </section>
+
+  <section class="view" id="v-files" hidden>
+    <div class="viewhead"><h2>Send a file</h2><p>For small files. Bigger ones are trickled out slowly so the mesh stays usable for everyone else.</p></div>
+    <label class="drop" id="drop" for="fileIn"><strong id="dropTitle">Choose a file</strong><span class="hint" id="dropSub">Up to 60 kB after compression: notes, small images, configs.</span></label>
+    <input type="file" id="fileIn" hidden>
+    <div id="fileInfo" hidden>
+      <dl class="facts">
+        <div><dt>File</dt><dd id="fName">-</dd></div><div><dt>On the air</dt><dd id="fSize">-</dd></div>
+        <div><dt>Packets</dt><dd id="fPk">-</dd></div><div><dt>Airtime</dt><dd id="fAir">-</dd></div><div><dt>Time at this pace</dt><dd id="fEta">-</dd></div>
+      </dl>
+      <div class="opts">
+        <div class="field" style="margin:0"><label for="selParity">Protection</label><select id="selParity"><option value="0">No extra packets</option><option value="0.125">12% extra</option><option value="0.25" selected>25% extra</option><option value="0.5">50% extra</option></select><small>Uses the method chosen in Settings.</small></div>
+      </div>
+      <label class="check" style="margin-top:0"><input type="checkbox" id="chkZip" checked><span>Compress first when it makes the file smaller</span></label>
+      <div class="bar" id="xbar"><div class="fill" id="xfill"></div></div>
+      <p class="xstat" id="xstat" aria-live="polite"></p>
+      <div class="row"><button class="btn primary" id="btnFileSend" disabled>Send file</button><button class="btn" id="btnFilePause" hidden>Pause</button><button class="btn ghost" id="btnFileCancel" hidden>Cancel</button></div>
+    </div>
+  </section>
+
+  <section class="view" id="v-inbox" hidden>
+    <div class="viewhead"><h2>Inbox</h2><p>Voice notes, postcards, files and plain text from other boards.</p></div>
+    <ul id="inbox"></ul>
+    <p class="empty" id="inboxEmpty">Nothing yet. Anything sent to your channel lands here.</p>
   </section>
 
   <section class="view" id="v-log" hidden>
     <div class="viewhead"><h2>Diagnostics</h2><p>What the board reports about itself, and every packet going in or out.</p></div>
     <div class="hwgrid" id="hw"></div>
-    <div class="trtool"><h3>Trace route</h3>
-      <p class="hint">Sends one request to a node. Each repeater it passes adds itself to the answer, so you see the real path and the signal at every step. Only the target itself can produce the answer.</p>
-      <div class="row" style="margin-top:10px"><select id="trNode" aria-label="Node to trace" style="width:auto;max-width:100%"></select><button class="btn small primary" id="trGo">Trace route</button></div>
-      <p class="status" id="trMsg"></p><ul class="trlist" id="trList"></ul>
-    </div>
     <div class="logbar">
       <select id="logFilter" aria-label="Filter the log"><option value="all">Everything</option><option value="ours">Our notes, files and acks</option><option value="tx">Sent</option><option value="rx">Received</option><option value="board">Board reports</option><option value="err">Problems only</option></select>
       <label class="check"><input type="checkbox" id="logHex"><span>Hex dumps</span></label>
-      <button class="btn small" id="logTest" hidden>Wi-Fi test</button><button class="btn small" id="logPause">Pause</button><button class="btn small" id="logCopy">Copy</button><button class="btn small ghost" id="logClear">Clear</button>
+      <button class="btn small" id="logPause">Pause</button><button class="btn small" id="logCopy">Copy</button><button class="btn small ghost" id="logClear">Clear</button>
     </div>
     <ul class="loglist" id="logList" data-f="all"></ul>
     <p class="empty" id="logEmpty">Nothing logged yet. Connect a board and the conversation with it appears here, newest first.</p>
@@ -263,16 +269,12 @@ dialog.sheet{max-width:660px;width:100%;margin:auto auto 0;border-radius:26px 26
     <div class="group"><h3>Connection</h3><p class="hint">Talk to your board over Bluetooth or over your local Wi-Fi.</p><div class="row" style="margin-top:12px"><button class="btn small" id="btnDlg">Connection options</button></div></div>
     <div class="group"><h3>Radio</h3>
       <div class="field"><label for="selPreset">Modem preset</label><select id="selPreset"></select><small id="presetHint"></small></div>
+      <div class="field"><label for="selChannel">Send on channel</label><select id="selChannel"><option value="0">Primary channel (slot 0)</option></select><small id="channelHint"></small></div>
       <div class="field"><label for="selPace">Sending pace</label><select id="selPace"><option value="0.1">Gentle</option><option value="0.25" selected>Balanced</option><option value="0.5">Fast</option></select><small id="paceHint">Time between packets. Nearby nodes repeat every packet you send, so sending the next one too soon makes them collide and get lost. If packets keep going missing, choose Gentle or lower the hop limit.</small></div>
       <label class="check"><input type="checkbox" id="chkAck"><span><strong>Ask the mesh to confirm each packet</strong><small>The board watches for a neighbour repeating each packet and retries if it doesn't. The Log then shows a confirmation, or the reason it failed. Costs a little airtime.</small></span></label>
-      <div class="field"><label for="selCs">Packet size</label><select id="selCs"><option value="60">Tiny: 60 bytes, most robust</option><option value="100" selected>Small: 100 bytes</option><option value="160">Medium: 160 bytes</option><option value="200">Large: 200 bytes, fastest on strong links</option></select><small>Smaller packets spend less time on the air, so they survive weak links much better, but you need more of them. The size travels with each packet, so the other side needs no matching setting.</small></div>
       <div class="field"><label for="selHops">Hop limit</label><select id="selHops"><option>1</option><option>2</option><option selected>3</option><option>4</option></select><small>How many relays may repeat your packets. Lower keeps the airwaves freer.</small></div>
     </div>
-    <div class="group"><h3>Missing packets</h3>
-      <p class="hint">Instead of sending spare packets, the receiving page tells the sender exactly which packets it is missing, and the sender sends only those again.</p>
-      <label class="check" id="repairRow"><input type="checkbox" id="chkRepair" checked><span><strong>Resend what's missing</strong><small id="repairHint"></small></span></label>
-    </div>
-    <div class="group" id="fecGroup" hidden><h3>Spare packets (paused)</h3>
+    <div class="group"><h3>Error protection</h3>
       <p class="hint">Radio packets sometimes vanish on the way. Protection sends a few spare packets along with the real ones, so a lost packet can be rebuilt instead of leaving a gap.</p>
       <div style="margin-top:14px" role="radiogroup" aria-label="Error protection method">
         <label class="opt"><input type="radio" name="fec" value="1" checked><span><strong>Reed-Solomon</strong><small>Any spare can replace any lost packet. The most protection for the airtime. The number of spares is fixed when you send.</small></span></label>
@@ -284,75 +286,18 @@ dialog.sheet{max-width:660px;width:100%;margin:auto auto 0;border-radius:26px 26
       <div class="field" id="extraField"><label for="selExtra">How many spares</label>
         <select id="selExtra"><option value="0.17">Light: 1 spare for every 6 packets</option><option value="0.25" selected>Normal: 1 for every 4 packets</option><option value="0.5">Strong: 1 for every 2 packets</option></select>
         <small>Always at least one spare. Longer notes get more spares automatically. Files pick their own share on the Files tab.</small></div>
+      <label class="check" id="repairRow"><input type="checkbox" id="chkRepair" checked><span><strong>Resend what's missing</strong><small id="repairHint"></small></span></label>
     </div>
     <div class="group"><h3>Notes</h3>
-      <div class="field"><label for="selMax">Longest voice note</label><select id="selMax"><option value="5">5 seconds</option><option value="8" selected>8 seconds</option><option value="12">12 seconds</option><option value="20">20 seconds</option><option value="30">30 seconds</option></select><small>Voice takes about 88 bytes a second, so a 30 second note is 2.6 kB: about 27 packets at 100 bytes, plus spares.</small></div>
+      <div class="field"><label for="selMax">Longest voice note</label><select id="selMax"><option value="5">5 seconds</option><option value="8" selected>8 seconds</option><option value="12">12 seconds</option><option value="20">20 seconds</option><option value="30">30 seconds</option></select><small>Each 2.3 seconds costs one packet, plus spares. A 30 second note is about 14 packets.</small></div>
       <label class="check"><input type="checkbox" id="chkAuto" checked><span>Play incoming voice notes automatically</span></label>
+      <label class="check"><input type="checkbox" id="chkText"><span>Send a short text first, so the board's screen shows a message (uses extra airtime)</span></label>
       <p class="hint">Everything travels on Meshtastic's private app port (256), so the regular Meshtastic app ignores it.</p>
     </div>
     <div class="group"><h3>This browser</h3><ul id="checks"></ul></div>
   </section>
 </div>
 </div>
-
-<dialog class="sheet" id="shVoice" aria-label="Voice note"><div class="dlg">
-  <div class="shhead"><div><h2>Voice note</h2><p class="hint">Speak for a few seconds. Codec2 squeezes it to about 90 bytes a second.</p></div><button class="btn ghost small" data-close>Close</button></div>
-  
-    <div class="stage">
-      <div class="strip" id="strip"></div>
-      <div class="stripmeta" id="stripMeta" aria-live="polite"></div>
-      <div class="controls"><button class="rec" id="btnRec" aria-label="Start recording"><span class="recicon"></span></button></div>
-      <div class="actions" id="clipActions" hidden>
-        <button class="btn" id="btnPlayClip" data-idle="Hear it as they will">Hear it as they will</button>
-        <button class="btn primary" id="btnSend">Send to mesh</button>
-        <button class="btn ghost" id="btnDiscard">Discard</button>
-      </div>
-      <div class="simrow"><button class="btn small ghost" id="btnSim" hidden>Test it here</button><label><input type="checkbox" id="chkDrop"> lose one packet on the way</label></div>
-      <div class="status" id="sendStatus" role="status"></div>
-    </div>
-</div></dialog>
-<dialog class="sheet" id="shPic" aria-label="Picture"><div class="dlg">
-  <div class="shhead"><div><h2>Picture</h2><p class="hint">Pixel art or a pixelated photo. 16 by 16 fits in a single packet.</p></div><button class="btn ghost small" data-close>Close</button></div>
-  
-    <div class="drawgrid">
-      <canvas id="pad" class="pad" aria-label="Drawing pad"></canvas>
-      <div class="drawtools">
-        <div class="palette" id="palette" role="group" aria-label="Colours"></div>
-        <p class="hint" id="pxMeta"></p>
-        <div class="row" style="margin-top:12px">
-          <select id="selPx" aria-label="Picture size" style="width:auto"><option value="16">16 by 16</option><option value="32">32 by 32</option></select>
-          <button class="btn small" id="btnPxClear">Clear</button>
-          <button class="btn small primary" id="btnPxSend" disabled>Send postcard</button>
-        </div>
-        <div class="row" style="margin-top:10px"><button class="btn small" id="btnPhoto">Load a photo</button><input type="file" id="photoIn" accept="image/*" hidden><button class="btn small ghost" id="btnPxSim">Test it here</button></div>
-        <div class="status" id="pxStatus" role="status"></div>
-      </div>
-    </div>
-</div></dialog>
-<dialog class="sheet" id="shFile" aria-label="File"><div class="dlg">
-  <div class="shhead"><div><h2>File</h2><p class="hint">Anything else, up to about 60 kB. Big ones trickle out slowly so the mesh stays usable.</p></div><button class="btn ghost small" data-close>Close</button></div>
-  
-    <label class="drop" id="drop" for="fileIn"><strong id="dropTitle">Choose a file</strong><span class="hint" id="dropSub">Up to 60 kB after compression: notes, small images, configs.</span></label>
-    <input type="file" id="fileIn" hidden>
-    <div id="fileInfo" hidden>
-      <dl class="facts">
-        <div><dt>File</dt><dd id="fName">-</dd></div><div><dt>On the air</dt><dd id="fSize">-</dd></div>
-        <div><dt>Packets</dt><dd id="fPk">-</dd></div><div><dt>Airtime</dt><dd id="fAir">-</dd></div><div><dt>Time at this pace</dt><dd id="fEta">-</dd></div>
-      </dl>
-      <div class="opts">
-        <div class="field" hidden style="margin:0"><label for="selParity">Protection</label><select id="selParity"><option value="0">No extra packets</option><option value="0.125">12% extra</option><option value="0.25" selected>25% extra</option><option value="0.5">50% extra</option></select><small>Uses the method chosen in Settings.</small></div>
-      </div>
-      <label class="check" style="margin-top:0"><input type="checkbox" id="chkZip" checked><span>Compress first when it makes the file smaller</span></label>
-      <p class="dlgnote" id="imgHint" hidden>Photos are large for LoRa. <button class="btn small" id="btnToPic">Send it as a tiny picture instead</button></p>
-      <div class="bar" id="xbar"><div class="fill" id="xfill"></div></div>
-      <p class="xstat" id="xstat" aria-live="polite"></p>
-      <div class="row"><button class="btn primary" id="btnFileSend" disabled>Send file</button><button class="btn" id="btnFilePause" hidden>Pause</button><button class="btn ghost" id="btnFileCancel" hidden>Cancel</button></div>
-    </div>
-</div></dialog>
-<dialog class="sheet" id="dlgNode" aria-label="New message"><div class="dlg">
-  <div class="shhead"><div><h2>New message</h2><p class="hint">Pick a node your board has heard. Only that node gets the message.</p></div><button class="btn ghost small" data-close>Close</button></div>
-  <ul class="threadlist" id="nodeList"></ul><p class="empty" id="nodeEmpty">No nodes yet. They appear a few seconds after you connect.</p>
-</div></dialog>
 
 <dialog id="dlg" aria-labelledby="dlgTitle"><div class="dlg">
   <button class="btn ghost small dlgclose" id="dlgClose">Close</button>
@@ -9940,9 +9885,6 @@ var MESH = {
 /* Our voice-note packet: 4-byte header + up to CHUNK bytes of Codec2 bitstream. */
 var VOICE = { MAGIC: 0xA1, MAGIC_IMG: 0xA2, HEADER: 4, CHUNK: 200, RATE: 8000, FRAME_BITS: 28, FRAME_SECONDS: 0.04 };
 
-/* Packet (chunk) size is chosen by the sender and carried in every packet header. */
-function withChunk(cs, fn) { var old = VOICE.CHUNK; VOICE.CHUNK = cs; try { return fn(); } finally { VOICE.CHUNK = old; } }
-
 /* ---------- Minimal protobuf ---------- */
 var pb = {
   varint: function (n) {
@@ -10050,7 +9992,7 @@ var PORT_NAMES = { 1: 'TEXT_MESSAGE', 2: 'REMOTE_HARDWARE', 3: 'POSITION', 4: 'N
   32: 'REPLY', 33: 'IP_TUNNEL', 34: 'PAXCOUNTER', 64: 'SERIAL', 65: 'STORE_FORWARD', 66: 'RANGE_TEST', 67: 'TELEMETRY', 68: 'ZPS', 70: 'TRACEROUTE', 71: 'NEIGHBORINFO', 72: 'ATAK_PLUGIN', 73: 'MAP_REPORT', 256: 'PRIVATE_APP', 257: 'ATAK_FORWARDER' };
 var REGIONS = { 0: 'UNSET', 1: 'US', 2: 'EU_433', 3: 'EU_868', 4: 'CN', 5: 'JP', 6: 'ANZ', 7: 'KR', 8: 'TW', 9: 'RU', 10: 'IN', 11: 'NZ_865', 12: 'TH', 13: 'LORA_24', 14: 'UA_433', 15: 'UA_868', 16: 'MY_433', 17: 'MY_919', 18: 'SG_923' };
 var PRESET_ENUM = { 0: 'LONG_FAST', 1: 'LONG_SLOW', 2: 'VERY_LONG_SLOW', 3: 'MEDIUM_SLOW', 4: 'MEDIUM_FAST', 5: 'SHORT_SLOW', 6: 'SHORT_FAST', 7: 'LONG_MODERATE', 8: 'SHORT_TURBO' };
-var ROUTING_ERRORS = { 0: 'delivered', 1: 'NO_ROUTE', 2: 'GOT_NAK', 3: 'TIMEOUT', 4: 'NO_INTERFACE', 5: 'MAX_RETRANSMIT (the board resent it three times and heard no acknowledgement)', 6: 'NO_CHANNEL', 7: 'TOO_LARGE', 8: 'NO_RESPONSE', 9: 'DUTY_CYCLE_LIMIT (airtime limit hit)', 32: 'BAD_REQUEST', 33: 'NOT_AUTHORIZED', 34: 'PKI_FAILED', 38: 'RATE_LIMIT_EXCEEDED' };
+var ROUTING_ERRORS = { 0: 'delivered', 1: 'NO_ROUTE', 2: 'GOT_NAK', 3: 'TIMEOUT', 4: 'NO_INTERFACE', 5: 'MAX_RETRANSMIT (no neighbour repeated it)', 6: 'NO_CHANNEL', 7: 'TOO_LARGE', 8: 'NO_RESPONSE', 9: 'DUTY_CYCLE_LIMIT (airtime limit hit)', 32: 'BAD_REQUEST', 33: 'NOT_AUTHORIZED', 34: 'PKI_FAILED', 38: 'RATE_LIMIT_EXCEEDED' };
 function routingError(payload) { var r = pb.get(pb.parse(payload), 3); return r === undefined ? 0 : r; }
 function f32opt(v) { return v === undefined ? null : pb.f32ToFloat(v); }
 function parseMetrics(buf) {
@@ -10091,7 +10033,7 @@ function parseFromRadio(buf) {
       var ni = pb.parse(e.value), u = pb.get(ni, 2), user = u ? pb.parse(u) : [];
       var ln = pb.get(user, 2), sn = pb.get(user, 3);
       var dm = pb.get(ni, 6);
-      return { kind: 'nodeInfo', num: pb.get(ni, 1) >>> 0, longName: ln ? utf8(ln) : '', shortName: sn ? utf8(sn) : '', channel: pb.get(ni, 7) || 0, snr: f32opt(pb.get(ni, 4)), lastHeard: pb.get(ni, 5) || 0, hops: pb.get(ni, 9), metrics: dm ? parseMetrics(dm) : null };
+      return { kind: 'nodeInfo', num: pb.get(ni, 1) >>> 0, longName: ln ? utf8(ln) : '', shortName: sn ? utf8(sn) : '', snr: f32opt(pb.get(ni, 4)), lastHeard: pb.get(ni, 5) || 0, hops: pb.get(ni, 9), metrics: dm ? parseMetrics(dm) : null };
     }
     if (e.field === 7 && e.wire === 0) return { kind: 'configComplete', id: e.value };
     if (e.field === 10 && e.wire === 2) {
@@ -10205,7 +10147,7 @@ function decodeVoice(codec, stream, chunkPresent) {
    parity/repair symbol = sum(coeff[i] * chunk[i]). Reed-Solomon uses a Cauchy matrix (any k symbols
    recover the data). The fountain uses pseudo-random 0/1 coefficients derived from idx, so the sender
    can keep producing fresh symbols forever (needs about k+1 or k+2 on average). */
-var FEC = { NONE: 0, RS: 1, FOUNTAIN: 2, MAGIC_VOICE: 0xB1, MAGIC_IMG: 0xB2, MAGIC_NACK: 0xB3, MAGIC_NACK2: 0xB4, HEADER: 8 };
+var FEC = { NONE: 0, RS: 1, FOUNTAIN: 2, MAGIC_VOICE: 0xB1, MAGIC_IMG: 0xB2, MAGIC_NACK: 0xB3, HEADER: 7 };
 var GF_EXP = new Uint8Array(512), GF_LOG = new Uint8Array(256);
 (function () { var x = 1, i; for (i = 0; i < 255; i++) { GF_EXP[i] = x; GF_LOG[x] = i; x <<= 1; if (x & 256) x ^= 0x11d; } for (i = 255; i < 512; i++) GF_EXP[i] = GF_EXP[i - 255]; })();
 function gfMul(a, b) { return a && b ? GF_EXP[GF_LOG[a] + GF_LOG[b]] : 0; }
@@ -10253,31 +10195,19 @@ function fecSolve(mode, k, syms) {
 function dataLen(streamLen, k, idx) { return Math.min(VOICE.CHUNK, streamLen - idx * VOICE.CHUNK); }
 
 /* Sender session: k plain packets, then `extra` protection packets; more can be made later on request. */
-function makeSession(stream, msgId, kind, mode, extra, cs) {
-  cs = cs || VOICE.CHUNK;
-  return withChunk(cs, function () { return makeSessionInner(stream, msgId, kind, mode, extra, cs); });
-}
-function makeSessionInner(stream, msgId, kind, mode, extra, cs) {
+function makeSession(stream, msgId, kind, mode, extra) {
   var k = Math.max(1, Math.ceil(stream.length / VOICE.CHUNK)), chunks = [], i;
   for (i = 0; i < k; i++) chunks.push(padChunk(stream.subarray(i * VOICE.CHUNK, (i + 1) * VOICE.CHUNK)));
   var s = { stream: stream, msgId: msgId & 255, kind: kind, mode: mode, k: k, chunks: chunks, next: k, repairs: 0, packets: [] };
-  s.cs = cs;
   s.packet = function (idx) {
-    return withChunk(cs, function () {
-      var body = idx < k ? stream.subarray(idx * cs, (idx + 1) * cs) : fecSymbol(mode, k, chunks, idx);
-      var p = new Uint8Array(FEC.HEADER + body.length);
-      p[0] = kind === 'img' ? FEC.MAGIC_IMG : FEC.MAGIC_VOICE; p[1] = s.msgId; p[2] = mode; p[3] = k; p[4] = idx; p[5] = stream.length >> 8; p[6] = stream.length & 255; p[7] = cs;
-      p.set(body, FEC.HEADER); return p;
-    });
+    var body = idx < k ? stream.subarray(idx * VOICE.CHUNK, (idx + 1) * VOICE.CHUNK) : fecSymbol(mode, k, chunks, idx);
+    var p = new Uint8Array(FEC.HEADER + body.length);
+    p[0] = kind === 'img' ? FEC.MAGIC_IMG : FEC.MAGIC_VOICE; p[1] = s.msgId; p[2] = mode; p[3] = k; p[4] = idx; p[5] = stream.length >> 8; p[6] = stream.length & 255;
+    p.set(body, FEC.HEADER); return p;
   };
   for (i = 0; i < k + extra && i < 255; i++) { s.packets.push(s.packet(i)); }
   s.next = s.packets.length;
   return s;
-}
-function nackMissing(msgId, targetNode, idxList) {
-  var n = Math.min(idxList.length, 30), out = [FEC.MAGIC_NACK2, msgId & 255, targetNode & 255, (targetNode >>> 8) & 255, (targetNode >>> 16) & 255, (targetNode >>> 24) & 255, n];
-  for (var i = 0; i < n; i++) out.push(idxList[i] & 255);
-  return Uint8Array.from(out);
 }
 function nackPacket(msgId, need, targetNode) {
   return Uint8Array.of(FEC.MAGIC_NACK, msgId & 255, need & 255, targetNode & 255, (targetNode >>> 8) & 255, (targetNode >>> 16) & 255, (targetNode >>> 24) & 255);
@@ -10299,26 +10229,17 @@ function airtimeMs(presetKey, appBytes) {
 }
 
 /* ---------- File transfer: blocks of up to 16 chunks, each block erasure-coded on its own ---------- */
-var FILE = { MAGIC: 0xC1, NACK: 0xC2, NACK2: 0xC3, HEADER: 9, BLOCK: 16, MAX: 61440 };
+var FILE = { MAGIC: 0xC1, NACK: 0xC2, HEADER: 8, BLOCK: 16, MAX: 61440 };
 function fileLayout(L) {
   var chunks = Math.ceil(L / VOICE.CHUNK), blocks = Math.ceil(chunks / FILE.BLOCK);
   return { chunks: chunks, blocks: blocks, kb: function (b) { return Math.min(FILE.BLOCK, chunks - b * FILE.BLOCK); } };
 }
 /* stream: bytes to send. Returns {packets, layout, repair(block, n)}. */
-function makeFileSender(stream, id, compressed, mode, parityPct, cs) {
-  cs = cs || VOICE.CHUNK;
-  var out = withChunk(cs, function () { return makeFileSenderInner(stream, id, compressed, mode, parityPct, cs); });
-  var rawRepair = out.repair;
-  out.repair = function (bl, n) { return withChunk(cs, function () { return rawRepair(bl, n); }); };
-  var rawPF = out.packetFor;
-  out.packetFor = function (bl, idx) { return withChunk(cs, function () { return rawPF(bl, idx); }); };
-  out.cs = cs; return out;
-}
-function makeFileSenderInner(stream, id, compressed, mode, parityPct, cs) {
+function makeFileSender(stream, id, compressed, mode, parityPct) {
   var L = stream.length, lay = fileLayout(L), flags = (compressed ? 1 : 0) | (mode << 1), blocks = [], packets = [], b, i;
   function pack(bl, idx, body) {
     var p = new Uint8Array(FILE.HEADER + body.length);
-    p[0] = FILE.MAGIC; p[1] = id & 255; p[2] = flags; p[3] = (L >> 16) & 255; p[4] = (L >> 8) & 255; p[5] = L & 255; p[6] = bl; p[7] = idx; p[8] = cs;
+    p[0] = FILE.MAGIC; p[1] = id & 255; p[2] = flags; p[3] = (L >> 16) & 255; p[4] = (L >> 8) & 255; p[5] = L & 255; p[6] = bl; p[7] = idx;
     p.set(body, FILE.HEADER); return p;
   }
   function symbol(bl, idx) {
@@ -10338,7 +10259,6 @@ function makeFileSenderInner(stream, id, compressed, mode, parityPct, cs) {
   }
   return {
     packets: packets, layout: lay, id: id & 255, mode: mode,
-    packetFor: function (bl, idx) { return blocks[bl] && idx < 255 ? symbol(bl, idx) : null; },
     repair: function (bl, n) {
       var B = blocks[bl], out = [];
       if (!B || !mode) return out;
@@ -10349,27 +10269,16 @@ function makeFileSenderInner(stream, id, compressed, mode, parityPct, cs) {
 }
 function parseFilePacket(p) {
   if (!p || p.length <= FILE.HEADER || p[0] !== FILE.MAGIC) return null;
-  var flags = p[2], mode = (flags >> 1) & 3, L = (p[3] << 16) | (p[4] << 8) | p[5], cs = p[8];
-  if (mode > 2 || L < 1 || cs < 16 || cs > 230) return null;
-  var lay = withChunk(cs, function () { return fileLayout(L); });
+  var flags = p[2], mode = (flags >> 1) & 3, L = (p[3] << 16) | (p[4] << 8) | p[5];
+  if (mode > 2 || L < 1) return null;
+  var lay = fileLayout(L);
   if (p[6] >= lay.blocks) return null;
-  return { id: p[1], compressed: !!(flags & 1), mode: mode, L: L, cs: cs, block: p[6], idx: p[7], body: p.subarray(FILE.HEADER) };
+  return { id: p[1], compressed: !!(flags & 1), mode: mode, L: L, block: p[6], idx: p[7], body: p.subarray(FILE.HEADER) };
 }
 function fileNackPacket(id, targetNode, needs) {   // needs: [{block, need}]
   var n = Math.min(needs.length, 24), out = [FILE.NACK, id & 255, targetNode & 255, (targetNode >>> 8) & 255, (targetNode >>> 16) & 255, (targetNode >>> 24) & 255, n];
   for (var i = 0; i < n; i++) out.push(needs[i].block & 255, Math.min(255, needs[i].need));
   return Uint8Array.from(out);
-}
-function fileNackMissing(id, targetNode, pairs) {   // pairs: [{block, idx}]
-  var n = Math.min(pairs.length, 24), out = [FILE.NACK2, id & 255, targetNode & 255, (targetNode >>> 8) & 255, (targetNode >>> 16) & 255, (targetNode >>> 24) & 255, n];
-  for (var i = 0; i < n; i++) out.push(pairs[i].block & 255, pairs[i].idx & 255);
-  return Uint8Array.from(out);
-}
-function parseFileNack2(p) {
-  if (!p || p.length < 7 || p[0] !== FILE.NACK2) return null;
-  var pairs = [], n = p[6];
-  for (var i = 0; i < n && 8 + 2 * i < p.length; i++) pairs.push({ block: p[7 + 2 * i], idx: p[8 + 2 * i] });
-  return { id: p[1], target: (p[2] | (p[3] << 8) | (p[4] << 16) | (p[5] << 24)) >>> 0, pairs: pairs };
 }
 function parseFileNack(p) {
   if (!p || p.length < 7 || p[0] !== FILE.NACK) return null;
@@ -10377,12 +10286,11 @@ function parseFileNack(p) {
   for (var i = 0; i < n && 7 + 2 * i + 1 < p.length; i++) needs.push({ block: p[7 + 2 * i], need: p[8 + 2 * i] });
   return { id: p[1], target: (p[2] | (p[3] << 8) | (p[4] << 16) | (p[5] << 24)) >>> 0, needs: needs };
 }
-function FileReceiver(L, mode, cs) {
-  this.cs = cs || VOICE.CHUNK; var self = this;
-  this.L = L; this.mode = mode; this.lay = withChunk(this.cs, function () { return fileLayout(L); }); this.blk = []; this.count = 0;
+function FileReceiver(L, mode) {
+  this.L = L; this.mode = mode; this.lay = fileLayout(L); this.blk = []; this.count = 0;
   for (var b = 0; b < this.lay.blocks; b++) this.blk.push({ kb: this.lay.kb(b), syms: new Map(), data: null, rank: 0 });
 }
-FileReceiver.prototype.addRaw = function (b, idx, body) {
+FileReceiver.prototype.add = function (b, idx, body) {
   var B = this.blk[b];
   if (!B || B.data || B.syms.has(idx)) return;
   B.syms.set(idx, padChunk(body)); this.count++;
@@ -10396,15 +10304,10 @@ FileReceiver.prototype.progress = function () {
   return got / this.lay.chunks;
 };
 FileReceiver.prototype.complete = function () { return this.blk.every(function (B) { return !!B.data; }); };
-FileReceiver.prototype.missing = function () {
-  var out = [];
-  this.blk.forEach(function (B, b) { if (B.data) return; for (var i = 0; i < B.kb; i++) if (!B.syms.has(i)) out.push({ block: b, idx: i }); });
-  return out;
-};
 FileReceiver.prototype.needs = function () {
   var out = []; this.blk.forEach(function (B, i) { if (!B.data) out.push({ block: i, need: Math.max(1, B.kb - B.rank) }); }); return out;
 };
-FileReceiver.prototype.resultRaw = function () {
+FileReceiver.prototype.result = function () {
   if (!this.complete()) return null;
   var out = new Uint8Array(this.L);
   this.blk.forEach(function (B, b) { B.data.forEach(function (d, i) { var off = (b * FILE.BLOCK + i) * VOICE.CHUNK; out.set(d.subarray(0, Math.min(VOICE.CHUNK, this.L - off)), off); }, this); }, this);
@@ -10425,17 +10328,12 @@ function makeChunks(stream, msgId, magic) {
 }
 
 function parseChunk(payload) {
-  if (payload && payload.length >= 7 && payload[0] === FEC.MAGIC_NACK2) {
-    var cnt = payload[6], list = [];
-    for (var q = 0; q < cnt && 7 + q < payload.length; q++) list.push(payload[7 + q]);
-    return { type: 'nack2', msgId: payload[1], target: (payload[2] | (payload[3] << 8) | (payload[4] << 16) | (payload[5] << 24)) >>> 0, idx: list };
-  }
-  if (payload && payload.length >= 7 && payload[0] === FEC.MAGIC_NACK)
+  if (payload && payload.length >= FEC.HEADER && payload[0] === FEC.MAGIC_NACK)
     return { type: 'nack', msgId: payload[1], need: payload[2], target: (payload[3] | (payload[4] << 8) | (payload[5] << 16) | (payload[6] << 24)) >>> 0 };
   if (payload && payload.length > FEC.HEADER && (payload[0] === FEC.MAGIC_VOICE || payload[0] === FEC.MAGIC_IMG)) {
-    var mode = payload[2], k = payload[3], idx = payload[4], len = (payload[5] << 8) | payload[6], cs = payload[7];
-    if (mode > 2 || k < 1 || cs < 16 || cs > 230 || len < 1 || len > k * cs || len <= (k - 1) * cs) return null;
-    return { type: payload[0] === FEC.MAGIC_IMG ? 'img' : 'voice', msgId: payload[1], idx: idx, total: k, body: payload.subarray(FEC.HEADER), fec: { mode: mode, k: k, len: len, cs: cs } };
+    var mode = payload[2], k = payload[3], idx = payload[4], len = (payload[5] << 8) | payload[6];
+    if ((mode !== FEC.RS && mode !== FEC.FOUNTAIN) || k < 1 || len < 1 || len > k * VOICE.CHUNK || len <= (k - 1) * VOICE.CHUNK) return null;
+    return { type: payload[0] === FEC.MAGIC_IMG ? 'img' : 'voice', msgId: payload[1], idx: idx, total: k, body: payload.subarray(FEC.HEADER), fec: { mode: mode, k: k, len: len } };
   }
   if (!payload || payload.length <= VOICE.HEADER || (payload[0] !== VOICE.MAGIC && payload[0] !== VOICE.MAGIC_IMG)) return null;
   var idx = payload[2], total = payload[3];
@@ -10495,7 +10393,7 @@ function packImage(px, size) {
 }
 /* Unknown pixels (packet never arrived) come back as 255. */
 function decodeImage(stream, present, totalChunks) {
-  var size = stream.length > 200 ? 32 : 16, px = new Uint8Array(size * size).fill(255);
+  var size = totalChunks > 1 ? 32 : 16, px = new Uint8Array(size * size).fill(255);
   for (var i = 0; i < size * size; i++) {
     var b = 1 + (i >> 1);
     if (b >= stream.length || (present && !present[Math.floor(b / VOICE.CHUNK)])) continue;
@@ -10505,14 +10403,11 @@ function decodeImage(stream, present, totalChunks) {
 }
 
 if (typeof module !== 'undefined') {
-  module.exports = { nackMissing: nackMissing, fileNackMissing: fileNackMissing, parseFileNack2: parseFileNack2, withChunk: withChunk, parseRouteDiscovery: parseRouteDiscovery, PORT_NAMES: PORT_NAMES, REGIONS: REGIONS, PRESET_ENUM: PRESET_ENUM, ROUTING_ERRORS: ROUTING_ERRORS, routingError: routingError, parseMetrics: parseMetrics, MESH: MESH, VOICE: VOICE, pb: pb, buildWantConfig: buildWantConfig, buildSendPacket: buildSendPacket,
+  module.exports = { parseRouteDiscovery: parseRouteDiscovery, PORT_NAMES: PORT_NAMES, REGIONS: REGIONS, PRESET_ENUM: PRESET_ENUM, ROUTING_ERRORS: ROUTING_ERRORS, routingError: routingError, parseMetrics: parseMetrics, MESH: MESH, VOICE: VOICE, pb: pb, buildWantConfig: buildWantConfig, buildSendPacket: buildSendPacket,
     parseFromRadio: parseFromRadio, makeCodec: makeCodec, packFrames: packFrames, unpackFrame: unpackFrame,
     encodeVoice: encodeVoice, decodeVoice: decodeVoice, makeChunks: makeChunks, parseChunk: parseChunk,
     VoiceAssembly: VoiceAssembly, PRESETS: PRESETS, airtimeMs: airtimeMs, FILE: FILE, makeFileSender: makeFileSender, parseFilePacket: parseFilePacket, fileNackPacket: fileNackPacket, parseFileNack: parseFileNack, FileReceiver: FileReceiver, FEC: FEC, makeSession: makeSession, fecSolve: fecSolve, padChunk: padChunk, dataLen: dataLen, nackPacket: nackPacket, packImage: packImage, decodeImage: decodeImage, PALETTE: PALETTE, chunkSizes: chunkSizes, ampsFromPcm: ampsFromPcm };
 }
-
-FileReceiver.prototype.add = function (b, idx, body) { var s = this; return withChunk(s.cs, function () { return s.addRaw(b, idx, body); }); };
-FileReceiver.prototype.result = function () { var s = this; return withChunk(s.cs, function () { return s.resultRaw(); }); };
 
 /* ===== App: UI, Bluetooth, audio ===== */
 (function () {
@@ -10523,9 +10418,9 @@ FileReceiver.prototype.result = function () { var s = this; return withChunk(s.c
     dev: null, toRadio: null, fromRadio: null, fromNum: null,
     connected: false, ready: false, myNum: null,
     nodes: new Map(), channels: [], channelIndex: 0,
-    maxSec: 8, hops: 3, autoplay: true, 
+    maxSec: 8, hops: 3, autoplay: true, textNotice: false,
     clip: null, recording: false, sending: false,
-    inbox: new Map(), sessions: new Map(), preset: 'LONG_FAST', wantAck: false, pending: new Map(), hw: { queue: null, meta: null, lora: null, net: {}, pollMs: null, poll: { n: 0, sum: 0, max: 0, last: 0 }, putMs: null }, stats: { tx: 0, rx: 0, txB: 0, rxB: 0, acks: 0, fails: 0 }, cs: 100, nackMin: 8000, xfer: null, traces: new Map(), view: 'chat', threads: new Map(), thread: null, target: null, sheet: null, liveBub: null, mode: 'ble', http: null, poll: null, fec: 0, extra: 0.25, repair: true
+    inbox: new Map(), sessions: new Map(), preset: 'LONG_FAST', wantAck: false, pending: new Map(), hw: { queue: null, meta: null, lora: null, net: {}, pollMs: null }, stats: { tx: 0, rx: 0, txB: 0, rxB: 0, acks: 0, fails: 0 }, xfer: null, view: 'voice', unread: 0, mode: 'ble', http: null, poll: null, fec: 1, extra: 0.25, repair: true
   };
   var CHUNK_SECONDS = VOICE.CHUNK * 8 / VOICE.FRAME_BITS * VOICE.FRAME_SECONDS; // ~2.29 s per packet
   var SIM_NODE = 0x00c0ffee;
@@ -10545,7 +10440,6 @@ FileReceiver.prototype.result = function () { var s = this; return withChunk(s.c
   function setStatus(msg, kind) {
     var el = $('sendStatus');
     el.textContent = msg || '';
-    if (S.liveBub && msg) S.liveBub.set(msg, kind === 'err');
     el.className = 'status' + (kind ? ' ' + kind : '');
   }
 
@@ -10768,40 +10662,22 @@ FileReceiver.prototype.result = function () { var s = this; return withChunk(s.c
   /* ---------- Bluetooth (Meshtastic BLE service) ---------- */
   var gattChain = Promise.resolve();
   function gatt(fn) { var p = gattChain.then(fn); gattChain = p.then(function () {}, function () {}); return p; }
-  function httpFetch(url, opts, ms) {
-    var limit = ms || S.httpTimeout || 20000;
-    return gatt(function () {
-      var ctl = new AbortController(), timer = setTimeout(function () { ctl.abort(); }, limit);
-      opts = opts || {}; opts.signal = ctl.signal;
-      return fetch(url, opts).then(function (r) {
-        return r.arrayBuffer().then(function (b) { clearTimeout(timer); return { ok: r.ok, status: r.status, bytes: new Uint8Array(b) }; });
-      }).catch(function (e) {
-        clearTimeout(timer);
-        throw (e && e.name === 'AbortError') ? new Error('The board did not answer within ' + Math.round(limit / 1000) + ' s') : e;
-      });
-    });
-  }
   function writeToRadio(bytes) {
     if (S.mode === 'http') {
-      var p0 = performance.now();
-      return httpFetch(S.http.base + '/api/v1/toradio', { method: 'PUT', headers: { 'Content-Type': 'application/x-protobuf' }, body: bytes })
-        .then(function (r) {
-          S.hw.putMs = Math.round(performance.now() - p0);
-          if (S.hw.putMs > 1500) logEvt('err', 'Sending to the board over Wi-Fi took ' + S.hw.putMs + ' ms. The board’s web server is slow.', null, 'bad');
-          if (!r.ok) throw new Error('The board answered ' + r.status);
-        });
+      return fetch(S.http.base + '/api/v1/toradio', { method: 'PUT', headers: { 'Content-Type': 'application/x-protobuf' }, body: bytes })
+        .then(function (r) { if (!r.ok) throw new Error('The board answered ' + r.status); });
     }
     return gatt(function () { return S.toRadio.writeValueWithResponse ? S.toRadio.writeValueWithResponse(bytes) : S.toRadio.writeValue(bytes); });
   }
   async function readOne() {
     if (S.mode === 'http') {
-      var t0 = performance.now(), r = await httpFetch(S.http.base + '/api/v1/fromradio?all=false');
+      var t0 = performance.now();
+      var r = await fetch(S.http.base + '/api/v1/fromradio?all=false');
+      S.hw.pollMs = Math.round(performance.now() - t0);
+      if (S.hw.pollMs > 1500) logEvt('err', 'The board took ' + S.hw.pollMs + ' ms to answer a Wi-Fi poll. That is slow.', null, 'bad');
       if (!r.ok) throw new Error('The board answered ' + r.status);
-      var out = r.bytes, ms = Math.round(performance.now() - t0), P = S.hw.poll;
-      P.n++; P.sum += ms; P.last = ms; if (ms > P.max) P.max = ms;
-      S.hw.pollMs = ms; S.http.fails = 0;
-      if (ms > 1500) logEvt('err', (out.length ? 'A Wi-Fi poll that returned ' + out.length + ' bytes' : 'An empty Wi-Fi poll') + ' took ' + ms + ' ms. The board’s web server is slow.', null, 'bad');
-      return out;
+      S.http.fails = 0;
+      return new Uint8Array(await r.arrayBuffer());
     }
     var v = await gatt(function () { return S.fromRadio.readValue(); });
     return new Uint8Array(v.buffer.slice(v.byteOffset, v.byteOffset + v.byteLength));
@@ -10826,7 +10702,7 @@ FileReceiver.prototype.result = function () { var s = this; return withChunk(s.c
   function handleFromRadio(m) {
     try { logFrom(m); } catch (e) { console.warn('log failed', e); }
     if (m.kind === 'myInfo') S.myNum = m.num;
-    else if (m.kind === 'nodeInfo') { S.nodes.set(m.num, { longName: m.longName, shortName: m.shortName, channel: m.channel, snr: m.snr, hops: m.hops, metrics: m.metrics, lastHeard: m.lastHeard }); refreshThreadTitles(); if ($('dlgNode').open) fillNodeList(); if (S.view === 'log') fillTraceNodes(); }
+    else if (m.kind === 'nodeInfo') S.nodes.set(m.num, { longName: m.longName, shortName: m.shortName, snr: m.snr, hops: m.hops, metrics: m.metrics, lastHeard: m.lastHeard });
     else if (m.kind === 'channel') {
       S.channels = S.channels.filter(function (c) { return c.index !== m.index; });
       if (m.role > 0) S.channels.push(m);
@@ -10834,7 +10710,7 @@ FileReceiver.prototype.result = function () { var s = this; return withChunk(s.c
       renderChannels();
     }
     else if (m.kind === 'configComplete') setReady(true);
-    else if (m.kind === 'packet' && m.port !== null && m.from !== S.myNum) onIncoming(m.from, m.port, m.payload, { snr: m.snr, rssi: m.rssi, channel: m.channel, to: m.to, hops: m.hopStart ? m.hopStart - m.hopLimit : null, relay: m.relay });
+    else if (m.kind === 'packet' && m.port !== null && m.from !== S.myNum) onIncoming(m.from, m.port, m.payload, { snr: m.snr, rssi: m.rssi });
   }
 
   function setLink(state, title, sub) {
@@ -10843,7 +10719,6 @@ FileReceiver.prototype.result = function () { var s = this; return withChunk(s.c
     $('linkSub').textContent = sub;
     logEvt(state === 'bad' ? 'err' : 'sys', title + '. ' + sub, null, state === 'bad' ? 'bad' : '');
     $('connectOptions').hidden = S.connected; $('connectedRow').hidden = !S.connected;
-    $('logTest').hidden = !(S.connected && S.mode === 'http');
   }
   function setReady(on) {
     S.ready = on;
@@ -10859,11 +10734,24 @@ FileReceiver.prototype.result = function () { var s = this; return withChunk(s.c
     return c.name ? '“' + c.name + '”' : (idx === 0 ? 'the primary channel' : 'channel ' + idx);
   }
   function renderChannels() {
-    S.channels.forEach(function (c) { mkThread('ch:' + c.index, false, null, c.index); });
-    refreshThreadTitles();
+    var sel = $('selChannel'), html = '';
+    S.channels.forEach(function (c) {
+      var nm = c.name || (c.index === 0 ? 'Primary channel' : 'Channel ' + c.index);
+      html += '<option value="' + c.index + '">' + esc(nm) + ' (slot ' + c.index + ')</option>';
+    });
+    sel.innerHTML = html || '<option value="0">Primary channel (slot 0)</option>';
+    sel.value = String(S.channelIndex);
+    if (sel.value !== String(S.channelIndex)) { S.channelIndex = parseInt(sel.value, 10) || 0; }
+    updateChannelHint();
     if (S.ready) setReady(true);
   }
-  function updateChannelHint() { updateThreadHead(); }
+  function updateChannelHint() {
+    var c = S.channels.filter(function (x) { return x.index === S.channelIndex; })[0];
+    var el = $('channelHint');
+    if (c && c.pskLen <= 1) el.textContent = 'This channel uses the default shared key, so any Meshtastic node in range can receive your notes. A private channel keeps them between your boards.';
+    else if (c) el.textContent = 'Both boards need this same channel and key.';
+    else el.textContent = 'Channels appear after you connect.';
+  }
 
   function btError(e) {
     var n = e && e.name, m = (e && e.message) || '';
@@ -10928,14 +10816,12 @@ FileReceiver.prototype.result = function () { var s = this; return withChunk(s.c
 
   /* ---------- Sending ---------- */
   function randomId() { var a = new Uint32Array(1); crypto.getRandomValues(a); return (a[0] || 1) >>> 0; }
-  function sendPacket(port, payload, opt) {
-    opt = opt || {};
-    var to = opt.to !== undefined ? opt.to : (S.target ? S.target.to : MESH.BROADCAST), ch = opt.ch !== undefined ? opt.ch : S.channelIndex, ack = opt.wantAck !== undefined ? opt.wantAck : S.wantAck;
-    var id = opt.id || randomId(), t0 = performance.now();
-    var bytes = buildSendPacket({ to: to, channel: ch, port: port, payload: payload, id: id, hopLimit: S.hops, wantAck: ack, wantResponse: opt.wantResponse });
-    var base = 'TX #' + hex8(id) + ' to ' + toName(to) + ' on channel ' + ch + ', ' + (PORT_NAMES[port] || 'port ' + port) + ' ' + payload.length + ' B, hop limit ' + S.hops + (ack ? ', ack requested' : '') + describeApp(port, payload);
+  function sendPacket(port, payload) {
+    var id = randomId(), t0 = performance.now();
+    var bytes = buildSendPacket({ to: MESH.BROADCAST, channel: S.channelIndex, port: port, payload: payload, id: id, hopLimit: S.hops, wantAck: S.wantAck });
+    var base = 'TX #' + hex8(id) + ' to everyone on channel ' + S.channelIndex + ', ' + (PORT_NAMES[port] || 'port ' + port) + ' ' + payload.length + ' B, hop limit ' + S.hops + (S.wantAck ? ', ack requested' : '') + describeApp(port, payload);
     var li = logEvt('tx', base, bytes, 'ours');
-    S.pending.set(id, { t: Date.now(), li: li, base: base, cb: opt.onAck, to: to });
+    S.pending.set(id, { t: Date.now(), li: li, base: base });
     if (S.pending.size > 60) S.pending.delete(S.pending.keys().next().value);
     return writeToRadio(bytes).then(function () {
       var ms = Math.round(performance.now() - t0);
@@ -10948,78 +10834,57 @@ FileReceiver.prototype.result = function () { var s = this; return withChunk(s.c
       throw e;
     });
   }
-  /* ---------- Sending progress ---------- */
-  async function countdown(say, done, remaining, lastAir) {
-    var end = Date.now() + paceMs();
-    while (Date.now() < end) {
-      var left = (end - Date.now()) + (remaining - 1) * paceMs() + lastAir * 1000;
-      say(done + ' Next in ' + Math.ceil((end - Date.now()) / 1000) + ' s, about ' + fmtTime(left) + ' left.');
-      await sleep(Math.min(500, Math.max(50, end - Date.now())));
-    }
-  }
-  async function sendPackets(sess, say, mark) {
-    var chunks = sess.packets, t0 = Date.now(), air = 0, i, a = 0;
-    for (i = 0; i < chunks.length; i++) {
-      a = airtimeMs(S.preset, chunks[i].length) / 1000;
-      var label = i >= sess.k ? 'spare ' + (i - sess.k + 1) : 'data packet ' + (i + 1) + ' of ' + sess.k;
-      mark(i, 'sending');
-      say('Sending ' + label + ' (packet ' + (i + 1) + ' of ' + chunks.length + ', ' + chunks[i].length + ' bytes, about ' + a.toFixed(1) + ' s on the air)…');
-      var w0 = performance.now();
-      try { await sendPacket(MESH.PORT_PRIVATE, chunks[i]); } catch (e) { e.pk = i + 1; mark(i, 'lost'); throw e; }
-      var ms = Math.round(performance.now() - w0);
-      air += a; mark(i, 'sent');
-      if (i < chunks.length - 1) await countdown(say, 'Packet ' + (i + 1) + ' of ' + chunks.length + ' accepted by the board in ' + ms + ' ms.', chunks.length - 1 - i, a);
-    }
-    var sp = chunks.length - sess.k;
-    return 'Done: ' + chunks.length + ' packets (' + sess.k + ' data' + (sp ? ' + ' + sp + ' spare' : '') + ') handed to the board in ' + fmtTime(Date.now() - t0) + ', about ' + air.toFixed(0) + ' s of airtime. The other side needs this page open and connected.';
-  }
   async function sendClip() {
-    if (S.sending) { setStatus('Another send is still in progress. It will finish or fail shortly.', 'note'); return; }
-    if (!S.clip) return;
-    if (!S.ready) { setStatus('Connect a board first.', 'err'); return; }
+    if (!S.clip || !S.ready || S.sending) return;
     S.sending = true; stopPlayback();
-    var states = [], fail = 1;
+    $('btnSend').disabled = true; $('btnDiscard').disabled = true; $('btnRec').disabled = true;
+    var sess = buildSession(S.clip.stream, Math.floor(Math.random() * 256), 'voice'), chunks = sess.packets;
+    var states = chunks.map(function () { return 'ready'; }), k = 0;
     try {
-      var bub = addOutVoice(); S.liveBub = bub; S.clip.sent = true; closeSheet('shVoice');
-      $('btnSend').disabled = true; $('btnDiscard').disabled = true; $('btnRec').disabled = true;
-      var sess = buildSession(S.clip.stream, Math.floor(Math.random() * 256), 'voice');
-      sess.bub = bub; states = sess.packets.map(function () { return 'ready'; });
-      var done = await sendPackets(sess, setStatus, function (i, st) { states[i] = st; if (S.clip) renderClipStrip(states); });
-      setStatus(done, 'ok');
+      if (S.textNotice) {
+        setStatus('Sending a text notice first…');
+        await sendPacket(MESH.PORT_TEXT, new TextEncoder().encode('[voice note ' + S.clip.seconds.toFixed(1) + 's]'));
+        await sleep(paceMs());
+      }
+      for (k = 0; k < chunks.length; k++) {
+        states[k] = 'sending'; renderClipStrip(states);
+        setStatus('Sending packet ' + (k + 1) + ' of ' + chunks.length + '…');
+        await sendPacket(MESH.PORT_PRIVATE, chunks[k]);
+        states[k] = 'sent'; renderClipStrip(states);
+        if (k < chunks.length - 1) await sleep(paceMs());
+      }
+      setStatus('Handed to the board. It transmits each packet when the channel is clear. The other side needs this page open and connected to hear it.', 'ok');
     } catch (e) {
-      console.warn(e); fail = e.pk || 1;
-      logEvt('err', 'Voice note stopped at packet ' + fail + ': ' + (e.message || e.name), null, 'bad');
-      if (S.clip) S.clip.sent = false;
-      setStatus('Stopped at packet ' + fail + ': ' + (e.message || 'connection problem') + '. Open Voice and tap Send to try again.', 'err');
-    } finally {
-      S.liveBub = null; S.sending = false;
-      $('btnDiscard').disabled = false; $('btnRec').disabled = false; $('btnSend').disabled = !S.ready; refreshPx();
+      console.warn(e);
+      states[k] = 'lost'; renderClipStrip(states);
+      setStatus('Sending stopped at packet ' + (k + 1) + '. Check the connection and tap Send to try again.', 'err');
     }
+    S.sending = false;
+    $('btnDiscard').disabled = false; $('btnRec').disabled = false; $('btnSend').disabled = !S.ready;
   }
+
+  /* ---------- Receiving ---------- */
   function onIncoming(from, port, payload, meta) {
     if (port === MESH.PORT_PRIVATE) {
       if (payload[0] === FILE.MAGIC) { addFileChunk(from, parseFilePacket(payload), meta); return; }
       if (payload[0] === FILE.NACK) { handleFileNack(from, parseFileNack(payload)); return; }
-      if (payload[0] === FILE.NACK2) { handleFileNack2(from, parseFileNack2(payload)); return; }
       var c = parseChunk(payload);
       if (c && c.type === 'nack') handleNack(from, c);
-      else if (c && c.type === 'nack2') handleNack2(from, c);
       else if (c) (c.type === 'img' ? addImageChunk : addVoiceChunk)(from, c, meta);
     } else if (port === MESH.PORT_TEXT) {
       addText(from, utf8(payload), meta);
     }
   }
-  function addText(from, text, meta) {
-    if (/^\[(voice note|pixel postcard)[^\]]*\]$/.test(text)) return;   // notice sent ahead of a note; the real item follows
-    var th = threadFor(from, meta), li = document.createElement('li');
-    li.className = 'bubble in';
-    li.innerHTML = '<div class="notehead"><strong>' + esc(nodeName(from)) + '</strong><span class="when">' + nowLabel() + '</span></div><p>' + esc(text) + '</p>';
-    place(li, th, text, true);
+  function inboxEmptyCheck() {
+    $('inboxEmpty').hidden = $('inbox').children.length > 0;
+    if (S.view !== 'inbox') { S.unread++; updateBadge(); }
   }
-  function attachNote(n, from, meta, label) {
-    var th = threadFor(from, meta);
-    n.th = th; n.target = targetOf(th); n.li.className = 'note bubble in';
-    place(n.li, th, label, true);
+  function updateBadge() { var b = $('badge'); b.textContent = S.unread; b.hidden = !S.unread; }
+  function addText(from, text, meta) {
+    var li = document.createElement('li');
+    li.className = 'text';
+    li.innerHTML = '<div class="notehead"><strong>' + esc(nodeName(from)) + '</strong><span class="when">' + nowLabel() + '</span></div><p>' + esc(text) + '</p>';
+    $('inbox').prepend(li); inboxEmptyCheck();
   }
   function addVoiceChunk(from, c, meta) {
     var key = from + ':' + c.msgId, n = S.inbox.get(key);
@@ -11027,10 +10892,11 @@ FileReceiver.prototype.result = function () { var s = this; return withChunk(s.c
     if (!n) {
       n = { key: key, from: from, total: c.total, asm: new VoiceAssembly(c.total), complete: false, stalled: false,
             pcm: null, amps: null, seconds: 0, last: Date.now(), meta: meta, li: document.createElement('li'), timer: null, played: false };
+      n.li.className = 'note';
       S.inbox.set(key, n);
-      attachNote(n, from, meta, 'Voice note');
+      $('inbox').prepend(n.li); inboxEmptyCheck();
     }
-    n.cs = n.cs || (c.fec ? c.fec.cs : 200); withChunk(n.cs, function () { absorb(n, c); }); noteArrival(n, c, meta); n.last = Date.now(); n.stalled = false; n.meta = meta || n.meta;
+    absorb(n, c); n.last = Date.now(); n.stalled = false; n.meta = meta || n.meta;
     var wasComplete = n.complete;
     n.complete = n.asm.complete();
     decodeNote(n);
@@ -11042,22 +10908,21 @@ FileReceiver.prototype.result = function () { var s = this; return withChunk(s.c
       try { playPcm(n.pcm, n.li.querySelector('.play')); } catch (e) { console.warn('autoplay blocked', e); }
     }
   }
-  function decodeNote(n) { return withChunk(n.cs || 200, function () { return decodeNoteInner(n); }); }
-  function decodeNoteInner(n) {
+  function decodeNote(n) {
     var r = n.asm.build();
     n.pcm = withCodec(function (cd) { return decodeVoice(cd, r.stream, r.present); });
     n.amps = ampsFromPcm(n.pcm);
     n.seconds = n.pcm.length / VOICE.RATE;
   }
-  function renderNote(n) { return withChunk(n.cs || 200, function () { return renderNoteInner(n); }); }
-  function renderNoteInner(n) {
+  function renderNote(n) {
     var got = n.asm.got(), i;
     var segs = [];
     for (i = 0; i < n.total; i++) {
       var p = n.asm.parts[i];
       segs.push({ weight: p ? p.length : VOICE.CHUNK, state: p ? 'sent' : 'wait', name: 'Packet ' + (i + 1), sub: p ? (p.length + VOICE.HEADER) + ' bytes' : (n.stalled ? 'never arrived' : 'waiting') });
     }
-    var status = recvStatus(n, n.seconds.toFixed(1) + ' s of audio');
+    var status = n.complete ? n.seconds.toFixed(1) + ' s, all ' + n.total + (n.total === 1 ? ' packet' : ' packets') + ' arrived'
+      : got + ' of ' + n.total + ' packets' + (n.stalled ? ', the rest never arrived' : ', more on the way');
     status += fecNote(n);
     var sig = '';
     if (n.meta && n.meta.snr !== null && n.meta.snr !== undefined) sig = 'Signal: ' + n.meta.snr.toFixed(1) + ' dB SNR' + (n.meta.rssi ? ', ' + n.meta.rssi + ' dBm' : '');
@@ -11066,7 +10931,7 @@ FileReceiver.prototype.result = function () { var s = this; return withChunk(s.c
       '<div class="notehead"><strong>' + esc(nodeName(n.from)) + '</strong><span class="when">' + nowLabel() + '</span></div>' +
       '<div class="strip inbox">' + stripMarkup({ amps: n.amps, segs: segs, label: 'Received voice note' }) + '</div>' +
       '<div class="noterow"><button class="btn small play" data-idle="' + idle + '">' + idle + '</button><span class="notestat">' + esc(status) + '</span>' +
-      (sig ? '<span class="sig">' + esc(sig) + '</span>' : '') + '</div>' + pkDetail(n); wireDetail(n);
+      (sig ? '<span class="sig">' + esc(sig) + '</span>' : '') + '</div>';
     var btn = n.li.querySelector('.play');
     btn.addEventListener('click', function () { if (n.pcm && n.pcm.length) playPcm(n.pcm, btn); });
     if (player.src && player.btn && player.btn.dataset && player.btn.dataset.key === n.key) { /* keep */ }
@@ -11074,10 +10939,8 @@ FileReceiver.prototype.result = function () { var s = this; return withChunk(s.c
   }
 
   /* Test path: run the recorded clip through the chunker and the receive code, no radio involved. */
-  function showSimThread() { closeSheet('shVoice'); closeSheet('shPic'); showView('chat'); openThread(threadFor(SIM_NODE, {}).key); }
   async function simulate() {
     if (!S.clip) return;
-    showSimThread();
     var sess = buildSession(S.clip.stream, Math.floor(Math.random() * 256), 'voice'), chunks = sess.packets;
     var drop = $('chkDrop').checked && chunks.length > 1 ? Math.floor(Math.random() * sess.k) : -1;
     $('btnSim').disabled = true;
@@ -11087,6 +10950,7 @@ FileReceiver.prototype.result = function () { var s = this; return withChunk(s.c
       await sleep(500);
     }
     $('btnSim').disabled = false;
+    $('inbox').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
 
@@ -11109,7 +10973,7 @@ FileReceiver.prototype.result = function () { var s = this; return withChunk(s.c
     if (x < 0 || y < 0 || x >= pad.n || y >= pad.n) return;
     pad.px[y * pad.n + x] = pad.color; drawPad();
   }
-  function refreshPx() { var b = $('btnPxSend'); if (b) b.disabled = !S.ready || S.sending; refreshFile(); refreshMsg(); }
+  function refreshPx() { var b = $('btnPxSend'); if (b) b.disabled = !S.ready || S.sending; refreshFile(); }
   function initPad() {
     var pal = $('palette'), html = '';
     PALETTE.forEach(function (c, i) { html += '<button class="sw' + (i === 0 ? ' on' : '') + '" data-i="' + i + '" style="background:' + c + '" aria-label="Colour ' + (i + 1) + '"></button>'; });
@@ -11131,25 +10995,21 @@ FileReceiver.prototype.result = function () { var s = this; return withChunk(s.c
     padClear(); refreshPx();
   }
   async function sendPostcard() {
-    if (S.sending) { $('pxStatus').textContent = 'Another send is still in progress. It will finish or fail shortly.'; return; }
-    if (!S.ready) return;
+    if (!S.ready || S.sending) return;
     S.sending = true; refreshPx();
-    var bub = { set: function () {}, progress: function () {} };
-    function say(v) { $('pxStatus').textContent = v; bub.set(v); }
+    var sess = buildSession(packImage(pad.px, pad.n), Math.floor(Math.random() * 256), 'img'), chunks = sess.packets, k = 0, st = $('pxStatus');
     try {
-      bub = addOutPic(); pad.sent = true; closeSheet('shPic');
-      var sess = buildSession(packImage(pad.px, pad.n), Math.floor(Math.random() * 256), 'img'); sess.bub = bub;
-      say(await sendPackets(sess, say, function () {})); $('pxStatus').className = 'status ok';
-    } catch (e) {
-      console.warn(e);
-      logEvt('err', 'Picture stopped at packet ' + (e.pk || 1) + ': ' + (e.message || e.name), null, 'bad');
-      pad.sent = false;
-      var msg = 'Stopped at packet ' + (e.pk || 1) + ': ' + (e.message || 'connection problem') + '. Open Picture and tap Send to try again.';
-      $('pxStatus').textContent = msg; $('pxStatus').className = 'status err'; bub.set(msg, true);
-    } finally { S.sending = false; refreshPx(); }
+      if (S.textNotice) { st.textContent = 'Sending a text notice first…'; await sendPacket(MESH.PORT_TEXT, new TextEncoder().encode('[pixel postcard]')); await sleep(paceMs()); }
+      for (k = 0; k < chunks.length; k++) {
+        st.textContent = 'Sending packet ' + (k + 1) + ' of ' + chunks.length + '…';
+        await sendPacket(MESH.PORT_PRIVATE, chunks[k]);
+        if (k < chunks.length - 1) await sleep(paceMs());
+      }
+      st.textContent = 'Handed to the board. The other side needs this page open and connected.'; st.className = 'status ok';
+    } catch (e) { console.warn(e); st.textContent = 'Sending stopped at packet ' + (k + 1) + '. Check the connection and try again.'; st.className = 'status err'; }
+    S.sending = false; refreshPx();
   }
   async function simulatePostcard() {
-    showSimThread();
     var sess = buildSession(packImage(pad.px, pad.n), Math.floor(Math.random() * 256), 'img'), chunks = sess.packets;
     var drop = $('chkDrop').checked && chunks.length > 1 ? Math.floor(Math.random() * sess.k) : -1;
     for (var k = 0; k < chunks.length; k++) { if (k !== drop) onIncoming(SIM_NODE, MESH.PORT_PRIVATE, chunks[k], {}); await sleep(600); }
@@ -11159,28 +11019,32 @@ FileReceiver.prototype.result = function () { var s = this; return withChunk(s.c
     if (n && n.total !== c.total) n = null;
     if (!n) {
       n = { key: key, from: from, total: c.total, asm: new VoiceAssembly(c.total), li: document.createElement('li'), stalled: false, timer: null, meta: meta, isImg: true };
-      S.inbox.set(key, n); attachNote(n, from, meta, 'Picture');
+      n.li.className = 'note'; S.inbox.set(key, n); $('inbox').prepend(n.li); inboxEmptyCheck();
     }
-    n.cs = n.cs || (c.fec ? c.fec.cs : 200); withChunk(n.cs, function () { absorb(n, c); }); noteArrival(n, c, meta); n.stalled = false; n.meta = meta || n.meta;
+    absorb(n, c); n.stalled = false; n.meta = meta || n.meta;
     renderImageNote(n);
     clearTimeout(n.timer); scheduleNack(n);
     if (!n.asm.complete()) n.timer = setTimeout(function () { n.stalled = true; renderImageNote(n); }, 45000);
   }
-  function renderImageNote(n) { return withChunk(n.cs || 200, function () { return renderImageNoteInner(n); }); }
-  function renderImageNoteInner(n) {
+  function renderImageNote(n) {
     var r = n.asm.build(), img = decodeImage(r.stream, r.present, n.total), got = n.asm.got();
-    var status = recvStatus(n, 'Picture');
+    var status = n.asm.complete() ? 'Pixel postcard, all ' + n.total + (n.total === 1 ? ' packet' : ' packets') + ' arrived'
+      : got + ' of ' + n.total + ' packets' + (n.stalled ? ', the rest never arrived' : ', more on the way');
     status += fecNote(n);
     var sig = n.meta && n.meta.snr !== null && n.meta.snr !== undefined ? 'Signal: ' + n.meta.snr.toFixed(1) + ' dB SNR' + (n.meta.rssi ? ', ' + n.meta.rssi + ' dBm' : '') : '';
-    n.li.innerHTML = '<div class="notehead"><strong>' + esc(nodeName(n.from)) + '</strong><span class="when">' + nowLabel() + '</span></div><canvas class="pix" aria-label="Received pixel postcard"></canvas><div class="noterow"><span class="notestat">' + esc(status) + '</span>' + (sig ? '<span class="sig">' + esc(sig) + '</span>' : '') + '</div>' + pkDetail(n); wireDetail(n);
+    n.li.innerHTML = '<div class="notehead"><strong>' + esc(nodeName(n.from)) + '</strong><span class="when">' + nowLabel() + '</span></div><canvas class="pix" aria-label="Received pixel postcard"></canvas><div class="noterow"><span class="notestat">' + esc(status) + '</span>' + (sig ? '<span class="sig">' + esc(sig) + '</span>' : '') + '</div>';
     paintCanvas(n.li.querySelector('canvas'), img.size, img.px);
   }
 
 
   /* ---------- Error protection: build, absorb, repair ---------- */
   function buildSession(stream, id, kind) {
-    var kk = Math.max(1, Math.ceil(stream.length / VOICE.CHUNK)), s = makeSession(stream, id, kind, S.fec, spareCount(kk), VOICE.CHUNK);
-    s.target = { to: MESH.BROADCAST, ch: S.channelIndex }; S.sessions.set(s.msgId, s);
+    if (S.fec === FEC.NONE) {
+      var ch = makeChunks(stream, id, kind === 'img' ? VOICE.MAGIC_IMG : VOICE.MAGIC);
+      return { packets: ch, k: ch.length };
+    }
+    var kk = Math.max(1, Math.ceil(stream.length / VOICE.CHUNK)), s = makeSession(stream, id, kind, S.fec, spareCount(kk));
+    S.sessions.set(s.msgId, s);
     if (S.sessions.size > 8) S.sessions.delete(S.sessions.keys().next().value);
     return s;
   }
@@ -11196,29 +11060,6 @@ FileReceiver.prototype.result = function () { var s = this; return withChunk(s.c
     n.rank = r.rank;
     if (r.data) for (var i = 0; i < c.total; i++) if (!n.asm.parts[i]) { n.asm.add(i, r.data[i].subarray(0, dataLen(c.fec.len, c.total, i))); n.recovered = (n.recovered || 0) + 1; }
   }
-  /* ---------- Receiving detail ---------- */
-  function noteArrival(n, c, meta) {
-    n.t0 = n.t0 || Date.now(); n.arr = n.arr || [];
-    if (n.arr.some(function (x) { return x.idx === c.idx; })) { n.dups = (n.dups || 0) + 1; return; }
-    n.arr.push({ idx: c.idx, spare: !!(c.fec && c.idx >= c.total), t: Date.now() - n.t0, snr: meta && meta.snr, rssi: meta && meta.rssi, hops: meta && meta.hops, relay: meta && meta.relay });
-  }
-  function recvStatus(n, doneLabel) {
-    var arr = n.arr || [], last = arr.length ? arr[arr.length - 1].t / 1000 : 0, spares = arr.filter(function (x) { return x.spare; }).length, miss = [], i;
-    for (i = 0; i < n.total; i++) if (!n.asm.parts[i]) miss.push(i + 1);
-    if (!miss.length) return doneLabel + ': all ' + n.total + (n.total === 1 ? ' packet' : ' packets') + ' in ' + last.toFixed(1) + ' s' + (spares ? ', plus ' + spares + (spares === 1 ? ' spare' : ' spares') : '') + (n.dups ? ', ' + n.dups + ' duplicate' + (n.dups === 1 ? '' : 's') + ' ignored' : '');
-    return n.asm.got() + ' of ' + n.total + ' packets after ' + last.toFixed(1) + ' s, waiting for ' + (miss.length === 1 ? 'packet ' : 'packets ') + miss.join(', ') + (n.stalled ? '. Nothing new for 45 s, so they were probably lost' : '');
-  }
-  function pkDetail(n) {
-    var rows = (n.arr || []).slice().sort(function (x, y) { return x.t - y.t; }).map(function (x) {
-      var nm = x.spare ? 'Spare ' + (x.idx - n.total + 1) : 'Packet ' + (x.idx + 1);
-      var info = (x.t / 1000).toFixed(1) + ' s' + (x.hops !== null && x.hops !== undefined ? ', ' + x.hops + (x.hops === 1 ? ' hop' : ' hops') : '') + (x.hops === 0 ? ' (direct)' : (x.relay !== undefined && x.relay !== null ? ', via ' + relayName(x.relay) : '')) + (x.snr !== null && x.snr !== undefined ? ', SNR ' + x.snr.toFixed(1) : '') + (x.rssi ? ', ' + x.rssi + ' dBm' : '');
-      return '<li><span>' + nm + '</span><span>' + esc(info) + '</span></li>';
-    }).join('');
-    var seen = {}; (n.arr || []).forEach(function (x) { if (!x.spare) seen[x.idx] = 1; });
-    for (var i = 0; i < n.total; i++) if (!seen[i]) rows += '<li class="' + (n.asm.parts[i] ? 'fix' : 'miss') + '"><span>Packet ' + (i + 1) + '</span><span>' + (n.asm.parts[i] ? 'rebuilt from spares' : (n.stalled ? 'lost' : 'not here yet')) + '</span></li>';
-    return '<details class="pkd"' + (n.open ? ' open' : '') + '><summary>Packet details</summary><ul class="pklist">' + rows + '</ul></details>';
-  }
-  function wireDetail(n) { var d = n.li.querySelector('.pkd'); if (d) d.addEventListener('toggle', function () { n.open = d.open; }); }
   function fecNote(n) {
     var s = '';
     if (n.recovered) s += ', rebuilt ' + n.recovered + (n.recovered === 1 ? ' lost packet' : ' lost packets') + ' with ' + (n.fec.mode === FEC.RS ? 'Reed-Solomon' : 'the fountain code');
@@ -11227,45 +11068,17 @@ FileReceiver.prototype.result = function () { var s = this; return withChunk(s.c
   }
   function scheduleNack(n) {
     clearTimeout(n.nackTimer);
-    if (!n.fec || n.asm.complete() || !S.repair || (n.nacks || 0) >= 8) return;
-    var arr = n.arr || [], gap = arr.length > 1 ? (arr[arr.length - 1].t - arr[0].t) / (arr.length - 1) : paceMs();
-    n.nackTimer = setTimeout(function () { sendNack(n); }, Math.max(S.nackMin, 2.5 * gap) * (1 + (n.nacks || 0) * 0.5));
+    if (!n.fec || n.asm.complete() || !S.repair || (n.nacks || 0) >= 2) return;
+    n.nackTimer = setTimeout(function () { sendNack(n); }, (n.nacks ? 4 : 2.5) * paceMs());
   }
   async function sendNack(n) {
     if (!S.ready || n.asm.complete()) return;
-    var miss = [], i;
-    for (i = 0; i < n.total; i++) if (!n.asm.parts[i]) miss.push(i);
-    if (!miss.length) return;
+    var need = Math.max(1, n.total - (n.rank || 0));
     n.nacks = (n.nacks || 0) + 1;
-    n.nackNote = ', asked the sender to resend ' + (miss.length === 1 ? 'packet ' : 'packets ') + miss.slice(0, 8).map(function (x) { return x + 1; }).join(', ') + (miss.length > 8 ? ' and more' : '');
+    n.nackNote = ', asked the sender for ' + need + ' more';
     (n.isImg ? renderImageNote : renderNote)(n);
-    logEvt('sys', 'Missing ' + miss.length + ' of ' + n.total + ' packets (' + miss.slice(0, 12).map(function (x) { return x + 1; }).join(', ') + '). Asking ' + nodeName(n.from) + ' to resend.');
-    try { await sendPacket(MESH.PORT_PRIVATE, nackMissing(n.msgId, n.from, miss), n.target); } catch (e) { console.warn(e); }
+    try { await sendPacket(MESH.PORT_PRIVATE, nackPacket(n.msgId, need, n.from)); } catch (e) { console.warn(e); }
     scheduleNack(n);
-  }
-  function handleNack2(from, c) {
-    var s = S.sessions.get(c.msgId);
-    if (c.target !== S.myNum || !s || !S.repair || !S.ready) return;
-    s.inflight = s.inflight || {}; s.resent = s.resent || 0;
-    var room = Math.max(0, 8 * s.k - s.resent), list = c.idx.filter(function (i) { return i < s.k && !s.inflight[i]; }).slice(0, Math.min(12, room));
-    if (!list.length) return;
-    list.forEach(function (i) { s.inflight[i] = 1; }); s.resent += list.length;
-    (async function () {
-      while (S.sending) await sleep(500);
-      S.sending = true; refreshPx();
-      try {
-        for (var i = 0; i < list.length; i++) {
-          var msg = 'Resending packet ' + (list[i] + 1) + ' of ' + s.k + ' (' + (i + 1) + ' of ' + list.length + '), asked for by ' + nodeName(from) + '.';
-          if (s.bub) s.bub.set(msg);
-          logEvt('sys', msg);
-          await sendPacket(MESH.PORT_PRIVATE, s.packet(list[i]), s.target);
-          delete s.inflight[list[i]];
-          if (i < list.length - 1) await sleep(paceMs());
-        }
-        if (s.bub) s.bub.set('Resent ' + list.length + (list.length === 1 ? ' packet' : ' packets') + ' because ' + nodeName(from) + ' asked for them.');
-      } catch (e) { console.warn(e); list.forEach(function (i) { delete s.inflight[i]; }); }
-      S.sending = false; refreshPx();
-    })();
   }
   function handleNack(from, c) {
     var s = S.sessions.get(c.msgId);
@@ -11278,7 +11091,7 @@ FileReceiver.prototype.result = function () { var s = this; return withChunk(s.c
       try {
         for (var i = 0; i < count; i++) {
           setStatus(nodeName(from) + ' asked for more. Sending extra packet ' + (i + 1) + ' of ' + count + '…');
-          await sendPacket(MESH.PORT_PRIVATE, s.packet(s.next++), s.target);
+          await sendPacket(MESH.PORT_PRIVATE, s.packet(s.next++));
           if (i < count - 1) await sleep(paceMs());
         }
         setStatus('Sent ' + count + ' extra ' + (count === 1 ? 'packet' : 'packets') + ' because ' + nodeName(from) + ' asked for more.', 'ok');
@@ -11303,8 +11116,10 @@ FileReceiver.prototype.result = function () { var s = this; return withChunk(s.c
       : S.fec === FEC.FOUNTAIN ? 'If packet 2 is lost, a spare rebuilds it. Occasionally a spare turns out to overlap with what you already have, and one more is needed. The sender can always make another.'
       : 'If packet 2 is lost, the audio or picture has a hole there, and nothing can be requested again.';
     $('fecCap').textContent = cap;
-    $('chkRepair').disabled = false;
-    $('repairHint').textContent = 'If something is still missing about ' + Math.round(Math.max(S.nackMin, 2.5 * paceMs()) / 1000) + ' s after the last packet arrived, your device lists the missing packets and asks the sender to send just those again. The sender answers automatically. Both people need this on. It costs a little airtime.';
+    var rp = $('chkRepair'); rp.disabled = S.fec === FEC.NONE;
+    $('repairHint').textContent = S.fec === FEC.NONE
+      ? 'Needs Reed-Solomon or Fountain, because a repair is a fresh spare packet. Turn one of those on to use this.'
+      : 'If something is still missing about ' + Math.round(2.5 * paceMs() / 1000) + ' s after the last packet arrived, your device asks the sender for more spares. When someone asks you, your device sends them. It costs a little extra airtime, and both people need it on.';
   }
 
 
@@ -11313,8 +11128,9 @@ FileReceiver.prototype.result = function () { var s = this; return withChunk(s.c
     S.view = name;
     Array.prototype.forEach.call(document.querySelectorAll('.view'), function (v) { v.hidden = v.id !== 'v-' + name; });
     Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (t) { t.setAttribute('aria-selected', t.dataset.view === name ? 'true' : 'false'); });
-    if (name === 'log') { renderHw(); askNodes(); fillTraceNodes(); }
-    if (name === 'chat') { var th = S.threads.get(S.thread); if (th) { th.unread = 0; updateBadge(); } else renderThreadList(); }
+    if (name === 'inbox') { S.unread = 0; updateBadge(); }
+    if (name === 'files') showFileInfo();
+    if (name === 'log') renderHw();
     window.scrollTo(0, 0);
   }
   function updateTiming() {
@@ -11325,7 +11141,7 @@ FileReceiver.prototype.result = function () { var s = this; return withChunk(s.c
   function updatePaceUi() {
     var names = { '0.1': 'Gentle', '0.25': 'Balanced', '0.5': 'Fast' };
     Array.prototype.forEach.call($('selPace').options, function (o) { o.textContent = names[o.value] + ': about ' + Math.round(fullAir() / parseFloat(o.value) / 1000) + ' s between packets'; });
-    updateFecUi(); updateClipMeta(); if (S.sheet === 'file') showFileInfo();
+    updateFecUi(); updateClipMeta(); if (S.view === 'files') showFileInfo();
   }
   function initShell() {
     Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (t) { t.addEventListener('click', function () { showView(t.dataset.view); }); });
@@ -11368,12 +11184,11 @@ FileReceiver.prototype.result = function () { var s = this; return withChunk(s.c
       try { ensureAudio(); } catch (e) { /* audio is optional for connecting */ }
       setLink('busy', 'Contacting ' + host + '…', 'Waiting for the board to answer.');
       S.mode = 'http'; S.http = { base: base, fails: 0 };
-      logEvt('sys', 'Asking for settings only, not the whole node list, to keep the Wi-Fi handshake short.');
-      await writeToRadio(buildWantConfig(69420));
+      await writeToRadio(buildWantConfig(1 + Math.floor(Math.random() * 0x7ffffff0)));
       S.connected = true; S.ready = false; S.channels = [];
       setLink('busy', host, 'Reading the board’s settings…');
       await drain();
-      clearInterval(S.poll); S.poll = setInterval(drain, 2000);
+      clearInterval(S.poll); S.poll = setInterval(drain, 1500);
       setTimeout(function () { if (S.connected && !S.ready) setReady(true); }, 12000);
     } catch (e) {
       console.warn(e);
@@ -11402,7 +11217,6 @@ FileReceiver.prototype.result = function () { var s = this; return withChunk(s.c
       try { var z = await pipe(body, new CompressionStream('deflate-raw')); if (z.length < body.length) { stream = z; comp = true; } } catch (e) { console.warn(e); }
     }
     F = { file: file, stream: stream, compressed: comp, rawLen: raw.length, id: Math.floor(Math.random() * 256) };
-    $('imgHint').hidden = !/^image\//.test(file.type);
     S.xfer = null; showFileInfo();
   }
   function plan() {
@@ -11441,7 +11255,6 @@ FileReceiver.prototype.result = function () { var s = this; return withChunk(s.c
     $('xstat').textContent = T.cancelled ? 'Cancelled after ' + T.i + ' packets.' : done
       ? 'All ' + T.queue.length + ' packets handed to the board. Staying ready to send repairs if the receiver asks.' + T.note
       : (T.error ? T.error + ' ' : '') + (T.paused ? 'Paused. ' : '') + 'Sent ' + T.i + ' of ' + T.queue.length + ' packets, about ' + fmtTime(left) + ' left.' + T.note;
-    if (T.bub) { T.bub.set($('xstat').textContent); T.bub.progress(pct); }
     refreshFile();
   }
   async function startFile() {
@@ -11449,7 +11262,6 @@ FileReceiver.prototype.result = function () { var s = this; return withChunk(s.c
     F.id = Math.floor(Math.random() * 256);
     var snd = makeFileSender(F.stream, F.id, F.compressed, S.fec, parseFloat($('selParity').value));
     S.xfer = { snd: snd, id: F.id, queue: snd.packets.slice(), i: 0, paused: false, cancelled: false, running: false, error: '', note: '' };
-    S.xfer.target = S.target; S.xfer.bub = addOutFile(); closeSheet('shFile');
     runXfer(S.xfer);
   }
   async function runXfer(T) {
@@ -11457,7 +11269,7 @@ FileReceiver.prototype.result = function () { var s = this; return withChunk(s.c
     T.running = true; T.error = '';
     while (T.i < T.queue.length && !T.cancelled) {
       if (T.paused || !S.ready) { if (!S.ready && !T.paused) { T.paused = true; T.error = 'Connection lost.'; renderXfer(); } await sleep(300); continue; }
-      try { await sendPacket(MESH.PORT_PRIVATE, T.queue[T.i], T.target); }
+      try { await sendPacket(MESH.PORT_PRIVATE, T.queue[T.i]); }
       catch (e) { console.warn(e); T.paused = true; T.error = 'A send failed.'; renderXfer(); continue; }
       T.i++; T.error = ''; renderXfer();
       if (T.i < T.queue.length) { var end = Date.now() + paceMs(); while (Date.now() < end && !T.cancelled) await sleep(Math.min(250, end - Date.now())); }
@@ -11478,11 +11290,11 @@ FileReceiver.prototype.result = function () { var s = this; return withChunk(s.c
   function addFileChunk(from, f, meta) {
     if (!f) return;
     var key = 'f:' + from + ':' + f.id, n = S.inbox.get(key);
-    if (n && (n.L !== f.L || n.mode !== f.mode || n.rx.cs !== f.cs)) n = null;
+    if (n && (n.L !== f.L || n.mode !== f.mode)) n = null;
     if (!n) {
-      n = { key: key, from: from, id: f.id, L: f.L, mode: f.mode, compressed: f.compressed, rx: new FileReceiver(f.L, f.mode, f.cs), li: document.createElement('li'),
+      n = { key: key, from: from, id: f.id, L: f.L, mode: f.mode, compressed: f.compressed, rx: new FileReceiver(f.L, f.mode), li: document.createElement('li'),
             gaps: [], lastAt: 0, nacks: 0, done: false, timer: null, meta: meta, note: '', t0: Date.now() };
-      S.inbox.set(key, n); attachNote(n, from, meta, 'File');
+      n.li.className = 'note'; S.inbox.set(key, n); $('inbox').prepend(n.li); inboxEmptyCheck();
     }
     var now = Date.now(); if (n.lastAt) n.gaps.push(now - n.lastAt); n.lastAt = now;
     n.meta = meta || n.meta; n.note = '';
@@ -11503,28 +11315,16 @@ FileReceiver.prototype.result = function () { var s = this; return withChunk(s.c
   }
   function scheduleFileNack(n) {
     clearTimeout(n.timer);
-    if (n.done || !S.repair || n.nacks >= 8) return;
+    if (n.done || !S.repair || n.nacks >= 4) return;
     var avg = n.gaps.length ? n.gaps.reduce(function (s, x) { return s + x; }, 0) / n.gaps.length : 15000;
-    n.timer = setTimeout(function () { sendFileNack(n); }, Math.min(120000, Math.max(S.nackMin * 2, 2.5 * avg)) * (1 + n.nacks * 0.4));
+    n.timer = setTimeout(function () { sendFileNack(n); }, Math.min(180000, Math.max(30000, 3 * avg)) * (1 + n.nacks * 0.5));
   }
   async function sendFileNack(n) {
     if (n.done || !S.ready) return;
-    var miss = n.rx.missing();
-    if (!miss.length) return;
     n.nacks++;
-    logEvt('sys', 'File missing ' + miss.length + ' packets. Asking ' + nodeName(n.from) + ' to resend.');
-    try { await sendPacket(MESH.PORT_PRIVATE, fileNackMissing(n.id, n.from, miss), n.target); n.note = ', asked the sender to resend ' + miss.length + (miss.length === 1 ? ' packet' : ' packets'); } catch (e) { console.warn(e); }
+    var needs = n.rx.needs(), tot = needs.reduce(function (s, x) { return s + x.need; }, 0);
+    try { await sendPacket(MESH.PORT_PRIVATE, fileNackPacket(n.id, n.from, needs)); n.note = ', asked the sender for ' + tot + ' more packets'; } catch (e) { console.warn(e); }
     renderFile(n); scheduleFileNack(n);
-  }
-  function handleFileNack2(from, nk) {
-    var T = S.xfer;
-    if (!nk || !T || nk.id !== T.id || nk.target !== S.myNum || !S.repair || T.cancelled) return;
-    var waiting = {}, i, added = 0;
-    for (i = T.i; i < T.queue.length; i++) waiting[T.queue[i][6] + ':' + T.queue[i][7]] = 1;
-    nk.pairs.forEach(function (p) { if (waiting[p.block + ':' + p.idx]) return; var pk = T.snd.packetFor(p.block, p.idx); if (pk) { T.queue.push(pk); added++; } });
-    if (!added) return;
-    T.note = ' ' + nodeName(from) + ' asked for ' + added + ' missing packets to be sent again.';
-    if (!T.running) runXfer(T); renderXfer();
   }
   function renderFile(n) {
     var pct = Math.round(n.rx.progress() * 100), head = '<div class="notehead"><strong>' + esc(nodeName(n.from)) + '</strong><span class="when">' + nowLabel() + '</span></div>';
@@ -11564,14 +11364,13 @@ FileReceiver.prototype.result = function () { var s = this; return withChunk(s.c
   function toName(to) { return to === MESH.BROADCAST ? 'everyone' : nodeName(to); }
   function describeApp(port, p) {
     if (port === MESH.PORT_TEXT) return ', text “' + utf8(p).slice(0, 40) + '”';
-    if (port === 70) return ', traceroute';
     if (port === 5) { var er = routingError(p); return ', ' + (ROUTING_ERRORS[er] || 'routing code ' + er); }
     if (port !== MESH.PORT_PRIVATE || !p.length) return '';
     var m = p[0], id = ' msg ' + hex2(p[1]);
     if (m === VOICE.MAGIC || m === VOICE.MAGIC_IMG) return ', ' + (m === VOICE.MAGIC ? 'voice' : 'postcard') + id + ' packet ' + (p[2] + 1) + ' of ' + p[3] + ' (no protection)';
     if (m === FEC.MAGIC_VOICE || m === FEC.MAGIC_IMG) {
       var k = p[3], idx = p[4];
-      return ', ' + (m === FEC.MAGIC_VOICE ? 'voice' : 'postcard') + id + (idx < k ? ' data packet ' + (idx + 1) + ' of ' + k : ' spare ' + (idx - k + 1) + ' for ' + k + ' packets') + (p[2] === FEC.RS ? ', Reed-Solomon' : p[2] === FEC.FOUNTAIN ? ', fountain' : ', no protection');
+      return ', ' + (m === FEC.MAGIC_VOICE ? 'voice' : 'postcard') + id + (idx < k ? ' data packet ' + (idx + 1) + ' of ' + k : ' spare ' + (idx - k + 1) + ' for ' + k + ' packets') + (p[2] === FEC.RS ? ', Reed-Solomon' : ', fountain');
     }
     if (m === FEC.MAGIC_NACK) return ', repair request for msg ' + hex2(p[1]) + ', needs ' + p[2] + ' more';
     if (m === FILE.MAGIC) return ', file transfer ' + hex2(p[1]) + ' block ' + p[6] + (p[7] >= 0 ? ' symbol ' + p[7] : '') + ((p[2] & 1) ? ', compressed' : '');
@@ -11584,21 +11383,14 @@ FileReceiver.prototype.result = function () { var s = this; return withChunk(s.c
       var own = m.from === S.myNum, pn = m.port === null ? 'ENCRYPTED, ' + m.encLen + ' B, key not held here' : (PORT_NAMES[m.port] || 'port ' + m.port) + ' ' + m.payload.length + ' B';
       var hops = m.hopStart ? (m.hopStart - m.hopLimit) + ' of ' + m.hopStart + ' hops used' : 'hop limit ' + m.hopLimit;
       var sig = (m.snr !== null && m.snr !== undefined ? ', SNR ' + m.snr.toFixed(1) + ' dB' : '') + (m.rssi ? ', RSSI ' + m.rssi + ' dBm' : '');
-      var txt = (own ? 'RX (echo of this board) ' : 'RX ') + '#' + hex8(m.id) + ' from ' + nodeName(m.from) + ' to ' + toName(m.to) + ', ' + pn + (m.port !== null ? describeApp(m.port, m.payload) : '') + ', ' + hops + sig + (m.relay !== undefined ? (m.hopStart && m.hopStart === m.hopLimit ? ', direct from the sender' : ', last relayed by ' + relayName(m.relay)) : '') + (m.viaMqtt ? ', via MQTT' : '');
+      var txt = (own ? 'RX (echo of this board) ' : 'RX ') + '#' + hex8(m.id) + ' from ' + nodeName(m.from) + ' to ' + toName(m.to) + ', ' + pn + (m.port !== null ? describeApp(m.port, m.payload) : '') + ', ' + hops + sig + (m.relay !== undefined ? ', last relay …' + hex2(m.relay) : '') + (m.viaMqtt ? ', via MQTT' : '');
       var cls = (m.port === MESH.PORT_PRIVATE || m.port === MESH.PORT_TEXT || m.port === 5) ? 'ours' : '', bad = false;
       if (m.port === 5 && m.requestId) {
         var er = routingError(m.payload), pend = S.pending.get(m.requestId), lat = pend ? ' after ' + (Date.now() - pend.t) + ' ms' : '';
-        var viaSelf = m.from === S.myNum, who = viaSelf ? 'a neighbour' : nodeName(m.from);
-        var direct = !!(pend && pend.to !== MESH.BROADCAST), isTarget = !!(direct && m.from === pend.to), rid = hex8(m.requestId);
-        if (er === 0) txt = direct
-          ? (isTarget ? 'ACK from the target itself, ' + nodeName(m.from) + ': TX #' + rid + ' delivered' + lat : 'RELAY ACK for TX #' + rid + ' from ' + who + '. ' + nodeName(pend.to) + ' has NOT confirmed yet')
-          : 'ACK for TX #' + rid + ' from ' + who + lat + ' (broadcast: shows a neighbour repeated it, not that anyone received it)';
-        else txt = 'FAILED: TX #' + rid + ' ' + (ROUTING_ERRORS[er] || 'routing error ' + er);
+        txt = (er === 0 ? 'ACK: the mesh confirmed TX #' + hex8(m.requestId) + lat + ' (from ' + nodeName(m.from) + ')' : 'FAILED: TX #' + hex8(m.requestId) + ' ' + (ROUTING_ERRORS[er] || 'routing error ' + er));
         if (er === 0) S.stats.acks++; else { bad = true; S.stats.fails++; }
-        if (pend && pend.cb) pend.cb(er, { from: m.from, isTarget: isTarget, who: who });
-        if (pend && pend.li) pend.li.querySelector('.lm').textContent = pend.base + (er === 0 ? (isTarget ? '. Confirmed by the target' : direct ? '. Relay ack only, target not confirmed' : '. A neighbour repeated it') + lat + '.' : '. FAILED: ' + (ROUTING_ERRORS[er] || er) + '.');
+        if (pend && pend.li) pend.li.querySelector('.lm').textContent = pend.base + (er === 0 ? '. Confirmed' + lat + '.' : '. FAILED: ' + (ROUTING_ERRORS[er] || er) + '.');
       }
-      if (m.port === 70 && m.payload) { try { var rd = parseRouteDiscovery(m.payload); txt += ', ' + routeSummary(rd); handleTrace(m, rd); } catch (e) { /* not a route reply */ } }
       if (!own) { S.stats.rx++; S.stats.rxB += m.payload ? m.payload.length : 0; }
       logEvt('rx', txt, m.payload, cls + (bad ? ' bad' : ''));
       renderHwSoon(); return;
@@ -11644,7 +11436,7 @@ FileReceiver.prototype.result = function () { var s = this; return withChunk(s.c
     var link = S.mode === 'http' ? 'Wi-Fi, ' + (S.http && S.http.base) : (S.dev ? 'Bluetooth, ' + (S.dev.name || 'board') : 'not connected');
     var duty = L && [2, 3, 14, 15].indexOf(L.region) >= 0 ? 'about 10% airtime per hour' : '';
     var boxes = [
-      ['Link', kv([['Connection', S.connected ? link : 'not connected'], ['Ready', S.ready ? 'yes' : 'no'], ['Wi-Fi poll time', S.mode === 'http' && H.poll.n ? H.poll.last + ' ms (average ' + Math.round(H.poll.sum / H.poll.n) + ', worst ' + H.poll.max + ')' : '', H.poll.last > 1500 ? 'badv' : (H.poll.last > 600 ? 'warnv' : '')], ['Last Wi-Fi send', S.mode === 'http' && H.putMs !== null ? H.putMs + ' ms' : '', H.putMs > 1500 ? 'badv' : (H.putMs > 600 ? 'warnv' : '')], ['Sending on channel', S.channelIndex]])],
+      ['Link', kv([['Connection', S.connected ? link : 'not connected'], ['Ready', S.ready ? 'yes' : 'no'], ['Wi-Fi poll time', S.mode === 'http' && H.pollMs !== null ? H.pollMs + ' ms' : '', H.pollMs > 1500 ? 'badv' : (H.pollMs > 600 ? 'warnv' : '')], ['Sending on channel', S.channelIndex]])],
       ['Board', kv([['Node', S.myNum ? '!' + hex8(S.myNum) : ''], ['Name', me.longName || me.shortName], ['Firmware', H.meta && H.meta.firmware], ['Hardware model', H.meta ? '#' + H.meta.hwModel : ''], ['Has Wi-Fi', H.meta ? (H.meta.hasWifi ? 'yes' : 'no') : ''], ['Wi-Fi setting', H.net.wifi === undefined ? '' : (H.net.wifi ? 'on' : 'off')], ['Bluetooth setting', H.net.bt === undefined ? '' : (H.net.bt ? 'on' : 'off')]])],
       ['Radio', kv([['Region', L && (REGIONS[L.region] || L.region)], ['Modem preset', L && (L.usePreset ? (PRESET_ENUM[L.preset] || L.preset) : 'custom')], ['Hop limit on board', L && (L.hopLimit || 'default (3)')], ['TX power', L && (L.txPower ? L.txPower + ' dBm' : 'default')], ['Regional limit', duty], ['Airtime model here', PRESETS[S.preset].name + ', ' + (airtimeMs(S.preset, 208) / 1000).toFixed(2) + ' s per full packet']])],
       ['Airwaves', kv([['Channel busy', mm.chUtil != null ? mm.chUtil.toFixed(1) + '%' : '', mm.chUtil > 25 ? 'warnv' : ''], ['Our TX airtime', mm.airUtilTx != null ? mm.airUtilTx.toFixed(1) + '%' : ''], ['TX queue free', q ? q.free + ' of ' + q.max : '', q && q.free <= 2 ? 'badv' : ''], ['Battery', mm.battery != null ? mm.battery + '%' : ''], ['Uptime', mm.uptime ? Math.round(mm.uptime / 60) + ' min' : '']])],
@@ -11654,24 +11446,6 @@ FileReceiver.prototype.result = function () { var s = this; return withChunk(s.c
     nodes.sort(function (x, y) { return (y[1].lastHeard || 0) - (x[1].lastHeard || 0); });
     boxes.push(['Nodes heard (' + nodes.length + ')', kv(nodes.slice(0, 8).map(function (x) { var n = x[1]; return [n.longName || n.shortName || '!' + hex8(x[0]), (n.hops !== undefined ? n.hops + ' hops' : '') + (n.snr !== null && n.snr !== undefined ? ', SNR ' + n.snr.toFixed(1) : '') + (n.lastHeard ? ', ' + ago(n.lastHeard) : '')]; }))]);
     $('hw').innerHTML = boxes.map(function (b) { return '<div class="hwbox"><h3>' + esc(b[0]) + '</h3>' + b[1] + '</div>'; }).join('');
-  }
-
-  async function wifiTest() {
-    if (!(S.connected && S.mode === 'http')) return;
-    $('logTest').disabled = true;
-    var times = [], i, put = null, putErr = '';
-    logEvt('sys', 'Wi-Fi test: five polls, then one small send…');
-    try {
-      for (i = 0; i < 5; i++) { var t0 = performance.now(), r = await httpFetch(S.http.base + '/api/v1/fromradio?all=false'); times.push(Math.round(performance.now() - t0)); await sleep(300); }
-    } catch (e) { logEvt('err', 'Wi-Fi test poll failed: ' + (e.message || e.name), null, 'bad'); }
-    try {
-      var p0 = performance.now(), pr = await httpFetch(S.http.base + '/api/v1/toradio', { method: 'PUT', headers: { 'Content-Type': 'application/x-protobuf' }, body: Uint8Array.from(pb.bytes(7, [])) });
-      put = Math.round(performance.now() - p0); if (!pr.ok) putErr = ' (the board answered ' + pr.status + ')';
-    } catch (e) { putErr = ' failed: ' + (e.message || e.name); }
-    var s = times.slice().sort(function (x, y) { return x - y; }), med = s[Math.floor(s.length / 2)] || 0, worst = s[s.length - 1] || 0;
-    var slow = worst > 1500 || (put || 0) > 1500;
-    logEvt('sys', 'Wi-Fi test: polls ' + times.join(', ') + ' ms (median ' + med + ', worst ' + worst + '). Small send: ' + (put === null ? 'no answer' : put + ' ms') + putErr + '. ' + (slow ? 'The board’s web server is slow, so the radio settings are not the problem.' : 'The Wi-Fi link looks healthy.'), null, slow ? 'bad' : '');
-    $('logTest').disabled = false;
   }
   function initLog() {
     $('logFilter').addEventListener('change', function (e) { $('logList').setAttribute('data-f', e.target.value); });
@@ -11683,256 +11457,8 @@ FileReceiver.prototype.result = function () { var s = this; return withChunk(s.c
       var done = function (ok) { $('logCopy').textContent = ok ? 'Copied' : 'Could not copy'; setTimeout(function () { $('logCopy').textContent = 'Copy'; }, 1500); };
       if (navigator.clipboard) navigator.clipboard.writeText(txt).then(function () { done(true); }, function () { done(false); }); else done(false);
     });
-    $('logTest').addEventListener('click', wifiTest);
-    $('trGo').addEventListener('click', function () { var v = parseInt($('trNode').value, 10); if (v) runTrace(v, null); else $('trMsg').textContent = 'Pick a node first.'; });
     $('chkAck').addEventListener('change', function (e) { S.wantAck = e.target.checked; logEvt('sys', 'Delivery confirmations ' + (S.wantAck ? 'requested' : 'not requested') + ' from now on.'); });
     renderHw();
-  }
-
-
-  /* ---------- Chats: threads, messages, attach sheets ---------- */
-  function chTitle(i) { var c = S.channels.filter(function (x) { return x.index === i; })[0]; return (c && c.name) || (i === 0 ? 'Primary channel' : 'Channel ' + i); }
-  function thTitle(th) { return th.dm ? nodeName(th.node) : chTitle(th.ch); }
-  function mkThread(key, dm, node, ch) {
-    var th = S.threads.get(key);
-    if (!th) { th = { key: key, dm: dm, node: node, ch: ch, ul: document.createElement('ul'), last: '', lastT: 0, unread: 0 }; th.ul.className = 'thread'; S.threads.set(key, th); }
-    return th;
-  }
-  function threadFor(from, meta) {
-    var dm = !!(from && meta && meta.to && meta.to !== MESH.BROADCAST && meta.to === S.myNum);
-    return dm ? mkThread('dm:' + from, true, from, (meta && meta.channel) || 0) : mkThread('ch:' + ((meta && meta.channel) || 0), false, null, (meta && meta.channel) || 0);
-  }
-  function targetOf(th) { return { to: MESH.BROADCAST, ch: th.ch }; }   // broadcast only: directed packets were not being repeated
-  function updateBadge() { var n = 0; S.threads.forEach(function (t) { n += t.unread; }); var b = $('badge'); b.textContent = n; b.hidden = !n; }
-  function place(li, th, preview, incoming) {
-    th.ul.appendChild(li); th.last = preview; th.lastT = Date.now();
-    var open = S.view === 'chat' && S.thread === th.key;
-    if (incoming && !open) th.unread++;
-    updateBadge();
-    if (open) { var b = $('thBody'); b.scrollTop = b.scrollHeight; } else if (S.view === 'chat' && !S.thread) renderThreadList();
-  }
-  function initials(s) { return (s.replace(/[^A-Za-z0-9]/g, '').slice(0, 2) || '?').toUpperCase(); }
-  function renderThreadList() {
-    var list = []; S.threads.forEach(function (t) { list.push(t); });
-    list.sort(function (x, y) { return (y.lastT - x.lastT) || (x.ch - y.ch); });
-    var ul = $('threadList'); ul.innerHTML = '';
-    list.forEach(function (th) {
-      var li = document.createElement('li'), b = document.createElement('button'), title = thTitle(th);
-      b.className = 'thcard';
-      b.innerHTML = '<span class="thav"></span><span class="thmain"><strong></strong><span></span></span><span class="thmeta"></span>';
-      b.querySelector('.thav').textContent = th.dm ? initials(title) : '#';
-      b.querySelector('strong').textContent = title;
-      b.querySelector('.thmain span').textContent = th.last || (th.dm ? 'No messages yet' : 'Everyone on this channel');
-      var meta = b.querySelector('.thmeta');
-      meta.textContent = th.lastT ? new Date(th.lastT).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : '';
-      if (th.unread) { var u = document.createElement('div'); u.className = 'unread'; u.textContent = th.unread; meta.appendChild(u); }
-      b.addEventListener('click', function () { openThread(th.key); });
-      li.appendChild(b); ul.appendChild(li);
-    });
-  }
-  function updateThreadHead() {
-    var th = S.threads.get(S.thread); if (!th) return;
-    $('thTitle').textContent = thTitle(th); $('thTrace').hidden = !th.dm;
-    var sel = $('thCh'); sel.hidden = !th.dm;
-    if (th.dm) { var opts = S.channels.length ? S.channels : [{ index: th.ch }]; sel.innerHTML = opts.map(function (x) { return '<option value="' + x.index + '">' + esc(chTitle(x.index)) + '</option>'; }).join(''); sel.value = String(th.ch); }
-    var c = S.channels.filter(function (x) { return x.index === th.ch; })[0];
-    $('thSub').textContent = th.dm ? 'Direct message, sent on ' + chTitle(th.ch) + '. Only they receive it.' : (c && c.pskLen <= 1 ? 'Default key: anyone in range can read this channel.' : (c ? 'Private channel. Everyone with the key sees it.' : 'Channel ' + th.ch));
-  }
-  function refreshThreadTitles() { if (S.thread) updateThreadHead(); else renderThreadList(); }
-  function openThread(key) {
-    var th = S.threads.get(key); if (!th) return;
-    S.thread = key; th.unread = 0; updateBadge();
-    S.channelIndex = th.ch; S.target = targetOf(th);
-    $('threadsPane').hidden = true; $('threadView').hidden = false;
-    $('thBody').innerHTML = ''; $('thBody').appendChild(th.ul);
-    updateThreadHead(); refreshMsg();
-    var b = $('thBody'); b.scrollTop = b.scrollHeight;
-  }
-  function closeThread() { S.thread = null; $('threadView').hidden = true; $('threadsPane').hidden = false; renderThreadList(); }
-
-  function outBubble(title, node, withBar, preview) {
-    var th = S.threads.get(S.thread);
-    if (!th) return { set: function () {}, progress: function () {} };
-    var li = document.createElement('li'); li.className = 'bubble out';
-    li.innerHTML = '<div class="notehead"><strong>You</strong><span class="when">' + nowLabel() + '</span></div><div class="ohead"></div><div class="obody"></div>' + (withBar ? '<div class="bar"><div class="fill"></div></div>' : '') + '<div class="notestat ostat"></div>';
-    li.querySelector('.ohead').textContent = title;
-    if (node) li.querySelector('.obody').appendChild(node);
-    place(li, th, 'You: ' + (preview || title), false);
-    return {
-      li: li,
-      set: function (t, bad) { li.querySelector('.ostat').textContent = t; li.classList.toggle('bad', !!bad); },
-      progress: function (p) { var f = li.querySelector('.fill'); if (f) f.style.width = Math.round(p * 100) + '%'; }
-    };
-  }
-  function addOutVoice() {
-    var c = S.clip, b = document.createElement('button');
-    b.className = 'btn small'; b.textContent = 'Play'; b.dataset.idle = 'Play';
-    b.addEventListener('click', function () { if (!c.preview) c.preview = withCodec(function (cd) { return decodeVoice(cd, c.stream, null); }); playPcm(c.preview, b); });
-    return outBubble('Voice note, ' + c.seconds.toFixed(1) + ' s', b, false, 'Voice note');
-  }
-  function addOutPic() { var cv = document.createElement('canvas'); cv.className = 'pix'; paintCanvas(cv, pad.n, pad.px); return outBubble('Picture, ' + pad.n + ' by ' + pad.n, cv, false, 'Picture'); }
-  function addOutFile() { return outBubble(F.file.name + ', ' + fmtBytes(F.stream.length), null, true, 'File: ' + F.file.name); }
-
-  function textBytes() { return new TextEncoder().encode($('msgIn').value.trim()).length; }
-  function refreshMsg() {
-    var n = textBytes(); $('btnMsg').disabled = !S.ready || !S.thread || !n || n > 200;
-    $('msgIn').placeholder = S.ready ? 'Message' : 'Connect a board to send';
-    $('msgCount').textContent = n + ' of 200 bytes'; $('msgCount').style.color = n > 200 ? 'var(--bad)' : '';
-  }
-  async function sendText() {
-    var v = $('msgIn').value.trim(), bytes = new TextEncoder().encode(v), th = S.threads.get(S.thread);
-    if (!v || bytes.length > 200 || !S.ready || !th) return;
-    var li = document.createElement('li'); li.className = 'bubble out';
-    li.innerHTML = '<div class="notehead"><strong>You</strong><span class="when">' + nowLabel() + '</span></div><p></p><div class="notestat ostat">Sending…</div>';
-    li.querySelector('p').textContent = v;
-    place(li, th, 'You: ' + v, false);
-    $('msgIn').value = ''; refreshMsg();
-    var stat = li.querySelector('.ostat'), settled = false;
-    function say(t, bad) { stat.textContent = t; li.classList.toggle('bad', !!bad); }
-    try {
-      await sendPacket(MESH.PORT_TEXT, bytes, { wantAck: true, to: th.dm ? th.node : undefined, onAck: function (er, info) {
-        if (er !== 0) { settled = true; say('Not delivered: ' + (ROUTING_ERRORS[er] || 'error ' + er), true); }
-        else if (!th.dm) { settled = true; say('Sent, and a neighbour repeated it'); }
-        else if (info.isTarget) { settled = true; say('Delivered: ' + thTitle(th) + ' confirmed it'); }
-        else if (!settled) say('Repeated by ' + info.who + '. Waiting for ' + thTitle(th) + ' to confirm…');
-      } });
-      if (!settled && stat.textContent === 'Sending…') say('Sent. Waiting for confirmation…');
-    } catch (e) { say('Could not send: ' + (e.message || e.name), true); }
-  }
-
-  function openSheet(id, name) {
-    S.sheet = name;
-    if (name === 'voice' && S.clip && S.clip.sent) discardClip();
-    if (name === 'pic' && pad.sent) { pad.sent = false; padClear(); $('pxStatus').textContent = ''; }
-    if (name === 'file') showFileInfo();
-    var d = $(id); if (d.showModal) d.showModal(); else d.setAttribute('open', '');
-    if (name === 'voice' && !S.clip) { renderIdleStrip(); $('stripMeta').textContent = idleHint(); }
-  }
-  function closeSheet(id) { var d = $(id); if (d.open) { if (d.close) d.close(); else d.removeAttribute('open'); } S.sheet = null; }
-  function openNodePicker() {
-    askNodes();
-    fillNodeList();
-    openSheet('dlgNode', 'node');
-  }
-  function fillNodeList() {
-    var ul = $('nodeList'), n = 0; ul.innerHTML = '';
-    S.nodes.forEach(function (info, num) {
-      if (num === S.myNum) return;
-      n++;
-      var li = document.createElement('li'), b = document.createElement('button'), nm = nodeName(num);
-      b.className = 'thcard'; b.innerHTML = '<span class="thav"></span><span class="thmain"><strong></strong><span></span></span>';
-      b.querySelector('.thav').textContent = initials(nm); b.querySelector('strong').textContent = nm;
-      b.querySelector('.thmain span').textContent = '!' + hex8(num) + (info.hops !== undefined ? ', ' + info.hops + ' hops away' : '');
-      b.addEventListener('click', function () { closeSheet('dlgNode'); var th = mkThread('dm:' + num, true, num, info.channel || 0); showView('chat'); openThread(th.key); });
-      li.appendChild(b); ul.appendChild(li);
-    });
-    $('nodeEmpty').hidden = n > 0;
-  }
-  var PAL_RGB = null;
-  function loadPhoto(file) {
-    if (!PAL_RGB) PAL_RGB = PALETTE.map(function (h) { return [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)]; });
-    var img = new Image(), url = URL.createObjectURL(file);
-    img.onload = function () {
-      var c = document.createElement('canvas'); c.width = c.height = pad.n;
-      var g = c.getContext('2d'), s = Math.min(img.width, img.height);
-      g.drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, pad.n, pad.n);
-      var d = g.getImageData(0, 0, pad.n, pad.n).data;
-      for (var i = 0; i < pad.n * pad.n; i++) {
-        var best = 0, bd = 1e9;
-        for (var j = 0; j < 16; j++) { var dr = d[i * 4] - PAL_RGB[j][0], dg = d[i * 4 + 1] - PAL_RGB[j][1], db = d[i * 4 + 2] - PAL_RGB[j][2], dd = dr * dr + dg * dg + db * db; if (dd < bd) { bd = dd; best = j; } }
-        pad.px[i] = best;
-      }
-      drawPad(); URL.revokeObjectURL(url);
-    };
-    img.src = url;
-  }
-  function initChat() {
-    mkThread('ch:0', false, null, 0); renderThreadList();
-    $('btnNew').addEventListener('click', openNodePicker);
-    $('thBack').addEventListener('click', closeThread);
-    $('thCh').addEventListener('change', function (e) { var th = S.threads.get(S.thread); if (!th) return; th.ch = parseInt(e.target.value, 10) || 0; S.channelIndex = th.ch; S.target = targetOf(th); updateThreadHead(); });
-    $('thTrace').addEventListener('click', function () { var th = S.threads.get(S.thread); if (th && th.dm) runTrace(th.node, th); });
-    $('atVoice').addEventListener('click', function () { openSheet('shVoice', 'voice'); });
-    $('atPic').addEventListener('click', function () { openSheet('shPic', 'pic'); });
-    $('atFile').addEventListener('click', function () { openSheet('shFile', 'file'); });
-    Array.prototype.forEach.call(document.querySelectorAll('[data-close]'), function (b) { b.addEventListener('click', function () { var d = b.closest('dialog'); if (d.close) d.close(); else d.removeAttribute('open'); S.sheet = null; }); });
-    Array.prototype.forEach.call(document.querySelectorAll('dialog.sheet'), function (d) { d.addEventListener('close', function () { S.sheet = null; if (S.recording) stopRecording(); stopPlayback(); }); });
-    $('msgIn').addEventListener('input', refreshMsg);
-    $('msgIn').addEventListener('keydown', function (e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendText(); } });
-    $('btnMsg').addEventListener('click', sendText);
-    $('btnPhoto').addEventListener('click', function () { $('photoIn').click(); });
-    $('photoIn').addEventListener('change', function (e) { if (e.target.files[0]) loadPhoto(e.target.files[0]); });
-    $('btnToPic').addEventListener('click', function () { var f = F.file; closeSheet('shFile'); openSheet('shPic', 'pic'); if (f) loadPhoto(f); });
-    refreshMsg();
-  }
-
-
-  /* ---------- Traceroute ---------- */
-  var trLast = 0, TR_WAIT = 90000;
-  function askNodes() { if (S.connected && S.mode === 'http' && !S.nodesAsked) { S.nodesAsked = true; logEvt('sys', 'Asking the board for its node list…'); writeToRadio(buildWantConfig(69421)).then(drain, function () {}); } }
-  function relayName(b) {
-    if (b === undefined || b === null) return '';
-    var c = []; S.nodes.forEach(function (n, num) { if ((num & 255) === b) c.push(nodeName(num)); });
-    return c.length === 1 ? c[0] : (c.length ? 'one of ' + c.slice(0, 3).join(', ') : '…' + hex2(b));
-  }
-  function routeSummary(rd) { return 'route ' + (rd.route.length ? 'via ' + rd.route.map(nodeName).join(' then ') : 'direct') + (rd.routeBack.length ? ', back via ' + rd.routeBack.map(nodeName).join(' then ') : ''); }
-  function chainHtml(names, snrs) {
-    var h = '<div class="trpath">';
-    names.forEach(function (n, i) {
-      h += '<span class="trn' + (i === 0 || i === names.length - 1 ? ' end' : '') + '">' + esc(n) + '</span>';
-      if (i < names.length - 1) { var v = snrs[i]; h += '<span class="trl">' + (v === undefined || v === -128 ? '→' : '→ ' + (v / 4).toFixed(1) + ' dB →') + '</span>'; }
-    });
-    return h + '</div>';
-  }
-  var SNR_LIMIT = { 7: -7.5, 8: -10, 9: -12.5, 10: -15, 11: -17.5, 12: -20 };
-  function weakNote(rd) {
-    var v = rd.snrTowards.concat(rd.snrBack).filter(function (x) { return x !== -128; }).map(function (x) { return x / 4; });
-    if (!v.length) return '';
-    var min = Math.min.apply(null, v), lim = SNR_LIMIT[PRESETS[S.preset].sf], margin = min - lim;
-    if (margin >= 8) return '';
-    return ' Weakest link: ' + min.toFixed(1) + ' dB, only ' + margin.toFixed(1) + ' dB above what ' + PRESETS[S.preset].name + ' can decode (about ' + lim + ' dB). Long packets are much likelier to be lost than short ones on a link like this, so use a smaller packet size in Settings.';
-  }
-  function renderTrace(t) {
-    var tn = nodeName(t.node), h = '<div class="notehead"><strong>Route to ' + esc(tn) + '</strong><span class="when">' + nowLabel() + '</span></div>';
-    if (t.error) h += '<p class="hint">' + esc(t.error) + '</p>';
-    else if (t.done) {
-      var rd = t.rd, n = rd.route.length;
-      h += '<p class="hint">There</p>' + chainHtml(['You'].concat(rd.route.map(nodeName), [tn]), rd.snrTowards);
-      h += '<p class="hint">Back</p>' + ((rd.routeBack.length || rd.snrBack.length) ? chainHtml([tn].concat(rd.routeBack.map(nodeName), ['You']), rd.snrBack) : '<p class="hint">The reply carried no return path.</p>');
-      h += '<p class="notestat">' + (n ? n + (n === 1 ? ' repeater' : ' repeaters') + ' between you and ' + esc(tn) : 'Direct, nothing repeated it') + '. ' +
-        (t.from === t.node ? 'The reply came from ' + esc(tn) + ' itself after ' + (t.dt / 1000).toFixed(1) + ' s, so the target really received the request.' : 'The reply came from ' + esc(nodeName(t.from)) + ', not from ' + esc(tn) + '.') + esc(weakNote(rd)) + '</p>';
-    } else if (t.timeout) h += '<p class="hint">No reply after ' + Math.round(TR_WAIT / 1000) + ' s. The target may be out of range, the path may need more hops than the limit (' + t.hops + '), or a packet was lost. A traceroute is one packet with no retries, so try again before concluding.</p>';
-    else h += '<p class="hint">Request sent. Waiting for the reply, up to ' + Math.round(TR_WAIT / 1000) + ' s…</p>';
-    t.els.forEach(function (el) { el.innerHTML = h; });
-  }
-  function runTrace(node, th) {
-    var t = { id: randomId(), node: node, t0: Date.now(), done: false, timeout: false, els: [], hops: S.hops, error: '' };
-    var li = document.createElement('li'); li.className = 'trcard';
-    $('trList').insertBefore(li, $('trList').firstChild); t.els.push(li);
-    if (th) { var b = document.createElement('li'); b.className = 'bubble sys'; t.els.push(b); place(b, th, 'Trace route', false); }
-    var wait = Math.ceil((30000 - (Date.now() - trLast)) / 1000);
-    if (!S.ready) t.error = 'Connect a board first.';
-    else if (wait > 0) t.error = 'Wait ' + wait + ' more seconds. Traceroutes are limited to one every 30 s to spare the airwaves.';
-    if (t.error) { renderTrace(t); return; }
-    trLast = Date.now(); askNodes();
-    S.traces.set(t.id, t); renderTrace(t);
-    t.timer = setTimeout(function () { if (!t.done) { t.timeout = true; renderTrace(t); } }, TR_WAIT);
-    sendPacket(70, new Uint8Array(0), { to: node, ch: th ? th.ch : ((S.nodes.get(node) || {}).channel || 0), id: t.id, wantResponse: true, wantAck: false }).catch(function (e) { t.error = 'Could not send the request: ' + (e.message || e.name); clearTimeout(t.timer); renderTrace(t); });
-  }
-  function handleTrace(m, rd) {
-    if (m.from === S.myNum) return;
-    var t = S.traces.get(m.requestId);
-    if (!t) S.traces.forEach(function (x) { if (!x.done && x.node === m.from) t = x; });
-    if (!t || t.done) return;
-    t.done = true; clearTimeout(t.timer); t.rd = rd; t.from = m.from; t.dt = Date.now() - t.t0; renderTrace(t);
-  }
-  function fillTraceNodes() {
-    var sel = $('trNode'), keep = sel.value, list = [];
-    S.nodes.forEach(function (n, num) { if (num !== S.myNum) list.push([num, nodeName(num)]); });
-    list.sort(function (x, y) { return x[1].localeCompare(y[1]); });
-    sel.innerHTML = list.length ? list.map(function (x) { return '<option value="' + x[0] + '">' + esc(x[1]) + '</option>'; }).join('') : '<option value="">No nodes heard yet</option>';
-    var th = S.threads.get(S.thread), want = th && th.dm ? String(th.node) : keep;
-    if (want) sel.value = want;
   }
 
   /* ---------- Environment checks ---------- */
@@ -11972,21 +11498,16 @@ FileReceiver.prototype.result = function () { var s = this; return withChunk(s.c
     $('btnSend').addEventListener('click', sendClip);
     $('btnDiscard').addEventListener('click', discardClip);
     $('btnSim').addEventListener('click', simulate);
+    $('selChannel').addEventListener('change', function (e) { S.channelIndex = parseInt(e.target.value, 10) || 0; updateChannelHint(); if (S.ready) setReady(true); });
     $('selMax').addEventListener('change', function (e) { S.maxSec = parseInt(e.target.value, 10); if (!S.clip && !S.recording) { renderIdleStrip(); $('stripMeta').textContent = idleHint(); } });
-    $('selCs').addEventListener('change', function (e) {
-      S.cs = parseInt(e.target.value, 10); VOICE.CHUNK = S.cs;
-      CHUNK_SECONDS = VOICE.CHUNK * 8 / VOICE.FRAME_BITS * VOICE.FRAME_SECONDS;
-      updateTiming(); if (!S.clip && !S.recording) { renderIdleStrip(); $('stripMeta').textContent = idleHint(); }
-    });
     $('selHops').addEventListener('change', function (e) { S.hops = parseInt(e.target.value, 10); });
     $('chkAuto').addEventListener('change', function (e) { S.autoplay = e.target.checked; });
-    VOICE.CHUNK = S.cs; CHUNK_SECONDS = VOICE.CHUNK * 8 / VOICE.FRAME_BITS * VOICE.FRAME_SECONDS;
+    $('chkText').addEventListener('change', function (e) { S.textNotice = e.target.checked; });
     initShell();
-    initChat();
     initLog();
     initPad();
     Array.prototype.forEach.call(document.querySelectorAll('input[name=fec]'), function (r) {
-      r.addEventListener('change', function () { S.fec = parseInt(r.value, 10); updateFecUi(); updateClipMeta(); if (S.sheet === 'file') showFileInfo(); });
+      r.addEventListener('change', function () { S.fec = parseInt(r.value, 10); updateFecUi(); updateClipMeta(); if (S.view === 'files') showFileInfo(); });
     });
     $('selExtra').addEventListener('change', function (e) { S.extra = parseFloat(e.target.value); updateFecUi(); updateClipMeta(); });
     $('chkRepair').addEventListener('change', function (e) { S.repair = e.target.checked; });
