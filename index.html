@@ -227,7 +227,7 @@ dialog.sheet{max-width:660px;width:100%;margin:auto auto 0;border-radius:26px 26
 
   <section class="view" id="v-chat">
     <div id="threadsPane">
-      <div class="viewhead row" style="justify-content:space-between"><div><h2>Chats</h2><p>Channels and direct messages.</p></div><button class="btn small primary" id="btnNew">New message</button></div>
+      <div class="viewhead row" style="justify-content:space-between"><div><h2>Chats</h2><p>Channels and direct messages.</p></div><button class="btn small primary" id="btnNew" hidden>New message</button></div>
       <ul class="threadlist" id="threadList"></ul>
     </div>
     <div id="threadView" hidden>
@@ -268,7 +268,11 @@ dialog.sheet{max-width:660px;width:100%;margin:auto auto 0;border-radius:26px 26
       <div class="field"><label for="selCs">Packet size</label><select id="selCs"><option value="60">Tiny: 60 bytes, most robust</option><option value="100" selected>Small: 100 bytes</option><option value="160">Medium: 160 bytes</option><option value="200">Large: 200 bytes, fastest on strong links</option></select><small>Smaller packets spend less time on the air, so they survive weak links much better, but you need more of them. The size travels with each packet, so the other side needs no matching setting.</small></div>
       <div class="field"><label for="selHops">Hop limit</label><select id="selHops"><option>1</option><option>2</option><option selected>3</option><option>4</option></select><small>How many relays may repeat your packets. Lower keeps the airwaves freer.</small></div>
     </div>
-    <div class="group"><h3>Error protection</h3>
+    <div class="group"><h3>Missing packets</h3>
+      <p class="hint">Instead of sending spare packets, the receiving page tells the sender exactly which packets it is missing, and the sender sends only those again.</p>
+      <label class="check" id="repairRow"><input type="checkbox" id="chkRepair" checked><span><strong>Resend what's missing</strong><small id="repairHint"></small></span></label>
+    </div>
+    <div class="group" id="fecGroup" hidden><h3>Spare packets (paused)</h3>
       <p class="hint">Radio packets sometimes vanish on the way. Protection sends a few spare packets along with the real ones, so a lost packet can be rebuilt instead of leaving a gap.</p>
       <div style="margin-top:14px" role="radiogroup" aria-label="Error protection method">
         <label class="opt"><input type="radio" name="fec" value="1" checked><span><strong>Reed-Solomon</strong><small>Any spare can replace any lost packet. The most protection for the airtime. The number of spares is fixed when you send.</small></span></label>
@@ -280,7 +284,6 @@ dialog.sheet{max-width:660px;width:100%;margin:auto auto 0;border-radius:26px 26
       <div class="field" id="extraField"><label for="selExtra">How many spares</label>
         <select id="selExtra"><option value="0.17">Light: 1 spare for every 6 packets</option><option value="0.25" selected>Normal: 1 for every 4 packets</option><option value="0.5">Strong: 1 for every 2 packets</option></select>
         <small>Always at least one spare. Longer notes get more spares automatically. Files pick their own share on the Files tab.</small></div>
-      <label class="check" id="repairRow"><input type="checkbox" id="chkRepair" checked><span><strong>Resend what's missing</strong><small id="repairHint"></small></span></label>
     </div>
     <div class="group"><h3>Notes</h3>
       <div class="field"><label for="selMax">Longest voice note</label><select id="selMax"><option value="5">5 seconds</option><option value="8" selected>8 seconds</option><option value="12">12 seconds</option><option value="20">20 seconds</option><option value="30">30 seconds</option></select><small>Voice takes about 88 bytes a second, so a 30 second note is 2.6 kB: about 27 packets at 100 bytes, plus spares.</small></div>
@@ -337,7 +340,7 @@ dialog.sheet{max-width:660px;width:100%;margin:auto auto 0;border-radius:26px 26
         <div><dt>Packets</dt><dd id="fPk">-</dd></div><div><dt>Airtime</dt><dd id="fAir">-</dd></div><div><dt>Time at this pace</dt><dd id="fEta">-</dd></div>
       </dl>
       <div class="opts">
-        <div class="field" style="margin:0"><label for="selParity">Protection</label><select id="selParity"><option value="0">No extra packets</option><option value="0.125">12% extra</option><option value="0.25" selected>25% extra</option><option value="0.5">50% extra</option></select><small>Uses the method chosen in Settings.</small></div>
+        <div class="field" hidden style="margin:0"><label for="selParity">Protection</label><select id="selParity"><option value="0">No extra packets</option><option value="0.125">12% extra</option><option value="0.25" selected>25% extra</option><option value="0.5">50% extra</option></select><small>Uses the method chosen in Settings.</small></div>
       </div>
       <label class="check" style="margin-top:0"><input type="checkbox" id="chkZip" checked><span>Compress first when it makes the file smaller</span></label>
       <p class="dlgnote" id="imgHint" hidden>Photos are large for LoRa. <button class="btn small" id="btnToPic">Send it as a tiny picture instead</button></p>
@@ -10047,7 +10050,7 @@ var PORT_NAMES = { 1: 'TEXT_MESSAGE', 2: 'REMOTE_HARDWARE', 3: 'POSITION', 4: 'N
   32: 'REPLY', 33: 'IP_TUNNEL', 34: 'PAXCOUNTER', 64: 'SERIAL', 65: 'STORE_FORWARD', 66: 'RANGE_TEST', 67: 'TELEMETRY', 68: 'ZPS', 70: 'TRACEROUTE', 71: 'NEIGHBORINFO', 72: 'ATAK_PLUGIN', 73: 'MAP_REPORT', 256: 'PRIVATE_APP', 257: 'ATAK_FORWARDER' };
 var REGIONS = { 0: 'UNSET', 1: 'US', 2: 'EU_433', 3: 'EU_868', 4: 'CN', 5: 'JP', 6: 'ANZ', 7: 'KR', 8: 'TW', 9: 'RU', 10: 'IN', 11: 'NZ_865', 12: 'TH', 13: 'LORA_24', 14: 'UA_433', 15: 'UA_868', 16: 'MY_433', 17: 'MY_919', 18: 'SG_923' };
 var PRESET_ENUM = { 0: 'LONG_FAST', 1: 'LONG_SLOW', 2: 'VERY_LONG_SLOW', 3: 'MEDIUM_SLOW', 4: 'MEDIUM_FAST', 5: 'SHORT_SLOW', 6: 'SHORT_FAST', 7: 'LONG_MODERATE', 8: 'SHORT_TURBO' };
-var ROUTING_ERRORS = { 0: 'delivered', 1: 'NO_ROUTE', 2: 'GOT_NAK', 3: 'TIMEOUT', 4: 'NO_INTERFACE', 5: 'MAX_RETRANSMIT (no neighbour repeated it)', 6: 'NO_CHANNEL', 7: 'TOO_LARGE', 8: 'NO_RESPONSE', 9: 'DUTY_CYCLE_LIMIT (airtime limit hit)', 32: 'BAD_REQUEST', 33: 'NOT_AUTHORIZED', 34: 'PKI_FAILED', 38: 'RATE_LIMIT_EXCEEDED' };
+var ROUTING_ERRORS = { 0: 'delivered', 1: 'NO_ROUTE', 2: 'GOT_NAK', 3: 'TIMEOUT', 4: 'NO_INTERFACE', 5: 'MAX_RETRANSMIT (the board resent it three times and heard no acknowledgement)', 6: 'NO_CHANNEL', 7: 'TOO_LARGE', 8: 'NO_RESPONSE', 9: 'DUTY_CYCLE_LIMIT (airtime limit hit)', 32: 'BAD_REQUEST', 33: 'NOT_AUTHORIZED', 34: 'PKI_FAILED', 38: 'RATE_LIMIT_EXCEEDED' };
 function routingError(payload) { var r = pb.get(pb.parse(payload), 3); return r === undefined ? 0 : r; }
 function f32opt(v) { return v === undefined ? null : pb.f32ToFloat(v); }
 function parseMetrics(buf) {
@@ -10202,7 +10205,7 @@ function decodeVoice(codec, stream, chunkPresent) {
    parity/repair symbol = sum(coeff[i] * chunk[i]). Reed-Solomon uses a Cauchy matrix (any k symbols
    recover the data). The fountain uses pseudo-random 0/1 coefficients derived from idx, so the sender
    can keep producing fresh symbols forever (needs about k+1 or k+2 on average). */
-var FEC = { NONE: 0, RS: 1, FOUNTAIN: 2, MAGIC_VOICE: 0xB1, MAGIC_IMG: 0xB2, MAGIC_NACK: 0xB3, HEADER: 8 };
+var FEC = { NONE: 0, RS: 1, FOUNTAIN: 2, MAGIC_VOICE: 0xB1, MAGIC_IMG: 0xB2, MAGIC_NACK: 0xB3, MAGIC_NACK2: 0xB4, HEADER: 8 };
 var GF_EXP = new Uint8Array(512), GF_LOG = new Uint8Array(256);
 (function () { var x = 1, i; for (i = 0; i < 255; i++) { GF_EXP[i] = x; GF_LOG[x] = i; x <<= 1; if (x & 256) x ^= 0x11d; } for (i = 255; i < 512; i++) GF_EXP[i] = GF_EXP[i - 255]; })();
 function gfMul(a, b) { return a && b ? GF_EXP[GF_LOG[a] + GF_LOG[b]] : 0; }
@@ -10271,6 +10274,11 @@ function makeSessionInner(stream, msgId, kind, mode, extra, cs) {
   s.next = s.packets.length;
   return s;
 }
+function nackMissing(msgId, targetNode, idxList) {
+  var n = Math.min(idxList.length, 30), out = [FEC.MAGIC_NACK2, msgId & 255, targetNode & 255, (targetNode >>> 8) & 255, (targetNode >>> 16) & 255, (targetNode >>> 24) & 255, n];
+  for (var i = 0; i < n; i++) out.push(idxList[i] & 255);
+  return Uint8Array.from(out);
+}
 function nackPacket(msgId, need, targetNode) {
   return Uint8Array.of(FEC.MAGIC_NACK, msgId & 255, need & 255, targetNode & 255, (targetNode >>> 8) & 255, (targetNode >>> 16) & 255, (targetNode >>> 24) & 255);
 }
@@ -10291,7 +10299,7 @@ function airtimeMs(presetKey, appBytes) {
 }
 
 /* ---------- File transfer: blocks of up to 16 chunks, each block erasure-coded on its own ---------- */
-var FILE = { MAGIC: 0xC1, NACK: 0xC2, HEADER: 9, BLOCK: 16, MAX: 61440 };
+var FILE = { MAGIC: 0xC1, NACK: 0xC2, NACK2: 0xC3, HEADER: 9, BLOCK: 16, MAX: 61440 };
 function fileLayout(L) {
   var chunks = Math.ceil(L / VOICE.CHUNK), blocks = Math.ceil(chunks / FILE.BLOCK);
   return { chunks: chunks, blocks: blocks, kb: function (b) { return Math.min(FILE.BLOCK, chunks - b * FILE.BLOCK); } };
@@ -10302,6 +10310,8 @@ function makeFileSender(stream, id, compressed, mode, parityPct, cs) {
   var out = withChunk(cs, function () { return makeFileSenderInner(stream, id, compressed, mode, parityPct, cs); });
   var rawRepair = out.repair;
   out.repair = function (bl, n) { return withChunk(cs, function () { return rawRepair(bl, n); }); };
+  var rawPF = out.packetFor;
+  out.packetFor = function (bl, idx) { return withChunk(cs, function () { return rawPF(bl, idx); }); };
   out.cs = cs; return out;
 }
 function makeFileSenderInner(stream, id, compressed, mode, parityPct, cs) {
@@ -10328,6 +10338,7 @@ function makeFileSenderInner(stream, id, compressed, mode, parityPct, cs) {
   }
   return {
     packets: packets, layout: lay, id: id & 255, mode: mode,
+    packetFor: function (bl, idx) { return blocks[bl] && idx < 255 ? symbol(bl, idx) : null; },
     repair: function (bl, n) {
       var B = blocks[bl], out = [];
       if (!B || !mode) return out;
@@ -10348,6 +10359,17 @@ function fileNackPacket(id, targetNode, needs) {   // needs: [{block, need}]
   var n = Math.min(needs.length, 24), out = [FILE.NACK, id & 255, targetNode & 255, (targetNode >>> 8) & 255, (targetNode >>> 16) & 255, (targetNode >>> 24) & 255, n];
   for (var i = 0; i < n; i++) out.push(needs[i].block & 255, Math.min(255, needs[i].need));
   return Uint8Array.from(out);
+}
+function fileNackMissing(id, targetNode, pairs) {   // pairs: [{block, idx}]
+  var n = Math.min(pairs.length, 24), out = [FILE.NACK2, id & 255, targetNode & 255, (targetNode >>> 8) & 255, (targetNode >>> 16) & 255, (targetNode >>> 24) & 255, n];
+  for (var i = 0; i < n; i++) out.push(pairs[i].block & 255, pairs[i].idx & 255);
+  return Uint8Array.from(out);
+}
+function parseFileNack2(p) {
+  if (!p || p.length < 7 || p[0] !== FILE.NACK2) return null;
+  var pairs = [], n = p[6];
+  for (var i = 0; i < n && 8 + 2 * i < p.length; i++) pairs.push({ block: p[7 + 2 * i], idx: p[8 + 2 * i] });
+  return { id: p[1], target: (p[2] | (p[3] << 8) | (p[4] << 16) | (p[5] << 24)) >>> 0, pairs: pairs };
 }
 function parseFileNack(p) {
   if (!p || p.length < 7 || p[0] !== FILE.NACK) return null;
@@ -10374,6 +10396,11 @@ FileReceiver.prototype.progress = function () {
   return got / this.lay.chunks;
 };
 FileReceiver.prototype.complete = function () { return this.blk.every(function (B) { return !!B.data; }); };
+FileReceiver.prototype.missing = function () {
+  var out = [];
+  this.blk.forEach(function (B, b) { if (B.data) return; for (var i = 0; i < B.kb; i++) if (!B.syms.has(i)) out.push({ block: b, idx: i }); });
+  return out;
+};
 FileReceiver.prototype.needs = function () {
   var out = []; this.blk.forEach(function (B, i) { if (!B.data) out.push({ block: i, need: Math.max(1, B.kb - B.rank) }); }); return out;
 };
@@ -10398,6 +10425,11 @@ function makeChunks(stream, msgId, magic) {
 }
 
 function parseChunk(payload) {
+  if (payload && payload.length >= 7 && payload[0] === FEC.MAGIC_NACK2) {
+    var cnt = payload[6], list = [];
+    for (var q = 0; q < cnt && 7 + q < payload.length; q++) list.push(payload[7 + q]);
+    return { type: 'nack2', msgId: payload[1], target: (payload[2] | (payload[3] << 8) | (payload[4] << 16) | (payload[5] << 24)) >>> 0, idx: list };
+  }
   if (payload && payload.length >= 7 && payload[0] === FEC.MAGIC_NACK)
     return { type: 'nack', msgId: payload[1], need: payload[2], target: (payload[3] | (payload[4] << 8) | (payload[5] << 16) | (payload[6] << 24)) >>> 0 };
   if (payload && payload.length > FEC.HEADER && (payload[0] === FEC.MAGIC_VOICE || payload[0] === FEC.MAGIC_IMG)) {
@@ -10473,7 +10505,7 @@ function decodeImage(stream, present, totalChunks) {
 }
 
 if (typeof module !== 'undefined') {
-  module.exports = { withChunk: withChunk, parseRouteDiscovery: parseRouteDiscovery, PORT_NAMES: PORT_NAMES, REGIONS: REGIONS, PRESET_ENUM: PRESET_ENUM, ROUTING_ERRORS: ROUTING_ERRORS, routingError: routingError, parseMetrics: parseMetrics, MESH: MESH, VOICE: VOICE, pb: pb, buildWantConfig: buildWantConfig, buildSendPacket: buildSendPacket,
+  module.exports = { nackMissing: nackMissing, fileNackMissing: fileNackMissing, parseFileNack2: parseFileNack2, withChunk: withChunk, parseRouteDiscovery: parseRouteDiscovery, PORT_NAMES: PORT_NAMES, REGIONS: REGIONS, PRESET_ENUM: PRESET_ENUM, ROUTING_ERRORS: ROUTING_ERRORS, routingError: routingError, parseMetrics: parseMetrics, MESH: MESH, VOICE: VOICE, pb: pb, buildWantConfig: buildWantConfig, buildSendPacket: buildSendPacket,
     parseFromRadio: parseFromRadio, makeCodec: makeCodec, packFrames: packFrames, unpackFrame: unpackFrame,
     encodeVoice: encodeVoice, decodeVoice: decodeVoice, makeChunks: makeChunks, parseChunk: parseChunk,
     VoiceAssembly: VoiceAssembly, PRESETS: PRESETS, airtimeMs: airtimeMs, FILE: FILE, makeFileSender: makeFileSender, parseFilePacket: parseFilePacket, fileNackPacket: fileNackPacket, parseFileNack: parseFileNack, FileReceiver: FileReceiver, FEC: FEC, makeSession: makeSession, fecSolve: fecSolve, padChunk: padChunk, dataLen: dataLen, nackPacket: nackPacket, packImage: packImage, decodeImage: decodeImage, PALETTE: PALETTE, chunkSizes: chunkSizes, ampsFromPcm: ampsFromPcm };
@@ -10493,7 +10525,7 @@ FileReceiver.prototype.result = function () { var s = this; return withChunk(s.c
     nodes: new Map(), channels: [], channelIndex: 0,
     maxSec: 8, hops: 3, autoplay: true, 
     clip: null, recording: false, sending: false,
-    inbox: new Map(), sessions: new Map(), preset: 'LONG_FAST', wantAck: false, pending: new Map(), hw: { queue: null, meta: null, lora: null, net: {}, pollMs: null, poll: { n: 0, sum: 0, max: 0, last: 0 }, putMs: null }, stats: { tx: 0, rx: 0, txB: 0, rxB: 0, acks: 0, fails: 0 }, cs: 100, xfer: null, traces: new Map(), view: 'chat', threads: new Map(), thread: null, target: null, sheet: null, liveBub: null, mode: 'ble', http: null, poll: null, fec: 1, extra: 0.25, repair: true
+    inbox: new Map(), sessions: new Map(), preset: 'LONG_FAST', wantAck: false, pending: new Map(), hw: { queue: null, meta: null, lora: null, net: {}, pollMs: null, poll: { n: 0, sum: 0, max: 0, last: 0 }, putMs: null }, stats: { tx: 0, rx: 0, txB: 0, rxB: 0, acks: 0, fails: 0 }, cs: 100, nackMin: 8000, xfer: null, traces: new Map(), view: 'chat', threads: new Map(), thread: null, target: null, sheet: null, liveBub: null, mode: 'ble', http: null, poll: null, fec: 0, extra: 0.25, repair: true
   };
   var CHUNK_SECONDS = VOICE.CHUNK * 8 / VOICE.FRAME_BITS * VOICE.FRAME_SECONDS; // ~2.29 s per packet
   var SIM_NODE = 0x00c0ffee;
@@ -10951,7 +10983,7 @@ FileReceiver.prototype.result = function () { var s = this; return withChunk(s.c
       var bub = addOutVoice(); S.liveBub = bub; S.clip.sent = true; closeSheet('shVoice');
       $('btnSend').disabled = true; $('btnDiscard').disabled = true; $('btnRec').disabled = true;
       var sess = buildSession(S.clip.stream, Math.floor(Math.random() * 256), 'voice');
-      states = sess.packets.map(function () { return 'ready'; });
+      sess.bub = bub; states = sess.packets.map(function () { return 'ready'; });
       var done = await sendPackets(sess, setStatus, function (i, st) { states[i] = st; if (S.clip) renderClipStrip(states); });
       setStatus(done, 'ok');
     } catch (e) {
@@ -10968,8 +11000,10 @@ FileReceiver.prototype.result = function () { var s = this; return withChunk(s.c
     if (port === MESH.PORT_PRIVATE) {
       if (payload[0] === FILE.MAGIC) { addFileChunk(from, parseFilePacket(payload), meta); return; }
       if (payload[0] === FILE.NACK) { handleFileNack(from, parseFileNack(payload)); return; }
+      if (payload[0] === FILE.NACK2) { handleFileNack2(from, parseFileNack2(payload)); return; }
       var c = parseChunk(payload);
       if (c && c.type === 'nack') handleNack(from, c);
+      else if (c && c.type === 'nack2') handleNack2(from, c);
       else if (c) (c.type === 'img' ? addImageChunk : addVoiceChunk)(from, c, meta);
     } else if (port === MESH.PORT_TEXT) {
       addText(from, utf8(payload), meta);
@@ -11104,7 +11138,7 @@ FileReceiver.prototype.result = function () { var s = this; return withChunk(s.c
     function say(v) { $('pxStatus').textContent = v; bub.set(v); }
     try {
       bub = addOutPic(); pad.sent = true; closeSheet('shPic');
-      var sess = buildSession(packImage(pad.px, pad.n), Math.floor(Math.random() * 256), 'img');
+      var sess = buildSession(packImage(pad.px, pad.n), Math.floor(Math.random() * 256), 'img'); sess.bub = bub;
       say(await sendPackets(sess, say, function () {})); $('pxStatus').className = 'status ok';
     } catch (e) {
       console.warn(e);
@@ -11146,10 +11180,8 @@ FileReceiver.prototype.result = function () { var s = this; return withChunk(s.c
   /* ---------- Error protection: build, absorb, repair ---------- */
   function buildSession(stream, id, kind) {
     var kk = Math.max(1, Math.ceil(stream.length / VOICE.CHUNK)), s = makeSession(stream, id, kind, S.fec, spareCount(kk), VOICE.CHUNK);
-    if (S.fec !== FEC.NONE) {
-      s.target = { to: S.target ? S.target.to : MESH.BROADCAST, ch: S.channelIndex }; S.sessions.set(s.msgId, s);
-      if (S.sessions.size > 8) S.sessions.delete(S.sessions.keys().next().value);
-    }
+    s.target = { to: MESH.BROADCAST, ch: S.channelIndex }; S.sessions.set(s.msgId, s);
+    if (S.sessions.size > 8) S.sessions.delete(S.sessions.keys().next().value);
     return s;
   }
   function absorb(n, c) {
@@ -11195,17 +11227,45 @@ FileReceiver.prototype.result = function () { var s = this; return withChunk(s.c
   }
   function scheduleNack(n) {
     clearTimeout(n.nackTimer);
-    if (!n.fec || n.asm.complete() || !S.repair || (n.nacks || 0) >= 2) return;
-    n.nackTimer = setTimeout(function () { sendNack(n); }, (n.nacks ? 4 : 2.5) * paceMs());
+    if (!n.fec || n.asm.complete() || !S.repair || (n.nacks || 0) >= 8) return;
+    var arr = n.arr || [], gap = arr.length > 1 ? (arr[arr.length - 1].t - arr[0].t) / (arr.length - 1) : paceMs();
+    n.nackTimer = setTimeout(function () { sendNack(n); }, Math.max(S.nackMin, 2.5 * gap) * (1 + (n.nacks || 0) * 0.5));
   }
   async function sendNack(n) {
     if (!S.ready || n.asm.complete()) return;
-    var need = Math.max(1, n.total - (n.rank || 0));
+    var miss = [], i;
+    for (i = 0; i < n.total; i++) if (!n.asm.parts[i]) miss.push(i);
+    if (!miss.length) return;
     n.nacks = (n.nacks || 0) + 1;
-    n.nackNote = ', asked the sender for ' + need + ' more';
+    n.nackNote = ', asked the sender to resend ' + (miss.length === 1 ? 'packet ' : 'packets ') + miss.slice(0, 8).map(function (x) { return x + 1; }).join(', ') + (miss.length > 8 ? ' and more' : '');
     (n.isImg ? renderImageNote : renderNote)(n);
-    try { await sendPacket(MESH.PORT_PRIVATE, nackPacket(n.msgId, need, n.from), n.target); } catch (e) { console.warn(e); }
+    logEvt('sys', 'Missing ' + miss.length + ' of ' + n.total + ' packets (' + miss.slice(0, 12).map(function (x) { return x + 1; }).join(', ') + '). Asking ' + nodeName(n.from) + ' to resend.');
+    try { await sendPacket(MESH.PORT_PRIVATE, nackMissing(n.msgId, n.from, miss), n.target); } catch (e) { console.warn(e); }
     scheduleNack(n);
+  }
+  function handleNack2(from, c) {
+    var s = S.sessions.get(c.msgId);
+    if (c.target !== S.myNum || !s || !S.repair || !S.ready) return;
+    s.inflight = s.inflight || {}; s.resent = s.resent || 0;
+    var room = Math.max(0, 8 * s.k - s.resent), list = c.idx.filter(function (i) { return i < s.k && !s.inflight[i]; }).slice(0, Math.min(12, room));
+    if (!list.length) return;
+    list.forEach(function (i) { s.inflight[i] = 1; }); s.resent += list.length;
+    (async function () {
+      while (S.sending) await sleep(500);
+      S.sending = true; refreshPx();
+      try {
+        for (var i = 0; i < list.length; i++) {
+          var msg = 'Resending packet ' + (list[i] + 1) + ' of ' + s.k + ' (' + (i + 1) + ' of ' + list.length + '), asked for by ' + nodeName(from) + '.';
+          if (s.bub) s.bub.set(msg);
+          logEvt('sys', msg);
+          await sendPacket(MESH.PORT_PRIVATE, s.packet(list[i]), s.target);
+          delete s.inflight[list[i]];
+          if (i < list.length - 1) await sleep(paceMs());
+        }
+        if (s.bub) s.bub.set('Resent ' + list.length + (list.length === 1 ? ' packet' : ' packets') + ' because ' + nodeName(from) + ' asked for them.');
+      } catch (e) { console.warn(e); list.forEach(function (i) { delete s.inflight[i]; }); }
+      S.sending = false; refreshPx();
+    })();
   }
   function handleNack(from, c) {
     var s = S.sessions.get(c.msgId);
@@ -11243,10 +11303,8 @@ FileReceiver.prototype.result = function () { var s = this; return withChunk(s.c
       : S.fec === FEC.FOUNTAIN ? 'If packet 2 is lost, a spare rebuilds it. Occasionally a spare turns out to overlap with what you already have, and one more is needed. The sender can always make another.'
       : 'If packet 2 is lost, the audio or picture has a hole there, and nothing can be requested again.';
     $('fecCap').textContent = cap;
-    var rp = $('chkRepair'); rp.disabled = S.fec === FEC.NONE;
-    $('repairHint').textContent = S.fec === FEC.NONE
-      ? 'Needs Reed-Solomon or Fountain, because a repair is a fresh spare packet. Turn one of those on to use this.'
-      : 'If something is still missing about ' + Math.round(2.5 * paceMs() / 1000) + ' s after the last packet arrived, your device asks the sender for more spares. When someone asks you, your device sends them. It costs a little extra airtime, and both people need it on.';
+    $('chkRepair').disabled = false;
+    $('repairHint').textContent = 'If something is still missing about ' + Math.round(Math.max(S.nackMin, 2.5 * paceMs()) / 1000) + ' s after the last packet arrived, your device lists the missing packets and asks the sender to send just those again. The sender answers automatically. Both people need this on. It costs a little airtime.';
   }
 
 
@@ -11445,16 +11503,28 @@ FileReceiver.prototype.result = function () { var s = this; return withChunk(s.c
   }
   function scheduleFileNack(n) {
     clearTimeout(n.timer);
-    if (n.done || !S.repair || n.nacks >= 4) return;
+    if (n.done || !S.repair || n.nacks >= 8) return;
     var avg = n.gaps.length ? n.gaps.reduce(function (s, x) { return s + x; }, 0) / n.gaps.length : 15000;
-    n.timer = setTimeout(function () { sendFileNack(n); }, Math.min(180000, Math.max(30000, 3 * avg)) * (1 + n.nacks * 0.5));
+    n.timer = setTimeout(function () { sendFileNack(n); }, Math.min(120000, Math.max(S.nackMin * 2, 2.5 * avg)) * (1 + n.nacks * 0.4));
   }
   async function sendFileNack(n) {
     if (n.done || !S.ready) return;
+    var miss = n.rx.missing();
+    if (!miss.length) return;
     n.nacks++;
-    var needs = n.rx.needs(), tot = needs.reduce(function (s, x) { return s + x.need; }, 0);
-    try { await sendPacket(MESH.PORT_PRIVATE, fileNackPacket(n.id, n.from, needs), n.target); n.note = ', asked the sender for ' + tot + ' more packets'; } catch (e) { console.warn(e); }
+    logEvt('sys', 'File missing ' + miss.length + ' packets. Asking ' + nodeName(n.from) + ' to resend.');
+    try { await sendPacket(MESH.PORT_PRIVATE, fileNackMissing(n.id, n.from, miss), n.target); n.note = ', asked the sender to resend ' + miss.length + (miss.length === 1 ? ' packet' : ' packets'); } catch (e) { console.warn(e); }
     renderFile(n); scheduleFileNack(n);
+  }
+  function handleFileNack2(from, nk) {
+    var T = S.xfer;
+    if (!nk || !T || nk.id !== T.id || nk.target !== S.myNum || !S.repair || T.cancelled) return;
+    var waiting = {}, i, added = 0;
+    for (i = T.i; i < T.queue.length; i++) waiting[T.queue[i][6] + ':' + T.queue[i][7]] = 1;
+    nk.pairs.forEach(function (p) { if (waiting[p.block + ':' + p.idx]) return; var pk = T.snd.packetFor(p.block, p.idx); if (pk) { T.queue.push(pk); added++; } });
+    if (!added) return;
+    T.note = ' ' + nodeName(from) + ' asked for ' + added + ' missing packets to be sent again.';
+    if (!T.running) runXfer(T); renderXfer();
   }
   function renderFile(n) {
     var pct = Math.round(n.rx.progress() * 100), head = '<div class="notehead"><strong>' + esc(nodeName(n.from)) + '</strong><span class="when">' + nowLabel() + '</span></div>';
@@ -11632,7 +11702,7 @@ FileReceiver.prototype.result = function () { var s = this; return withChunk(s.c
     var dm = !!(from && meta && meta.to && meta.to !== MESH.BROADCAST && meta.to === S.myNum);
     return dm ? mkThread('dm:' + from, true, from, (meta && meta.channel) || 0) : mkThread('ch:' + ((meta && meta.channel) || 0), false, null, (meta && meta.channel) || 0);
   }
-  function targetOf(th) { return { to: th.dm ? th.node : MESH.BROADCAST, ch: th.ch }; }
+  function targetOf(th) { return { to: MESH.BROADCAST, ch: th.ch }; }   // broadcast only: directed packets were not being repeated
   function updateBadge() { var n = 0; S.threads.forEach(function (t) { n += t.unread; }); var b = $('badge'); b.textContent = n; b.hidden = !n; }
   function place(li, th, preview, incoming) {
     th.ul.appendChild(li); th.last = preview; th.lastT = Date.now();
@@ -11720,7 +11790,7 @@ FileReceiver.prototype.result = function () { var s = this; return withChunk(s.c
     var stat = li.querySelector('.ostat'), settled = false;
     function say(t, bad) { stat.textContent = t; li.classList.toggle('bad', !!bad); }
     try {
-      await sendPacket(MESH.PORT_TEXT, bytes, { wantAck: true, onAck: function (er, info) {
+      await sendPacket(MESH.PORT_TEXT, bytes, { wantAck: true, to: th.dm ? th.node : undefined, onAck: function (er, info) {
         if (er !== 0) { settled = true; say('Not delivered: ' + (ROUTING_ERRORS[er] || 'error ' + er), true); }
         else if (!th.dm) { settled = true; say('Sent, and a neighbour repeated it'); }
         else if (info.isTarget) { settled = true; say('Delivered: ' + thTitle(th) + ' confirmed it'); }
