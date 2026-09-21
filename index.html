@@ -8,17 +8,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --paper:#EFEEF8; --text:#1A1936; --muted:#5E5C82; --rule:rgba(26,25,54,.15); --card:#F8F7FD;
-  --panel:#1E1C44; --panel-text:#F3F1FF; --panel-muted:#AAA6D6; --panel-rule:rgba(243,241,255,.18);
-  --accent:#5B3DF5; --accent-hi:#9C86FF; --rec:#FF4D63; --ok:#2FD39A; --warn:#FFC24D; --bad:#FF7A85;
-  --bar:#CFC9FF; --bar-dim:rgba(207,201,255,.22);
+  --paper:#EDF1EE; --text:#1E2130; --muted:#586070; --rule:rgba(30,33,48,.15); --card:#F7FAF8;
+  --panel:#2C2D3C; --panel-text:#F2F6F4; --panel-muted:#A5ABBB; --panel-rule:rgba(242,246,244,.16);
+  --accent:#67EA94; --accent-ink:#13804A; --accent-hi:#67EA94; --rec:#FF5C6C; --ok:#67EA94; --warn:#FFC94D; --bad:#FF7A85;
+  --bar:#B9C5BF; --bar-dim:rgba(185,197,191,.22);
   --f-body:'Instrument Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
   --f-display:'Bricolage Grotesque','Instrument Sans',system-ui,sans-serif;
   color-scheme:light dark;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --paper:#0F0E22; --text:#ECEBFB; --muted:#9B99C4; --rule:rgba(236,235,251,.15); --card:#171533; --panel:#1A1840; --accent:#8B72FF;}}
-:root[data-theme="dark"]{--paper:#0F0E22; --text:#ECEBFB; --muted:#9B99C4; --rule:rgba(236,235,251,.15); --card:#171533; --panel:#1A1840; --accent:#8B72FF;}
+  --paper:#15161E; --text:#E9EEEB; --muted:#98A0B0; --rule:rgba(233,238,235,.15); --card:#1E1F29; --panel:#2C2D3C; --accent-ink:#67EA94;}}
+:root[data-theme="dark"]{--paper:#15161E; --text:#E9EEEB; --muted:#98A0B0; --rule:rgba(233,238,235,.15); --card:#1E1F29; --panel:#2C2D3C; --accent-ink:#67EA94;}
 *{box-sizing:border-box}
 html,body{margin:0}
 body{background:var(--paper);color:var(--text);font:400 16px/1.5 var(--f-body);-webkit-text-size-adjust:100%}
@@ -28,18 +28,18 @@ button,select,input{font:inherit;color:inherit}
 
 /* shell: bottom tab bar on phones, left rail on tablets */
 .app{min-height:100dvh}
-.tabs{position:fixed;left:0;right:0;bottom:0;z-index:5;display:grid;grid-template-columns:repeat(5,1fr);background:var(--panel);color:var(--panel-muted);padding:6px 6px calc(env(safe-area-inset-bottom,0px) + 6px);border-radius:22px 22px 0 0}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:5;display:grid;grid-template-columns:repeat(6,1fr);background:var(--panel);color:var(--panel-muted);padding:6px 6px calc(env(safe-area-inset-bottom,0px) + 6px);border-radius:22px 22px 0 0}
 .tab{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 2px 6px;border:0;background:none;border-radius:16px;font-size:.74rem;font-weight:600;cursor:pointer;color:inherit}
 .tab svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.tab[aria-selected="true"]{color:var(--panel-text);background:rgba(156,134,255,.22)}
+.tab[aria-selected="true"]{color:var(--panel-text);background:rgba(103,234,148,.2)}
 .badge{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--rec);color:#fff;font-size:.7rem;line-height:18px;text-align:center}
 .content{padding:0 20px calc(env(safe-area-inset-bottom,0px) + 110px);max-width:760px;margin:0 auto}
 .top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:calc(env(safe-area-inset-top,0px) + 16px) 0 12px}
 h1{font:800 1.5rem/1 var(--f-display);letter-spacing:-.02em;margin:0}
 .chip{display:flex;align-items:center;gap:8px;min-height:40px;padding:0 14px;border-radius:999px;border:1.5px solid var(--rule);background:var(--card);cursor:pointer;font-weight:600;max-width:60%}
 .chip span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.dot{width:11px;height:11px;border-radius:50%;background:#77739f;flex:none}
-.dot.ok{background:var(--ok);box-shadow:0 0 0 4px rgba(47,211,154,.22)} .dot.bad{background:var(--bad)} .dot.busy{background:var(--warn)}
+.dot{width:11px;height:11px;border-radius:50%;background:#7d8394;flex:none}
+.dot.ok{background:var(--ok);box-shadow:0 0 0 4px rgba(103,234,148,.25)} .dot.bad{background:var(--bad)} .dot.busy{background:var(--warn)}
 .viewhead{margin:8px 0 18px}
 h2{font:800 1.7rem/1.1 var(--f-display);letter-spacing:-.02em;margin:0 0 6px}
 h3{font:800 1.05rem/1.2 var(--f-display);margin:0 0 4px}
@@ -49,23 +49,23 @@ h3{font:800 1.05rem/1.2 var(--f-display);margin:0 0 4px}
   .content{padding:0 32px 48px;margin-left:calc(112px + max(0px,(100vw - 112px - 760px)/2))}
 }
 
-.btn{min-height:44px;padding:0 18px;border-radius:999px;border:1.5px solid currentColor;background:transparent;cursor:pointer;font-weight:600;color:var(--accent)}
+.btn{min-height:44px;padding:0 18px;border-radius:999px;border:1.5px solid currentColor;background:transparent;cursor:pointer;font-weight:600;color:var(--accent-ink)}
 .btn:disabled{opacity:.4;cursor:not-allowed}
-.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#10261A}
 .btn.ghost{border-color:transparent;text-decoration:underline;text-underline-offset:3px}
 .btn.small{min-height:38px;padding:0 14px;font-size:.9rem}
 .warn{margin:0 0 14px;padding:10px 14px;border-radius:14px;background:rgba(255,194,77,.16);border:1px solid var(--warn);display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;font-size:.92rem}
 .status{min-height:1.5em;margin:12px 0 0;font-size:.92rem;color:var(--muted)}
-.status.ok{color:#149a6d} .status.err{color:#d9364a} .status.note{color:#a87400}
+.status.ok{color:#13804A} .status.err{color:#d9364a} .status.note{color:#a87400}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 
 /* voice stage */
 .stage{background:var(--panel);color:var(--panel-text);border-radius:28px;padding:22px 20px 20px}
-.stage .btn{color:var(--panel-text)} .stage .btn.primary{background:var(--accent-hi);border-color:var(--accent-hi);color:#151235}
+.stage .btn{color:var(--panel-text)} .stage .btn.primary{background:var(--accent-hi);border-color:var(--accent-hi);color:#10261A}
 .stage .status,.stage .hint{color:var(--panel-muted)} .stage .status.ok{color:var(--ok)} .stage .status.err{color:var(--bad)} .stage .status.note{color:var(--warn)}
 .strip svg{width:100%;height:96px;display:block}
 .strip .b{fill:var(--bar)} .strip .s-wait{fill:var(--bar-dim)} .strip .s-live{fill:var(--rec)}
-.strip .s-sending{fill:var(--accent-hi)} .strip .s-sent{fill:var(--ok)} .strip .s-lost{fill:var(--bad);opacity:.5}
+.strip .s-sending{fill:var(--warn)} .strip .s-sent{fill:var(--ok)} .strip .s-lost{fill:var(--bad);opacity:.5}
 .strip .div{stroke:var(--panel-muted);stroke-width:1;stroke-dasharray:3 4;opacity:.7}
 .seglabels{display:flex}
 .seglabels>div{min-width:0;display:flex;flex-direction:column;padding:4px 0 0 7px;border-left:1px dashed var(--panel-muted);font-size:.78rem;line-height:1.3}
@@ -92,19 +92,19 @@ h3{font:800 1.05rem/1.2 var(--f-display);margin:0 0 4px}
 .pad{touch-action:none;cursor:crosshair}
 .palette{display:grid;grid-template-columns:repeat(8,1fr);gap:7px;margin:0 0 14px}
 .sw{aspect-ratio:1;border-radius:9px;border:2px solid var(--rule);cursor:pointer;padding:0}
-.sw.on{outline:3px solid var(--accent);outline-offset:2px}
+.sw.on{outline:3px solid var(--accent-ink);outline-offset:2px}
 .pix{width:min(100%,200px);margin-top:6px}
 
 /* files */
 .drop{display:flex;flex-direction:column;gap:4px;align-items:center;justify-content:center;text-align:center;padding:30px 20px;border:2px dashed var(--muted);border-radius:22px;cursor:pointer;background:var(--card)}
-.drop:hover,.drop.over{border-color:var(--accent);background:rgba(139,114,255,.1)}
+.drop:hover,.drop.over{border-color:var(--accent-ink);background:rgba(103,234,148,.14)}
 .drop strong{font:800 1.15rem/1.2 var(--f-display)}
 .facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:14px;margin:18px 0}
 .facts div{border-top:2px solid var(--text);padding-top:6px}
 .facts dt{color:var(--muted);font-size:.82rem} .facts dd{margin:0;font:800 1.15rem/1.3 var(--f-display);font-variant-numeric:tabular-nums}
 .opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin:0 0 18px}
 .bar{height:14px;border-radius:7px;background:var(--rule);overflow:hidden;margin-top:6px}
-.fill{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent-hi));border-radius:7px;transition:width .3s}
+.fill{height:100%;width:0;background:linear-gradient(90deg,var(--accent-ink),var(--accent));border-radius:7px;transition:width .3s}
 .bar.done .fill{background:var(--ok)}
 .xstat{margin:8px 0 14px;font-variant-numeric:tabular-nums}
 
@@ -114,7 +114,7 @@ h3{font:800 1.05rem/1.2 var(--f-display);margin:0 0 4px}
 .notehead{display:flex;justify-content:space-between;gap:12px;margin-bottom:6px}
 .when{color:var(--muted);font-size:.88rem}
 #inbox p{margin:0}
-.inbox svg{height:64px} .inbox .b{fill:var(--accent)} .inbox .s-wait{fill:var(--rule)} .inbox .s-sent{fill:var(--accent)}
+.inbox svg{height:64px} .inbox .b{fill:var(--accent-ink)} .inbox .s-wait{fill:var(--rule)} .inbox .s-sent{fill:var(--accent-ink)}
 .inbox .div{stroke:var(--muted)} .inbox .seglabels>div{border-left-color:var(--muted)} .inbox .segsub{color:var(--muted)}
 .noterow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:10px}
 .notestat{font-size:.92rem} .sig{font-size:.86rem;color:var(--muted)}
@@ -135,7 +135,7 @@ select,input[type=text]{min-height:44px;padding:0 12px;border-radius:12px;border
 
 /* connection dialog */
 dialog{border:0;border-radius:26px;padding:0;max-width:520px;width:calc(100% - 32px);background:var(--paper);color:var(--text);box-shadow:0 20px 60px rgba(0,0,0,.4)}
-dialog::backdrop{background:rgba(10,9,30,.6)}
+dialog::backdrop{background:rgba(12,13,20,.6)}
 .dlg{padding:24px}
 .seg{display:flex;gap:4px;padding:4px;border-radius:999px;background:var(--card);border:1px solid var(--rule);margin:16px 0}
 .seg button{flex:1;min-height:40px;border:0;border-radius:999px;background:none;font-weight:600;cursor:pointer}
@@ -144,14 +144,34 @@ dialog::backdrop{background:rgba(10,9,30,.6)}
 .dlgnote{margin:12px 0;padding:10px 12px;border-radius:12px;background:var(--card);font-size:.9rem}
 .dlgclose{float:right}
 .opt{display:flex;gap:12px;align-items:flex-start;padding:14px;margin-bottom:10px;border:1.5px solid var(--rule);border-radius:16px;background:var(--card);cursor:pointer;max-width:520px}
-.opt:has(input:checked){border-color:var(--accent);background:rgba(139,114,255,.12)}
+.opt:has(input:checked){border-color:var(--accent-ink);background:rgba(103,234,148,.16)}
 .opt input{width:20px;height:20px;margin-top:2px;accent-color:var(--accent);flex:none}
 .opt strong,.check strong{display:block}
 .opt small,.check small{display:block;margin-top:2px}
 .fecdemo{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 8px}
 .pk{min-width:78px;padding:8px 10px;border-radius:12px;border:2px solid var(--ok);text-align:center;font-weight:600;font-size:.85rem;background:var(--card)}
 .pk small{display:block;font-weight:400;color:var(--muted)}
-.pk.lost{border-style:dashed;border-color:var(--bad)} .pk.spare{border-color:var(--accent)} .pk.fixed{background:rgba(47,211,154,.16)}
+.pk.lost{border-style:dashed;border-color:var(--bad)} .pk.spare{border-color:var(--accent-ink)} .pk.fixed{background:rgba(103,234,148,.18)}
+h1{display:flex;align-items:center;gap:10px}
+.mark{width:30px;height:30px;color:var(--text);flex:none}
+.hwgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px;margin-bottom:22px}
+.hwbox{border-top:2px solid var(--accent-ink);padding-top:8px}
+.hwbox dl{margin:6px 0 0}
+.hwbox dl div{display:flex;justify-content:space-between;gap:14px;padding:5px 0;border-bottom:1px solid var(--rule);font-size:.9rem}
+.hwbox dt{color:var(--muted)} .hwbox dd{margin:0;text-align:right;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.hwbox dd.warnv{color:#a87400} .hwbox dd.badv{color:#d9364a}
+.logbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+.logbar select{width:auto} .logbar .check{margin:0}
+.loglist{list-style:none;margin:0;padding:0}
+.lg{display:grid;grid-template-columns:auto auto 1fr;gap:2px 10px;padding:8px 0;border-top:1px solid var(--rule);font-size:.88rem;align-items:baseline}
+.lt{color:var(--muted);font:.78rem ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.lk{font-weight:700;font-size:.78rem;padding:1px 8px;border-radius:999px;background:var(--rule)}
+.lg.tx .lk{background:var(--accent);color:#10261A} .lg.board .lk{background:var(--warn);color:#2B2100} .lg.err .lk,.lg.bad .lk{background:var(--bad);color:#3A0B12}
+.lg.bad .lm{color:#d9364a}
+.lm{overflow-wrap:anywhere}
+.lx{grid-column:1/-1;margin:0;display:none;font:.76rem/1.4 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--muted);white-space:pre-wrap;word-break:break-all}
+.hex-on .lx{display:block}
+.loglist[data-f="tx"] .lg:not(.tx),.loglist[data-f="rx"] .lg:not(.rx),.loglist[data-f="board"] .lg:not(.board),.loglist[data-f="ours"] .lg:not(.ours),.loglist[data-f="err"] .lg:not(.bad):not(.err){display:none}
 @media (prefers-reduced-motion:reduce){.rec.on{animation:none}.recicon,.fill{transition:none}}
 </style>
 </head>
@@ -162,12 +182,13 @@ dialog::backdrop{background:rgba(10,9,30,.6)}
   <button class="tab" role="tab" data-view="draw" aria-selected="false"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 12h16M12 4v16"/></svg>Draw</button>
   <button class="tab" role="tab" data-view="files" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>Files</button>
   <button class="tab" role="tab" data-view="inbox" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M3 13l3-8h12l3 8v6H3z"/><path d="M3 13h5l1 3h6l1-3h5"/></svg>Inbox<span class="badge" id="badge" hidden>0</span></button>
+  <button class="tab" role="tab" data-view="log" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h13"/><circle cx="19" cy="12" r="1.2"/></svg>Log</button>
   <button class="tab" role="tab" data-view="settings" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Settings</button>
 </nav>
 
 <div class="content">
   <header class="top">
-    <h1>Mesh notes</h1>
+    <h1><svg class="mark" viewBox="0 0 32 32" aria-hidden="true"><path d="M6 24 16 8l10 16M6 24h20" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="6" cy="24" r="3.4" fill="#67EA94"/><circle cx="16" cy="8" r="3.4" fill="#67EA94"/><circle cx="26" cy="24" r="3.4" fill="#67EA94"/></svg>Mesh notes</h1>
     <button class="chip" id="chip" aria-haspopup="dialog"><span class="dot" id="dot"></span><span id="linkTitle">Not connected</span></button>
   </header>
   <div class="warn" id="envWarn" hidden></div>
@@ -231,6 +252,18 @@ dialog::backdrop{background:rgba(10,9,30,.6)}
     <p class="empty" id="inboxEmpty">Nothing yet. Anything sent to your channel lands here.</p>
   </section>
 
+  <section class="view" id="v-log" hidden>
+    <div class="viewhead"><h2>Diagnostics</h2><p>What the board reports about itself, and every packet going in or out.</p></div>
+    <div class="hwgrid" id="hw"></div>
+    <div class="logbar">
+      <select id="logFilter" aria-label="Filter the log"><option value="all">Everything</option><option value="ours">Our notes, files and acks</option><option value="tx">Sent</option><option value="rx">Received</option><option value="board">Board reports</option><option value="err">Problems only</option></select>
+      <label class="check"><input type="checkbox" id="logHex"><span>Hex dumps</span></label>
+      <button class="btn small" id="logPause">Pause</button><button class="btn small" id="logCopy">Copy</button><button class="btn small ghost" id="logClear">Clear</button>
+    </div>
+    <ul class="loglist" id="logList" data-f="all"></ul>
+    <p class="empty" id="logEmpty">Nothing logged yet. Connect a board and the conversation with it appears here, newest first.</p>
+  </section>
+
   <section class="view" id="v-settings" hidden>
     <div class="viewhead"><h2>Settings</h2></div>
     <div class="group"><h3>Connection</h3><p class="hint">Talk to your board over Bluetooth or over your local Wi-Fi.</p><div class="row" style="margin-top:12px"><button class="btn small" id="btnDlg">Connection options</button></div></div>
@@ -238,6 +271,7 @@ dialog::backdrop{background:rgba(10,9,30,.6)}
       <div class="field"><label for="selPreset">Modem preset</label><select id="selPreset"></select><small id="presetHint"></small></div>
       <div class="field"><label for="selChannel">Send on channel</label><select id="selChannel"><option value="0">Primary channel (slot 0)</option></select><small id="channelHint"></small></div>
       <div class="field"><label for="selPace">Sending pace</label><select id="selPace"><option value="0.1">Gentle</option><option value="0.25" selected>Balanced</option><option value="0.5">Fast</option></select><small id="paceHint">Time between packets. Nearby nodes repeat every packet you send, so sending the next one too soon makes them collide and get lost. If packets keep going missing, choose Gentle or lower the hop limit.</small></div>
+      <label class="check"><input type="checkbox" id="chkAck"><span><strong>Ask the mesh to confirm each packet</strong><small>The board watches for a neighbour repeating each packet and retries if it doesn't. The Log then shows a confirmation, or the reason it failed. Costs a little airtime.</small></span></label>
       <div class="field"><label for="selHops">Hop limit</label><select id="selHops"><option>1</option><option>2</option><option selected>3</option><option>4</option></select><small>How many relays may repeat your packets. Lower keeps the airwaves freer.</small></div>
     </div>
     <div class="group"><h3>Error protection</h3>
@@ -9933,16 +9967,52 @@ function buildSendPacket(o) {
 
 function utf8(bytes) { return new TextDecoder().decode(bytes); }
 
+var PORT_NAMES = { 1: 'TEXT_MESSAGE', 2: 'REMOTE_HARDWARE', 3: 'POSITION', 4: 'NODEINFO', 5: 'ROUTING', 6: 'ADMIN', 7: 'TEXT_COMPRESSED', 8: 'WAYPOINT', 9: 'AUDIO', 10: 'DETECTION_SENSOR',
+  32: 'REPLY', 33: 'IP_TUNNEL', 34: 'PAXCOUNTER', 64: 'SERIAL', 65: 'STORE_FORWARD', 66: 'RANGE_TEST', 67: 'TELEMETRY', 68: 'ZPS', 70: 'TRACEROUTE', 71: 'NEIGHBORINFO', 72: 'ATAK_PLUGIN', 73: 'MAP_REPORT', 256: 'PRIVATE_APP', 257: 'ATAK_FORWARDER' };
+var REGIONS = { 0: 'UNSET', 1: 'US', 2: 'EU_433', 3: 'EU_868', 4: 'CN', 5: 'JP', 6: 'ANZ', 7: 'KR', 8: 'TW', 9: 'RU', 10: 'IN', 11: 'NZ_865', 12: 'TH', 13: 'LORA_24', 14: 'UA_433', 15: 'UA_868', 16: 'MY_433', 17: 'MY_919', 18: 'SG_923' };
+var PRESET_ENUM = { 0: 'LONG_FAST', 1: 'LONG_SLOW', 2: 'VERY_LONG_SLOW', 3: 'MEDIUM_SLOW', 4: 'MEDIUM_FAST', 5: 'SHORT_SLOW', 6: 'SHORT_FAST', 7: 'LONG_MODERATE', 8: 'SHORT_TURBO' };
+var ROUTING_ERRORS = { 0: 'delivered', 1: 'NO_ROUTE', 2: 'GOT_NAK', 3: 'TIMEOUT', 4: 'NO_INTERFACE', 5: 'MAX_RETRANSMIT (no neighbour repeated it)', 6: 'NO_CHANNEL', 7: 'TOO_LARGE', 8: 'NO_RESPONSE', 9: 'DUTY_CYCLE_LIMIT (airtime limit hit)', 32: 'BAD_REQUEST', 33: 'NOT_AUTHORIZED', 34: 'PKI_FAILED', 38: 'RATE_LIMIT_EXCEEDED' };
+function routingError(payload) { var r = pb.get(pb.parse(payload), 3); return r === undefined ? 0 : r; }
+function f32opt(v) { return v === undefined ? null : pb.f32ToFloat(v); }
+function parseMetrics(buf) {
+  var m = pb.parse(buf);
+  return { battery: pb.get(m, 1), voltage: f32opt(pb.get(m, 2)), chUtil: f32opt(pb.get(m, 3)), airUtilTx: f32opt(pb.get(m, 4)), uptime: pb.get(m, 5) };
+}
 function parseFromRadio(buf) {
   var f = pb.parse(buf);
   for (var i = 0; i < f.length; i++) {
     var e = f[i];
+    if (e.field === 5 && e.wire === 2) {
+      var cf = pb.parse(e.value), names = { 1: 'device', 2: 'position', 3: 'power', 4: 'network', 5: 'display', 6: 'lora', 7: 'bluetooth', 8: 'security' };
+      if (!cf.length) return { kind: 'config', section: 'empty' };
+      var x = cf[0], res = { kind: 'config', section: names[x.field] || ('section ' + x.field) };
+      if (x.field === 6) {
+        var lf = pb.parse(x.value);
+        res.lora = { usePreset: !!pb.get(lf, 1), preset: pb.get(lf, 2) || 0, region: pb.get(lf, 7) || 0, hopLimit: pb.get(lf, 8) || 0, txPower: pb.get(lf, 10) || 0, channelNum: pb.get(lf, 11) || 0, overrideDuty: !!pb.get(lf, 12) };
+      }
+      if (x.field === 4) res.wifiEnabled = !!pb.get(pb.parse(x.value), 1);
+      if (x.field === 7) res.btEnabled = !!pb.get(pb.parse(x.value), 1);
+      return res;
+    }
+    if (e.field === 6 && e.wire === 2) { var lg = pb.parse(e.value), lm = pb.get(lg, 1); return { kind: 'log', message: lm ? utf8(lm) : '' }; }
+    if (e.field === 8) return { kind: 'rebooted' };
+    if (e.field === 9 && e.wire === 2) return { kind: 'moduleConfig' };
+    if (e.field === 11 && e.wire === 2) {
+      var q = pb.parse(e.value);
+      return { kind: 'queue', res: pb.get(q, 1) || 0, free: pb.get(q, 2) || 0, maxlen: pb.get(q, 3) || 0, packetId: pb.get(q, 4) >>> 0 };
+    }
+    if (e.field === 13 && e.wire === 2) {
+      var md = pb.parse(e.value), fw = pb.get(md, 1);
+      return { kind: 'metadata', firmware: fw ? utf8(fw) : '', hasWifi: !!pb.get(md, 4), hasBluetooth: !!pb.get(md, 5), hasEthernet: !!pb.get(md, 6), role: pb.get(md, 7) || 0, hwModel: pb.get(md, 9) || 0 };
+    }
+    if (e.field === 16 && e.wire === 2) { var cn = pb.parse(e.value), msg = pb.get(cn, 4); return { kind: 'notification', level: pb.get(cn, 3) || 0, message: msg ? utf8(msg) : '' }; }
     if (e.field === 2 && e.wire === 2) return parseMeshPacket(e.value);
     if (e.field === 3 && e.wire === 2) return { kind: 'myInfo', num: pb.get(pb.parse(e.value), 1) >>> 0 };
     if (e.field === 4 && e.wire === 2) {
       var ni = pb.parse(e.value), u = pb.get(ni, 2), user = u ? pb.parse(u) : [];
       var ln = pb.get(user, 2), sn = pb.get(user, 3);
-      return { kind: 'nodeInfo', num: pb.get(ni, 1) >>> 0, longName: ln ? utf8(ln) : '', shortName: sn ? utf8(sn) : '' };
+      var dm = pb.get(ni, 6);
+      return { kind: 'nodeInfo', num: pb.get(ni, 1) >>> 0, longName: ln ? utf8(ln) : '', shortName: sn ? utf8(sn) : '', snr: f32opt(pb.get(ni, 4)), lastHeard: pb.get(ni, 5) || 0, hops: pb.get(ni, 9), metrics: dm ? parseMetrics(dm) : null };
     }
     if (e.field === 7 && e.wire === 0) return { kind: 'configComplete', id: e.value };
     if (e.field === 10 && e.wire === 2) {
@@ -9964,10 +10034,19 @@ function parseMeshPacket(buf) {
   out.snr = snr === undefined ? null : pb.f32ToFloat(snr);
   var rssi = pb.get(f, 12);
   out.rssi = rssi === undefined || rssi === 0 ? null : rssi;
+  out.rxTime = pb.get(f, 7) || 0;
+  out.hopLimit = pb.get(f, 9) || 0;
+  out.hopStart = pb.get(f, 15) || 0;
+  out.priority = pb.get(f, 11) || 0;
+  out.wantAck = !!pb.get(f, 10);
+  out.viaMqtt = !!pb.get(f, 14);
+  out.relay = pb.get(f, 19);
+  var enc = pb.get(f, 5); out.encLen = enc ? enc.length : 0;
   if (d) {
     var df = pb.parse(d);
     out.port = pb.get(df, 1) || 0;
     out.payload = pb.get(df, 2) || new Uint8Array(0);
+    out.requestId = pb.get(df, 6) || 0;
   } else {
     out.port = null; // encrypted with a key we don't hold, or not decoded
   }
@@ -10303,7 +10382,7 @@ function decodeImage(stream, present, totalChunks) {
 }
 
 if (typeof module !== 'undefined') {
-  module.exports = { MESH: MESH, VOICE: VOICE, pb: pb, buildWantConfig: buildWantConfig, buildSendPacket: buildSendPacket,
+  module.exports = { PORT_NAMES: PORT_NAMES, REGIONS: REGIONS, PRESET_ENUM: PRESET_ENUM, ROUTING_ERRORS: ROUTING_ERRORS, routingError: routingError, parseMetrics: parseMetrics, MESH: MESH, VOICE: VOICE, pb: pb, buildWantConfig: buildWantConfig, buildSendPacket: buildSendPacket,
     parseFromRadio: parseFromRadio, makeCodec: makeCodec, packFrames: packFrames, unpackFrame: unpackFrame,
     encodeVoice: encodeVoice, decodeVoice: decodeVoice, makeChunks: makeChunks, parseChunk: parseChunk,
     VoiceAssembly: VoiceAssembly, PRESETS: PRESETS, airtimeMs: airtimeMs, FILE: FILE, makeFileSender: makeFileSender, parseFilePacket: parseFilePacket, fileNackPacket: fileNackPacket, parseFileNack: parseFileNack, FileReceiver: FileReceiver, FEC: FEC, makeSession: makeSession, fecSolve: fecSolve, padChunk: padChunk, dataLen: dataLen, nackPacket: nackPacket, packImage: packImage, decodeImage: decodeImage, PALETTE: PALETTE, chunkSizes: chunkSizes, ampsFromPcm: ampsFromPcm };
@@ -10320,7 +10399,7 @@ if (typeof module !== 'undefined') {
     nodes: new Map(), channels: [], channelIndex: 0,
     maxSec: 8, hops: 3, autoplay: true, textNotice: true,
     clip: null, recording: false, sending: false,
-    inbox: new Map(), sessions: new Map(), preset: 'LONG_FAST', xfer: null, view: 'voice', unread: 0, mode: 'ble', http: null, poll: null, fec: 1, extra: 0.25, repair: true
+    inbox: new Map(), sessions: new Map(), preset: 'LONG_FAST', wantAck: false, pending: new Map(), hw: { queue: null, meta: null, lora: null, net: {}, pollMs: null }, stats: { tx: 0, rx: 0, txB: 0, rxB: 0, acks: 0, fails: 0 }, xfer: null, view: 'voice', unread: 0, mode: 'ble', http: null, poll: null, fec: 1, extra: 0.25, repair: true
   };
   var CHUNK_SECONDS = VOICE.CHUNK * 8 / VOICE.FRAME_BITS * VOICE.FRAME_SECONDS; // ~2.29 s per packet
   var SIM_NODE = 0x00c0ffee;
@@ -10571,7 +10650,10 @@ if (typeof module !== 'undefined') {
   }
   async function readOne() {
     if (S.mode === 'http') {
+      var t0 = performance.now();
       var r = await fetch(S.http.base + '/api/v1/fromradio?all=false');
+      S.hw.pollMs = Math.round(performance.now() - t0);
+      if (S.hw.pollMs > 1500) logEvt('err', 'The board took ' + S.hw.pollMs + ' ms to answer a Wi-Fi poll. That is slow.', null, 'bad');
       if (!r.ok) throw new Error('The board answered ' + r.status);
       S.http.fails = 0;
       return new Uint8Array(await r.arrayBuffer());
@@ -10592,13 +10674,14 @@ if (typeof module !== 'undefined') {
           try { handleFromRadio(parseFromRadio(bytes)); } catch (e) { console.warn('skipped a malformed message', e); }
         }
       } while (drainAgain);
-    } catch (e) { if (S.connected) { console.warn('read failed', e); if (S.mode === 'http' && S.http && ++S.http.fails >= 4) lostHttp(); } }
+    } catch (e) { if (S.connected) { console.warn('read failed', e); logEvt('err', 'Reading from the board failed: ' + (e.message || e.name), null, 'bad'); if (S.mode === 'http' && S.http && ++S.http.fails >= 4) lostHttp(); } }
     finally { draining = false; }
   }
 
   function handleFromRadio(m) {
+    try { logFrom(m); } catch (e) { console.warn('log failed', e); }
     if (m.kind === 'myInfo') S.myNum = m.num;
-    else if (m.kind === 'nodeInfo') S.nodes.set(m.num, { longName: m.longName, shortName: m.shortName });
+    else if (m.kind === 'nodeInfo') S.nodes.set(m.num, { longName: m.longName, shortName: m.shortName, snr: m.snr, hops: m.hops, metrics: m.metrics, lastHeard: m.lastHeard });
     else if (m.kind === 'channel') {
       S.channels = S.channels.filter(function (c) { return c.index !== m.index; });
       if (m.role > 0) S.channels.push(m);
@@ -10613,6 +10696,7 @@ if (typeof module !== 'undefined') {
     $('dot').className = 'dot ' + state;
     $('linkTitle').textContent = title;
     $('linkSub').textContent = sub;
+    logEvt(state === 'bad' ? 'err' : 'sys', title + '. ' + sub, null, state === 'bad' ? 'bad' : '');
     $('connectOptions').hidden = S.connected; $('connectedRow').hidden = !S.connected;
   }
   function setReady(on) {
@@ -10712,7 +10796,22 @@ if (typeof module !== 'undefined') {
   /* ---------- Sending ---------- */
   function randomId() { var a = new Uint32Array(1); crypto.getRandomValues(a); return (a[0] || 1) >>> 0; }
   function sendPacket(port, payload) {
-    return writeToRadio(buildSendPacket({ to: MESH.BROADCAST, channel: S.channelIndex, port: port, payload: payload, id: randomId(), hopLimit: S.hops }));
+    var id = randomId(), t0 = performance.now();
+    var bytes = buildSendPacket({ to: MESH.BROADCAST, channel: S.channelIndex, port: port, payload: payload, id: id, hopLimit: S.hops, wantAck: S.wantAck });
+    var base = 'TX #' + hex8(id) + ' to everyone on channel ' + S.channelIndex + ', ' + (PORT_NAMES[port] || 'port ' + port) + ' ' + payload.length + ' B, hop limit ' + S.hops + (S.wantAck ? ', ack requested' : '') + describeApp(port, payload);
+    var li = logEvt('tx', base, bytes, 'ours');
+    S.pending.set(id, { t: Date.now(), li: li, base: base });
+    if (S.pending.size > 60) S.pending.delete(S.pending.keys().next().value);
+    return writeToRadio(bytes).then(function () {
+      var ms = Math.round(performance.now() - t0);
+      S.stats.tx++; S.stats.txB += payload.length;
+      if (li) li.querySelector('.lm').textContent = base + '. Board accepted it in ' + ms + ' ms.';
+      renderHwSoon();
+    }, function (e) {
+      S.stats.fails++;
+      logEvt('err', 'TX #' + hex8(id) + ' failed: ' + (e.message || e.name), null, 'bad');
+      throw e;
+    });
   }
   async function sendClip() {
     if (!S.clip || !S.ready || S.sending) return;
@@ -11010,6 +11109,7 @@ if (typeof module !== 'undefined') {
     Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (t) { t.setAttribute('aria-selected', t.dataset.view === name ? 'true' : 'false'); });
     if (name === 'inbox') { S.unread = 0; updateBadge(); }
     if (name === 'files') showFileInfo();
+    if (name === 'log') renderHw();
     window.scrollTo(0, 0);
   }
   function updateTiming() {
@@ -11220,6 +11320,126 @@ if (typeof module !== 'undefined') {
     }
   }
 
+
+  /* ---------- Diagnostics: log + hardware panel ---------- */
+  var LOGMAX = 500, logPaused = false, logItems = [], LK = { tx: 'TX', rx: 'RX', board: 'BOARD', sys: 'APP', err: 'ERROR' };
+  function hex2(n) { return ('0' + (n & 255).toString(16)).slice(-2); }
+  function hexOf(b, max) { var n = Math.min(b.length, max || 128), s = []; for (var i = 0; i < n; i++) s.push(hex2(b[i])); return s.join(' ') + (b.length > n ? ' … +' + (b.length - n) + ' more bytes' : ''); }
+  function stamp() { var d = new Date(); return d.toTimeString().slice(0, 8) + '.' + ('00' + d.getMilliseconds()).slice(-3); }
+  function logEvt(kind, msg, bytes, cls) {
+    var e = { t: stamp(), kind: kind, msg: msg, hex: bytes ? hexOf(bytes) : '' };
+    logItems.push(e); if (logItems.length > LOGMAX) logItems.shift();
+    if (logPaused) return null;
+    var li = document.createElement('li');
+    li.className = 'lg ' + kind + (cls ? ' ' + cls : '');
+    li.innerHTML = '<span class="lt">' + e.t + '</span><span class="lk">' + LK[kind] + '</span><span class="lm"></span>' + (e.hex ? '<pre class="lx"></pre>' : '');
+    li.querySelector('.lm').textContent = msg;
+    if (e.hex) li.querySelector('.lx').textContent = e.hex;
+    var ul = $('logList'); ul.insertBefore(li, ul.firstChild);
+    while (ul.children.length > LOGMAX) ul.removeChild(ul.lastChild);
+    $('logEmpty').hidden = true;
+    return li;
+  }
+  function toName(to) { return to === MESH.BROADCAST ? 'everyone' : nodeName(to); }
+  function describeApp(port, p) {
+    if (port === MESH.PORT_TEXT) return ', text “' + utf8(p).slice(0, 40) + '”';
+    if (port === 5) { var er = routingError(p); return ', ' + (ROUTING_ERRORS[er] || 'routing code ' + er); }
+    if (port !== MESH.PORT_PRIVATE || !p.length) return '';
+    var m = p[0], id = ' msg ' + hex2(p[1]);
+    if (m === VOICE.MAGIC || m === VOICE.MAGIC_IMG) return ', ' + (m === VOICE.MAGIC ? 'voice' : 'postcard') + id + ' packet ' + (p[2] + 1) + ' of ' + p[3] + ' (no protection)';
+    if (m === FEC.MAGIC_VOICE || m === FEC.MAGIC_IMG) {
+      var k = p[3], idx = p[4];
+      return ', ' + (m === FEC.MAGIC_VOICE ? 'voice' : 'postcard') + id + (idx < k ? ' data packet ' + (idx + 1) + ' of ' + k : ' spare ' + (idx - k + 1) + ' for ' + k + ' packets') + (p[2] === FEC.RS ? ', Reed-Solomon' : ', fountain');
+    }
+    if (m === FEC.MAGIC_NACK) return ', repair request for msg ' + hex2(p[1]) + ', needs ' + p[2] + ' more';
+    if (m === FILE.MAGIC) return ', file transfer ' + hex2(p[1]) + ' block ' + p[6] + (p[7] >= 0 ? ' symbol ' + p[7] : '') + ((p[2] & 1) ? ', compressed' : '');
+    if (m === FILE.NACK) return ', file repair request for transfer ' + hex2(p[1]);
+    return ', unrecognised app data';
+  }
+  function logFrom(m) {
+    var H = S.hw;
+    if (m.kind === 'packet') {
+      var own = m.from === S.myNum, pn = m.port === null ? 'ENCRYPTED, ' + m.encLen + ' B, key not held here' : (PORT_NAMES[m.port] || 'port ' + m.port) + ' ' + m.payload.length + ' B';
+      var hops = m.hopStart ? (m.hopStart - m.hopLimit) + ' of ' + m.hopStart + ' hops used' : 'hop limit ' + m.hopLimit;
+      var sig = (m.snr !== null && m.snr !== undefined ? ', SNR ' + m.snr.toFixed(1) + ' dB' : '') + (m.rssi ? ', RSSI ' + m.rssi + ' dBm' : '');
+      var txt = (own ? 'RX (echo of this board) ' : 'RX ') + '#' + hex8(m.id) + ' from ' + nodeName(m.from) + ' to ' + toName(m.to) + ', ' + pn + (m.port !== null ? describeApp(m.port, m.payload) : '') + ', ' + hops + sig + (m.relay !== undefined ? ', last relay …' + hex2(m.relay) : '') + (m.viaMqtt ? ', via MQTT' : '');
+      var cls = (m.port === MESH.PORT_PRIVATE || m.port === MESH.PORT_TEXT || m.port === 5) ? 'ours' : '', bad = false;
+      if (m.port === 5 && m.requestId) {
+        var er = routingError(m.payload), pend = S.pending.get(m.requestId), lat = pend ? ' after ' + (Date.now() - pend.t) + ' ms' : '';
+        txt = (er === 0 ? 'ACK: the mesh confirmed TX #' + hex8(m.requestId) + lat + ' (from ' + nodeName(m.from) + ')' : 'FAILED: TX #' + hex8(m.requestId) + ' ' + (ROUTING_ERRORS[er] || 'routing error ' + er));
+        if (er === 0) S.stats.acks++; else { bad = true; S.stats.fails++; }
+        if (pend && pend.li) pend.li.querySelector('.lm').textContent = pend.base + (er === 0 ? '. Confirmed' + lat + '.' : '. FAILED: ' + (ROUTING_ERRORS[er] || er) + '.');
+      }
+      if (!own) { S.stats.rx++; S.stats.rxB += m.payload ? m.payload.length : 0; }
+      logEvt('rx', txt, m.payload, cls + (bad ? ' bad' : ''));
+      renderHwSoon(); return;
+    }
+    if (m.kind === 'queue') {
+      H.queue = { free: m.free, max: m.maxlen, t: Date.now() };
+      var pd = S.pending.get(m.packetId), ago = pd ? ' (sent ' + (Date.now() - pd.t) + ' ms ago)' : '';
+      var full = m.maxlen && m.free <= 2;
+      logEvt('board', 'Transmit queue: ' + (m.res ? 'REFUSED packet #' + hex8(m.packetId) + ' (code ' + m.res + ')' : 'accepted #' + hex8(m.packetId)) + ago + '. ' + m.free + ' of ' + m.maxlen + ' slots free.' + (full ? ' Almost full: sending too fast.' : ''), null, (m.res || full) ? 'bad' : '');
+      renderHwSoon(); return;
+    }
+    if (m.kind === 'config') {
+      if (m.lora) {
+        H.lora = m.lora;
+        var key = PRESET_ENUM[m.lora.preset];
+        logEvt('board', 'LoRa config: region ' + (REGIONS[m.lora.region] || m.lora.region) + ', preset ' + (m.lora.usePreset ? (key || m.lora.preset) : 'custom') + ', hop limit ' + (m.lora.hopLimit || 'default (3)') + ', TX power ' + (m.lora.txPower ? m.lora.txPower + ' dBm' : 'default') + (m.lora.channelNum ? ', slot ' + m.lora.channelNum : '') + (m.lora.overrideDuty ? ', duty cycle limit OVERRIDDEN' : ''));
+        if (m.lora.usePreset && key && PRESETS[key] && S.preset !== key) { S.preset = key; $('selPreset').value = key; updateTiming(); logEvt('sys', 'Airtime model switched to ' + PRESETS[key].name + ' to match the board.'); }
+      } else if (m.section === 'network') { H.net.wifi = m.wifiEnabled; logEvt('board', 'Network config: Wi-Fi ' + (m.wifiEnabled ? 'enabled' : 'disabled')); }
+      else if (m.section === 'bluetooth') { H.net.bt = m.btEnabled; logEvt('board', 'Bluetooth config: ' + (m.btEnabled ? 'enabled' : 'disabled')); }
+      else logEvt('board', 'Config received: ' + m.section);
+      renderHwSoon(); return;
+    }
+    if (m.kind === 'metadata') { H.meta = m; logEvt('board', 'Firmware ' + (m.firmware || 'unknown') + ', hardware model ' + m.hwModel + ', Wi-Fi ' + (m.hasWifi ? 'yes' : 'no') + ', Bluetooth ' + (m.hasBluetooth ? 'yes' : 'no')); renderHwSoon(); return; }
+    if (m.kind === 'notification') { logEvt('board', 'Board says: ' + m.message, null, m.level >= 40 ? 'bad' : ''); return; }
+    if (m.kind === 'log') { logEvt('board', 'Board log: ' + m.message); return; }
+    if (m.kind === 'rebooted') { logEvt('err', 'The board rebooted.', null, 'bad'); return; }
+    if (m.kind === 'nodeInfo') {
+      var mt = m.metrics ? ', channel busy ' + (m.metrics.chUtil !== null ? m.metrics.chUtil.toFixed(1) + '%' : '?') + ', its TX airtime ' + (m.metrics.airUtilTx !== null ? m.metrics.airUtilTx.toFixed(1) + '%' : '?') : '';
+      logEvt('board', 'Node ' + (m.longName || '!' + hex8(m.num)) + ' (!' + hex8(m.num) + ')' + (m.hops !== undefined ? ', ' + m.hops + ' hops away' : '') + (m.snr !== null ? ', SNR ' + m.snr.toFixed(1) + ' dB' : '') + mt);
+      renderHwSoon(); return;
+    }
+    if (m.kind === 'myInfo') { logEvt('board', 'This board is node !' + hex8(m.num)); renderHwSoon(); return; }
+    if (m.kind === 'channel') { logEvt('board', 'Channel ' + m.index + ': ' + (m.name || '(unnamed)') + ', role ' + ['disabled', 'primary', 'secondary'][m.role] + ', ' + (m.pskLen <= 1 ? 'default shared key' : m.pskLen * 8 + '-bit key')); return; }
+    if (m.kind === 'configComplete') { logEvt('board', 'The board finished sending its settings. Ready.'); return; }
+    if (m.kind === 'moduleConfig') { logEvt('board', 'Module config received'); }
+  }
+  var hwTimer = null;
+  function renderHwSoon() { if (S.view !== 'log' || hwTimer) return; hwTimer = setTimeout(function () { hwTimer = null; renderHw(); }, 400); }
+  function kv(rows) { return '<dl>' + rows.filter(function (r) { return r[1] !== undefined && r[1] !== null && r[1] !== ''; }).map(function (r) { return '<div><dt>' + esc(r[0]) + '</dt><dd' + (r[2] ? ' class="' + r[2] + '"' : '') + '>' + esc(String(r[1])) + '</dd></div>'; }).join('') + '</dl>'; }
+  function ago(sec) { if (!sec) return ''; var d = Math.max(0, Math.round(Date.now() / 1000 - sec)); return d < 90 ? d + ' s ago' : d < 5400 ? Math.round(d / 60) + ' min ago' : Math.round(d / 3600) + ' h ago'; }
+  function renderHw() {
+    var H = S.hw, me = S.nodes.get(S.myNum) || {}, mm = me.metrics || {}, L = H.lora, q = H.queue;
+    var link = S.mode === 'http' ? 'Wi-Fi, ' + (S.http && S.http.base) : (S.dev ? 'Bluetooth, ' + (S.dev.name || 'board') : 'not connected');
+    var duty = L && [2, 3, 14, 15].indexOf(L.region) >= 0 ? 'about 10% airtime per hour' : '';
+    var boxes = [
+      ['Link', kv([['Connection', S.connected ? link : 'not connected'], ['Ready', S.ready ? 'yes' : 'no'], ['Wi-Fi poll time', S.mode === 'http' && H.pollMs !== null ? H.pollMs + ' ms' : '', H.pollMs > 1500 ? 'badv' : (H.pollMs > 600 ? 'warnv' : '')], ['Sending on channel', S.channelIndex]])],
+      ['Board', kv([['Node', S.myNum ? '!' + hex8(S.myNum) : ''], ['Name', me.longName || me.shortName], ['Firmware', H.meta && H.meta.firmware], ['Hardware model', H.meta ? '#' + H.meta.hwModel : ''], ['Has Wi-Fi', H.meta ? (H.meta.hasWifi ? 'yes' : 'no') : ''], ['Wi-Fi setting', H.net.wifi === undefined ? '' : (H.net.wifi ? 'on' : 'off')], ['Bluetooth setting', H.net.bt === undefined ? '' : (H.net.bt ? 'on' : 'off')]])],
+      ['Radio', kv([['Region', L && (REGIONS[L.region] || L.region)], ['Modem preset', L && (L.usePreset ? (PRESET_ENUM[L.preset] || L.preset) : 'custom')], ['Hop limit on board', L && (L.hopLimit || 'default (3)')], ['TX power', L && (L.txPower ? L.txPower + ' dBm' : 'default')], ['Regional limit', duty], ['Airtime model here', PRESETS[S.preset].name + ', ' + (airtimeMs(S.preset, 208) / 1000).toFixed(2) + ' s per full packet']])],
+      ['Airwaves', kv([['Channel busy', mm.chUtil != null ? mm.chUtil.toFixed(1) + '%' : '', mm.chUtil > 25 ? 'warnv' : ''], ['Our TX airtime', mm.airUtilTx != null ? mm.airUtilTx.toFixed(1) + '%' : ''], ['TX queue free', q ? q.free + ' of ' + q.max : '', q && q.free <= 2 ? 'badv' : ''], ['Battery', mm.battery != null ? mm.battery + '%' : ''], ['Uptime', mm.uptime ? Math.round(mm.uptime / 60) + ' min' : '']])],
+      ['This session', kv([['Packets sent', S.stats.tx + ' (' + S.stats.txB + ' B)'], ['Packets received', S.stats.rx + ' (' + S.stats.rxB + ' B)'], ['Mesh confirmations', S.stats.acks], ['Failures', S.stats.fails, S.stats.fails ? 'badv' : '']])]
+    ];
+    var nodes = []; S.nodes.forEach(function (n, num) { if (num !== S.myNum) nodes.push([num, n]); });
+    nodes.sort(function (x, y) { return (y[1].lastHeard || 0) - (x[1].lastHeard || 0); });
+    boxes.push(['Nodes heard (' + nodes.length + ')', kv(nodes.slice(0, 8).map(function (x) { var n = x[1]; return [n.longName || n.shortName || '!' + hex8(x[0]), (n.hops !== undefined ? n.hops + ' hops' : '') + (n.snr !== null && n.snr !== undefined ? ', SNR ' + n.snr.toFixed(1) : '') + (n.lastHeard ? ', ' + ago(n.lastHeard) : '')]; }))]);
+    $('hw').innerHTML = boxes.map(function (b) { return '<div class="hwbox"><h3>' + esc(b[0]) + '</h3>' + b[1] + '</div>'; }).join('');
+  }
+  function initLog() {
+    $('logFilter').addEventListener('change', function (e) { $('logList').setAttribute('data-f', e.target.value); });
+    $('logHex').addEventListener('change', function (e) { $('logList').classList.toggle('hex-on', e.target.checked); });
+    $('logPause').addEventListener('click', function () { logPaused = !logPaused; $('logPause').textContent = logPaused ? 'Resume' : 'Pause'; });
+    $('logClear').addEventListener('click', function () { logItems = []; $('logList').innerHTML = ''; $('logEmpty').hidden = false; });
+    $('logCopy').addEventListener('click', function () {
+      var txt = logItems.map(function (e) { return e.t + ' ' + (LK[e.kind] + '     ').slice(0, 6) + e.msg + (e.hex ? '\n              ' + e.hex : ''); }).join('\n');
+      var done = function (ok) { $('logCopy').textContent = ok ? 'Copied' : 'Could not copy'; setTimeout(function () { $('logCopy').textContent = 'Copy'; }, 1500); };
+      if (navigator.clipboard) navigator.clipboard.writeText(txt).then(function () { done(true); }, function () { done(false); }); else done(false);
+    });
+    $('chkAck').addEventListener('change', function (e) { S.wantAck = e.target.checked; logEvt('sys', 'Delivery confirmations ' + (S.wantAck ? 'requested' : 'not requested') + ' from now on.'); });
+    renderHw();
+  }
+
   /* ---------- Environment checks ---------- */
   function envChecks() {
     var framed = false; try { framed = window.top !== window.self; } catch (e) { framed = true; }
@@ -11263,6 +11483,7 @@ if (typeof module !== 'undefined') {
     $('chkAuto').addEventListener('change', function (e) { S.autoplay = e.target.checked; });
     $('chkText').addEventListener('change', function (e) { S.textNotice = e.target.checked; });
     initShell();
+    initLog();
     initPad();
     Array.prototype.forEach.call(document.querySelectorAll('input[name=fec]'), function (r) {
       r.addEventListener('change', function () { S.fec = parseInt(r.value, 10); updateFecUi(); updateClipMeta(); if (S.view === 'files') showFileInfo(); });
