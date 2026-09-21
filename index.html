@@ -194,6 +194,19 @@ dialog.sheet{max-width:660px;width:100%;margin:auto auto 0;border-radius:26px 26
 @media (min-width:860px){dialog.sheet{margin:auto;border-radius:26px}}
 .shhead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:14px}
 .shhead h2{font-size:1.4rem}
+.pkd summary{cursor:pointer;font-size:.86rem;color:var(--muted);margin-top:8px}
+.pklist{list-style:none;margin:6px 0 0;padding:0;font-size:.82rem}
+.pklist li{display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-top:1px solid var(--rule)}
+.pklist .miss span:last-child{color:#d9364a} .pklist .fix span:last-child{color:#13804A}
+.trtool{margin:0 0 22px}
+.trlist{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:10px}
+.trcard,.bubble.sys{padding:12px 14px;border-radius:16px;border:1.5px dashed var(--muted);background:var(--card)}
+.bubble.sys{align-self:center;max-width:96%;border-radius:16px}
+.trcard p,.bubble.sys p{margin:6px 0 0}
+.trpath{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;margin-top:4px}
+.trn{padding:3px 10px;border-radius:999px;border:1.5px solid var(--rule);font-weight:600;font-size:.88rem}
+.trn.end{background:var(--panel);color:var(--panel-text);border-color:transparent}
+.trl{color:var(--muted);font-size:.8rem;white-space:nowrap}
 @media (prefers-reduced-motion:reduce){.rec.on{animation:none}.recicon,.fill{transition:none}}
 </style>
 </head>
@@ -218,7 +231,7 @@ dialog.sheet{max-width:660px;width:100%;margin:auto auto 0;border-radius:26px 26
       <ul class="threadlist" id="threadList"></ul>
     </div>
     <div id="threadView" hidden>
-      <div class="thhead"><button class="btn small" id="thBack" aria-label="Back to chats">Back</button><div><h2 id="thTitle" style="font-size:1.25rem;margin:0"></h2><small id="thSub"></small></div></div>
+      <div class="thhead"><button class="btn small" id="thBack" aria-label="Back to chats">Back</button><div style="flex:1;min-width:0"><h2 id="thTitle" style="font-size:1.25rem;margin:0"></h2><small id="thSub"></small></div><button class="btn small" id="thTrace" hidden>Trace route</button></div>
       <div id="thBody"></div>
       <div class="composer">
         <div class="attachbar"><button class="btn small" id="atVoice">Voice</button><button class="btn small" id="atPic">Picture</button><button class="btn small" id="atFile">File</button></div>
@@ -231,6 +244,11 @@ dialog.sheet{max-width:660px;width:100%;margin:auto auto 0;border-radius:26px 26
   <section class="view" id="v-log" hidden>
     <div class="viewhead"><h2>Diagnostics</h2><p>What the board reports about itself, and every packet going in or out.</p></div>
     <div class="hwgrid" id="hw"></div>
+    <div class="trtool"><h3>Trace route</h3>
+      <p class="hint">Sends one request to a node. Each repeater it passes adds itself to the answer, so you see the real path and the signal at every step. Only the target itself can produce the answer.</p>
+      <div class="row" style="margin-top:10px"><select id="trNode" aria-label="Node to trace" style="width:auto;max-width:100%"></select><button class="btn small primary" id="trGo">Trace route</button></div>
+      <p class="status" id="trMsg"></p><ul class="trlist" id="trList"></ul>
+    </div>
     <div class="logbar">
       <select id="logFilter" aria-label="Filter the log"><option value="all">Everything</option><option value="ours">Our notes, files and acks</option><option value="tx">Sent</option><option value="rx">Received</option><option value="board">Board reports</option><option value="err">Problems only</option></select>
       <label class="check"><input type="checkbox" id="logHex"><span>Hex dumps</span></label>
@@ -266,7 +284,6 @@ dialog.sheet{max-width:660px;width:100%;margin:auto auto 0;border-radius:26px 26
     <div class="group"><h3>Notes</h3>
       <div class="field"><label for="selMax">Longest voice note</label><select id="selMax"><option value="5">5 seconds</option><option value="8" selected>8 seconds</option><option value="12">12 seconds</option><option value="20">20 seconds</option><option value="30">30 seconds</option></select><small>Each 2.3 seconds costs one packet, plus spares. A 30 second note is about 14 packets.</small></div>
       <label class="check"><input type="checkbox" id="chkAuto" checked><span>Play incoming voice notes automatically</span></label>
-      <label class="check"><input type="checkbox" id="chkText" checked><span>Send a short text first, so the board's screen shows a message</span></label>
       <p class="hint">Everything travels on Meshtastic's private app port (256), so the regular Meshtastic app ignores it.</p>
     </div>
     <div class="group"><h3>This browser</h3><ul id="checks"></ul></div>
@@ -9991,6 +10008,7 @@ function buildWantConfig(id) {
 function buildSendPacket(o) {
   // ToRadio { packet: MeshPacket { to, channel, decoded: Data{portnum,payload}, id, hop_limit, want_ack } }
   var data = pb.vf(1, o.port).concat(pb.bytes(2, o.payload));
+  if (o.wantResponse) data = data.concat(pb.vf(3, 1));
   var pkt = pb.f32(2, o.to === undefined ? MESH.BROADCAST : o.to);
   if (o.channel) pkt = pkt.concat(pb.vf(3, o.channel));
   pkt = pkt.concat(pb.bytes(4, data), pb.f32(6, o.id));
@@ -9999,6 +10017,26 @@ function buildSendPacket(o) {
   return Uint8Array.from(pb.bytes(1, pkt));
 }
 
+/* Traceroute reply: route = repeaters on the way there, snr in quarter-dB steps (-128 = unknown). */
+function parseRouteDiscovery(p) {
+  var f = pb.parse(p), out = { route: [], snrTowards: [], routeBack: [], snrBack: [] };
+  function fixeds(field, arr) {
+    f.forEach(function (e) {
+      if (e.field !== field) return;
+      if (e.wire === 5) arr.push(e.value >>> 0);
+      else if (e.wire === 2) for (var i = 0; i + 3 < e.value.length; i += 4) arr.push((e.value[i] | (e.value[i + 1] << 8) | (e.value[i + 2] << 16) | (e.value[i + 3] << 24)) >>> 0);
+    });
+  }
+  function varints(field, arr) {
+    f.forEach(function (e) {
+      if (e.field !== field) return;
+      if (e.wire === 0) arr.push(e.value);
+      else if (e.wire === 2) { var i = 0; while (i < e.value.length) { var r = pb.readVarint(e.value, i); arr.push(r[0]); i = r[1]; } }
+    });
+  }
+  fixeds(1, out.route); varints(2, out.snrTowards); fixeds(3, out.routeBack); varints(4, out.snrBack);
+  return out;
+}
 function utf8(bytes) { return new TextDecoder().decode(bytes); }
 
 var PORT_NAMES = { 1: 'TEXT_MESSAGE', 2: 'REMOTE_HARDWARE', 3: 'POSITION', 4: 'NODEINFO', 5: 'ROUTING', 6: 'ADMIN', 7: 'TEXT_COMPRESSED', 8: 'WAYPOINT', 9: 'AUDIO', 10: 'DETECTION_SENSOR',
@@ -10416,7 +10454,7 @@ function decodeImage(stream, present, totalChunks) {
 }
 
 if (typeof module !== 'undefined') {
-  module.exports = { PORT_NAMES: PORT_NAMES, REGIONS: REGIONS, PRESET_ENUM: PRESET_ENUM, ROUTING_ERRORS: ROUTING_ERRORS, routingError: routingError, parseMetrics: parseMetrics, MESH: MESH, VOICE: VOICE, pb: pb, buildWantConfig: buildWantConfig, buildSendPacket: buildSendPacket,
+  module.exports = { parseRouteDiscovery: parseRouteDiscovery, PORT_NAMES: PORT_NAMES, REGIONS: REGIONS, PRESET_ENUM: PRESET_ENUM, ROUTING_ERRORS: ROUTING_ERRORS, routingError: routingError, parseMetrics: parseMetrics, MESH: MESH, VOICE: VOICE, pb: pb, buildWantConfig: buildWantConfig, buildSendPacket: buildSendPacket,
     parseFromRadio: parseFromRadio, makeCodec: makeCodec, packFrames: packFrames, unpackFrame: unpackFrame,
     encodeVoice: encodeVoice, decodeVoice: decodeVoice, makeChunks: makeChunks, parseChunk: parseChunk,
     VoiceAssembly: VoiceAssembly, PRESETS: PRESETS, airtimeMs: airtimeMs, FILE: FILE, makeFileSender: makeFileSender, parseFilePacket: parseFilePacket, fileNackPacket: fileNackPacket, parseFileNack: parseFileNack, FileReceiver: FileReceiver, FEC: FEC, makeSession: makeSession, fecSolve: fecSolve, padChunk: padChunk, dataLen: dataLen, nackPacket: nackPacket, packImage: packImage, decodeImage: decodeImage, PALETTE: PALETTE, chunkSizes: chunkSizes, ampsFromPcm: ampsFromPcm };
@@ -10431,9 +10469,9 @@ if (typeof module !== 'undefined') {
     dev: null, toRadio: null, fromRadio: null, fromNum: null,
     connected: false, ready: false, myNum: null,
     nodes: new Map(), channels: [], channelIndex: 0,
-    maxSec: 8, hops: 3, autoplay: true, textNotice: true,
+    maxSec: 8, hops: 3, autoplay: true, 
     clip: null, recording: false, sending: false,
-    inbox: new Map(), sessions: new Map(), preset: 'LONG_FAST', wantAck: false, pending: new Map(), hw: { queue: null, meta: null, lora: null, net: {}, pollMs: null, poll: { n: 0, sum: 0, max: 0, last: 0 }, putMs: null }, stats: { tx: 0, rx: 0, txB: 0, rxB: 0, acks: 0, fails: 0 }, xfer: null, view: 'chat', threads: new Map(), thread: null, target: null, sheet: null, liveBub: null, mode: 'ble', http: null, poll: null, fec: 1, extra: 0.25, repair: true
+    inbox: new Map(), sessions: new Map(), preset: 'LONG_FAST', wantAck: false, pending: new Map(), hw: { queue: null, meta: null, lora: null, net: {}, pollMs: null, poll: { n: 0, sum: 0, max: 0, last: 0 }, putMs: null }, stats: { tx: 0, rx: 0, txB: 0, rxB: 0, acks: 0, fails: 0 }, xfer: null, traces: new Map(), view: 'chat', threads: new Map(), thread: null, target: null, sheet: null, liveBub: null, mode: 'ble', http: null, poll: null, fec: 1, extra: 0.25, repair: true
   };
   var CHUNK_SECONDS = VOICE.CHUNK * 8 / VOICE.FRAME_BITS * VOICE.FRAME_SECONDS; // ~2.29 s per packet
   var SIM_NODE = 0x00c0ffee;
@@ -10676,10 +10714,23 @@ if (typeof module !== 'undefined') {
   /* ---------- Bluetooth (Meshtastic BLE service) ---------- */
   var gattChain = Promise.resolve();
   function gatt(fn) { var p = gattChain.then(fn); gattChain = p.then(function () {}, function () {}); return p; }
+  function httpFetch(url, opts, ms) {
+    var limit = ms || S.httpTimeout || 20000;
+    return gatt(function () {
+      var ctl = new AbortController(), timer = setTimeout(function () { ctl.abort(); }, limit);
+      opts = opts || {}; opts.signal = ctl.signal;
+      return fetch(url, opts).then(function (r) {
+        return r.arrayBuffer().then(function (b) { clearTimeout(timer); return { ok: r.ok, status: r.status, bytes: new Uint8Array(b) }; });
+      }).catch(function (e) {
+        clearTimeout(timer);
+        throw (e && e.name === 'AbortError') ? new Error('The board did not answer within ' + Math.round(limit / 1000) + ' s') : e;
+      });
+    });
+  }
   function writeToRadio(bytes) {
     if (S.mode === 'http') {
       var p0 = performance.now();
-      return fetch(S.http.base + '/api/v1/toradio', { method: 'PUT', headers: { 'Content-Type': 'application/x-protobuf' }, body: bytes })
+      return httpFetch(S.http.base + '/api/v1/toradio', { method: 'PUT', headers: { 'Content-Type': 'application/x-protobuf' }, body: bytes })
         .then(function (r) {
           S.hw.putMs = Math.round(performance.now() - p0);
           if (S.hw.putMs > 1500) logEvt('err', 'Sending to the board over Wi-Fi took ' + S.hw.putMs + ' ms. The board’s web server is slow.', null, 'bad');
@@ -10690,9 +10741,9 @@ if (typeof module !== 'undefined') {
   }
   async function readOne() {
     if (S.mode === 'http') {
-      var t0 = performance.now(), r = await fetch(S.http.base + '/api/v1/fromradio?all=false');
+      var t0 = performance.now(), r = await httpFetch(S.http.base + '/api/v1/fromradio?all=false');
       if (!r.ok) throw new Error('The board answered ' + r.status);
-      var out = new Uint8Array(await r.arrayBuffer()), ms = Math.round(performance.now() - t0), P = S.hw.poll;
+      var out = r.bytes, ms = Math.round(performance.now() - t0), P = S.hw.poll;
       P.n++; P.sum += ms; P.last = ms; if (ms > P.max) P.max = ms;
       S.hw.pollMs = ms; S.http.fails = 0;
       if (ms > 1500) logEvt('err', (out.length ? 'A Wi-Fi poll that returned ' + out.length + ' bytes' : 'An empty Wi-Fi poll') + ' took ' + ms + ' ms. The board’s web server is slow.', null, 'bad');
@@ -10721,7 +10772,7 @@ if (typeof module !== 'undefined') {
   function handleFromRadio(m) {
     try { logFrom(m); } catch (e) { console.warn('log failed', e); }
     if (m.kind === 'myInfo') S.myNum = m.num;
-    else if (m.kind === 'nodeInfo') { S.nodes.set(m.num, { longName: m.longName, shortName: m.shortName, snr: m.snr, hops: m.hops, metrics: m.metrics, lastHeard: m.lastHeard }); refreshThreadTitles(); if ($('dlgNode').open) fillNodeList(); }
+    else if (m.kind === 'nodeInfo') { S.nodes.set(m.num, { longName: m.longName, shortName: m.shortName, snr: m.snr, hops: m.hops, metrics: m.metrics, lastHeard: m.lastHeard }); refreshThreadTitles(); if ($('dlgNode').open) fillNodeList(); if (S.view === 'log') fillTraceNodes(); }
     else if (m.kind === 'channel') {
       S.channels = S.channels.filter(function (c) { return c.index !== m.index; });
       if (m.role > 0) S.channels.push(m);
@@ -10729,7 +10780,7 @@ if (typeof module !== 'undefined') {
       renderChannels();
     }
     else if (m.kind === 'configComplete') setReady(true);
-    else if (m.kind === 'packet' && m.port !== null && m.from !== S.myNum) onIncoming(m.from, m.port, m.payload, { snr: m.snr, rssi: m.rssi, channel: m.channel, to: m.to });
+    else if (m.kind === 'packet' && m.port !== null && m.from !== S.myNum) onIncoming(m.from, m.port, m.payload, { snr: m.snr, rssi: m.rssi, channel: m.channel, to: m.to, hops: m.hopStart ? m.hopStart - m.hopLimit : null, relay: m.relay });
   }
 
   function setLink(state, title, sub) {
@@ -10826,11 +10877,11 @@ if (typeof module !== 'undefined') {
   function sendPacket(port, payload, opt) {
     opt = opt || {};
     var to = opt.to !== undefined ? opt.to : (S.target ? S.target.to : MESH.BROADCAST), ch = opt.ch !== undefined ? opt.ch : S.channelIndex, ack = opt.wantAck !== undefined ? opt.wantAck : S.wantAck;
-    var id = randomId(), t0 = performance.now();
-    var bytes = buildSendPacket({ to: to, channel: ch, port: port, payload: payload, id: id, hopLimit: S.hops, wantAck: ack });
+    var id = opt.id || randomId(), t0 = performance.now();
+    var bytes = buildSendPacket({ to: to, channel: ch, port: port, payload: payload, id: id, hopLimit: S.hops, wantAck: ack, wantResponse: opt.wantResponse });
     var base = 'TX #' + hex8(id) + ' to ' + toName(to) + ' on channel ' + ch + ', ' + (PORT_NAMES[port] || 'port ' + port) + ' ' + payload.length + ' B, hop limit ' + S.hops + (ack ? ', ack requested' : '') + describeApp(port, payload);
     var li = logEvt('tx', base, bytes, 'ours');
-    S.pending.set(id, { t: Date.now(), li: li, base: base, cb: opt.onAck });
+    S.pending.set(id, { t: Date.now(), li: li, base: base, cb: opt.onAck, to: to });
     if (S.pending.size > 60) S.pending.delete(S.pending.keys().next().value);
     return writeToRadio(bytes).then(function () {
       var ms = Math.round(performance.now() - t0);
@@ -10843,37 +10894,54 @@ if (typeof module !== 'undefined') {
       throw e;
     });
   }
-  async function sendClip() {
-    if (!S.clip || !S.ready || S.sending) return;
-    S.sending = true; stopPlayback();
-    var bub = addOutVoice(); S.liveBub = bub; S.clip.sent = true; closeSheet('shVoice');
-    $('btnSend').disabled = true; $('btnDiscard').disabled = true; $('btnRec').disabled = true;
-    var sess = buildSession(S.clip.stream, Math.floor(Math.random() * 256), 'voice'), chunks = sess.packets;
-    var states = chunks.map(function () { return 'ready'; }), k = 0;
-    try {
-      if (S.textNotice) {
-        setStatus('Sending a text notice first…');
-        await sendPacket(MESH.PORT_TEXT, new TextEncoder().encode('[voice note ' + S.clip.seconds.toFixed(1) + 's]'));
-        await sleep(paceMs());
-      }
-      for (k = 0; k < chunks.length; k++) {
-        states[k] = 'sending'; renderClipStrip(states);
-        setStatus('Sending packet ' + (k + 1) + ' of ' + chunks.length + '…');
-        await sendPacket(MESH.PORT_PRIVATE, chunks[k]);
-        states[k] = 'sent'; renderClipStrip(states);
-        if (k < chunks.length - 1) await sleep(paceMs());
-      }
-      setStatus('Handed to the board. It transmits each packet when the channel is clear. The other side needs this page open and connected to hear it.', 'ok');
-    } catch (e) {
-      console.warn(e);
-      states[k] = 'lost'; renderClipStrip(states);
-      setStatus('Sending stopped at packet ' + (k + 1) + '. Check the connection and tap Send to try again.', 'err');
+  /* ---------- Sending progress ---------- */
+  async function countdown(say, done, remaining, lastAir) {
+    var end = Date.now() + paceMs();
+    while (Date.now() < end) {
+      var left = (end - Date.now()) + (remaining - 1) * paceMs() + lastAir * 1000;
+      say(done + ' Next in ' + Math.ceil((end - Date.now()) / 1000) + ' s, about ' + fmtTime(left) + ' left.');
+      await sleep(Math.min(500, Math.max(50, end - Date.now())));
     }
-    S.liveBub = null; S.sending = false;
-    $('btnDiscard').disabled = false; $('btnRec').disabled = false; $('btnSend').disabled = !S.ready;
   }
-
-  /* ---------- Receiving ---------- */
+  async function sendPackets(sess, say, mark) {
+    var chunks = sess.packets, t0 = Date.now(), air = 0, i, a = 0;
+    for (i = 0; i < chunks.length; i++) {
+      a = airtimeMs(S.preset, chunks[i].length) / 1000;
+      var label = i >= sess.k ? 'spare ' + (i - sess.k + 1) : 'data packet ' + (i + 1) + ' of ' + sess.k;
+      mark(i, 'sending');
+      say('Sending ' + label + ' (packet ' + (i + 1) + ' of ' + chunks.length + ', ' + chunks[i].length + ' bytes, about ' + a.toFixed(1) + ' s on the air)…');
+      var w0 = performance.now();
+      try { await sendPacket(MESH.PORT_PRIVATE, chunks[i]); } catch (e) { e.pk = i + 1; mark(i, 'lost'); throw e; }
+      var ms = Math.round(performance.now() - w0);
+      air += a; mark(i, 'sent');
+      if (i < chunks.length - 1) await countdown(say, 'Packet ' + (i + 1) + ' of ' + chunks.length + ' accepted by the board in ' + ms + ' ms.', chunks.length - 1 - i, a);
+    }
+    var sp = chunks.length - sess.k;
+    return 'Done: ' + chunks.length + ' packets (' + sess.k + ' data' + (sp ? ' + ' + sp + ' spare' : '') + ') handed to the board in ' + fmtTime(Date.now() - t0) + ', about ' + air.toFixed(0) + ' s of airtime. The other side needs this page open and connected.';
+  }
+  async function sendClip() {
+    if (S.sending) { setStatus('Another send is still in progress. It will finish or fail shortly.', 'note'); return; }
+    if (!S.clip) return;
+    if (!S.ready) { setStatus('Connect a board first.', 'err'); return; }
+    S.sending = true; stopPlayback();
+    var states = [], fail = 1;
+    try {
+      var bub = addOutVoice(); S.liveBub = bub; S.clip.sent = true; closeSheet('shVoice');
+      $('btnSend').disabled = true; $('btnDiscard').disabled = true; $('btnRec').disabled = true;
+      var sess = buildSession(S.clip.stream, Math.floor(Math.random() * 256), 'voice');
+      states = sess.packets.map(function () { return 'ready'; });
+      var done = await sendPackets(sess, setStatus, function (i, st) { states[i] = st; if (S.clip) renderClipStrip(states); });
+      setStatus(done, 'ok');
+    } catch (e) {
+      console.warn(e); fail = e.pk || 1;
+      logEvt('err', 'Voice note stopped at packet ' + fail + ': ' + (e.message || e.name), null, 'bad');
+      if (S.clip) S.clip.sent = false;
+      setStatus('Stopped at packet ' + fail + ': ' + (e.message || 'connection problem') + '. Open Voice and tap Send to try again.', 'err');
+    } finally {
+      S.liveBub = null; S.sending = false;
+      $('btnDiscard').disabled = false; $('btnRec').disabled = false; $('btnSend').disabled = !S.ready; refreshPx();
+    }
+  }
   function onIncoming(from, port, payload, meta) {
     if (port === MESH.PORT_PRIVATE) {
       if (payload[0] === FILE.MAGIC) { addFileChunk(from, parseFilePacket(payload), meta); return; }
@@ -10906,7 +10974,7 @@ if (typeof module !== 'undefined') {
       S.inbox.set(key, n);
       attachNote(n, from, meta, 'Voice note');
     }
-    absorb(n, c); n.last = Date.now(); n.stalled = false; n.meta = meta || n.meta;
+    absorb(n, c); noteArrival(n, c, meta); n.last = Date.now(); n.stalled = false; n.meta = meta || n.meta;
     var wasComplete = n.complete;
     n.complete = n.asm.complete();
     decodeNote(n);
@@ -10931,8 +10999,7 @@ if (typeof module !== 'undefined') {
       var p = n.asm.parts[i];
       segs.push({ weight: p ? p.length : VOICE.CHUNK, state: p ? 'sent' : 'wait', name: 'Packet ' + (i + 1), sub: p ? (p.length + VOICE.HEADER) + ' bytes' : (n.stalled ? 'never arrived' : 'waiting') });
     }
-    var status = n.complete ? n.seconds.toFixed(1) + ' s, all ' + n.total + (n.total === 1 ? ' packet' : ' packets') + ' arrived'
-      : got + ' of ' + n.total + ' packets' + (n.stalled ? ', the rest never arrived' : ', more on the way');
+    var status = recvStatus(n, n.seconds.toFixed(1) + ' s of audio');
     status += fecNote(n);
     var sig = '';
     if (n.meta && n.meta.snr !== null && n.meta.snr !== undefined) sig = 'Signal: ' + n.meta.snr.toFixed(1) + ' dB SNR' + (n.meta.rssi ? ', ' + n.meta.rssi + ' dBm' : '');
@@ -10941,7 +11008,7 @@ if (typeof module !== 'undefined') {
       '<div class="notehead"><strong>' + esc(nodeName(n.from)) + '</strong><span class="when">' + nowLabel() + '</span></div>' +
       '<div class="strip inbox">' + stripMarkup({ amps: n.amps, segs: segs, label: 'Received voice note' }) + '</div>' +
       '<div class="noterow"><button class="btn small play" data-idle="' + idle + '">' + idle + '</button><span class="notestat">' + esc(status) + '</span>' +
-      (sig ? '<span class="sig">' + esc(sig) + '</span>' : '') + '</div>';
+      (sig ? '<span class="sig">' + esc(sig) + '</span>' : '') + '</div>' + pkDetail(n); wireDetail(n);
     var btn = n.li.querySelector('.play');
     btn.addEventListener('click', function () { if (n.pcm && n.pcm.length) playPcm(n.pcm, btn); });
     if (player.src && player.btn && player.btn.dataset && player.btn.dataset.key === n.key) { /* keep */ }
@@ -11006,20 +11073,22 @@ if (typeof module !== 'undefined') {
     padClear(); refreshPx();
   }
   async function sendPostcard() {
-    if (!S.ready || S.sending) return;
+    if (S.sending) { $('pxStatus').textContent = 'Another send is still in progress. It will finish or fail shortly.'; return; }
+    if (!S.ready) return;
     S.sending = true; refreshPx();
-    var sess = buildSession(packImage(pad.px, pad.n), Math.floor(Math.random() * 256), 'img'), chunks = sess.packets, k = 0, bub = addOutPic(), st = { set textContent(v) { $('pxStatus').textContent = v; bub.set(v); }, set className(v) { $('pxStatus').className = v; } };
-    pad.sent = true; closeSheet('shPic');
+    var bub = { set: function () {}, progress: function () {} };
+    function say(v) { $('pxStatus').textContent = v; bub.set(v); }
     try {
-      if (S.textNotice) { st.textContent = 'Sending a text notice first…'; await sendPacket(MESH.PORT_TEXT, new TextEncoder().encode('[pixel postcard]')); await sleep(paceMs()); }
-      for (k = 0; k < chunks.length; k++) {
-        st.textContent = 'Sending packet ' + (k + 1) + ' of ' + chunks.length + '…';
-        await sendPacket(MESH.PORT_PRIVATE, chunks[k]);
-        if (k < chunks.length - 1) await sleep(paceMs());
-      }
-      st.textContent = 'Handed to the board. The other side needs this page open and connected.'; st.className = 'status ok';
-    } catch (e) { console.warn(e); st.textContent = 'Sending stopped at packet ' + (k + 1) + '. Check the connection and try again.'; st.className = 'status err'; }
-    S.sending = false; refreshPx();
+      bub = addOutPic(); pad.sent = true; closeSheet('shPic');
+      var sess = buildSession(packImage(pad.px, pad.n), Math.floor(Math.random() * 256), 'img');
+      say(await sendPackets(sess, say, function () {})); $('pxStatus').className = 'status ok';
+    } catch (e) {
+      console.warn(e);
+      logEvt('err', 'Picture stopped at packet ' + (e.pk || 1) + ': ' + (e.message || e.name), null, 'bad');
+      pad.sent = false;
+      var msg = 'Stopped at packet ' + (e.pk || 1) + ': ' + (e.message || 'connection problem') + '. Open Picture and tap Send to try again.';
+      $('pxStatus').textContent = msg; $('pxStatus').className = 'status err'; bub.set(msg, true);
+    } finally { S.sending = false; refreshPx(); }
   }
   async function simulatePostcard() {
     showSimThread();
@@ -11034,18 +11103,17 @@ if (typeof module !== 'undefined') {
       n = { key: key, from: from, total: c.total, asm: new VoiceAssembly(c.total), li: document.createElement('li'), stalled: false, timer: null, meta: meta, isImg: true };
       S.inbox.set(key, n); attachNote(n, from, meta, 'Picture');
     }
-    absorb(n, c); n.stalled = false; n.meta = meta || n.meta;
+    absorb(n, c); noteArrival(n, c, meta); n.stalled = false; n.meta = meta || n.meta;
     renderImageNote(n);
     clearTimeout(n.timer); scheduleNack(n);
     if (!n.asm.complete()) n.timer = setTimeout(function () { n.stalled = true; renderImageNote(n); }, 45000);
   }
   function renderImageNote(n) {
     var r = n.asm.build(), img = decodeImage(r.stream, r.present, n.total), got = n.asm.got();
-    var status = n.asm.complete() ? 'Pixel postcard, all ' + n.total + (n.total === 1 ? ' packet' : ' packets') + ' arrived'
-      : got + ' of ' + n.total + ' packets' + (n.stalled ? ', the rest never arrived' : ', more on the way');
+    var status = recvStatus(n, 'Picture');
     status += fecNote(n);
     var sig = n.meta && n.meta.snr !== null && n.meta.snr !== undefined ? 'Signal: ' + n.meta.snr.toFixed(1) + ' dB SNR' + (n.meta.rssi ? ', ' + n.meta.rssi + ' dBm' : '') : '';
-    n.li.innerHTML = '<div class="notehead"><strong>' + esc(nodeName(n.from)) + '</strong><span class="when">' + nowLabel() + '</span></div><canvas class="pix" aria-label="Received pixel postcard"></canvas><div class="noterow"><span class="notestat">' + esc(status) + '</span>' + (sig ? '<span class="sig">' + esc(sig) + '</span>' : '') + '</div>';
+    n.li.innerHTML = '<div class="notehead"><strong>' + esc(nodeName(n.from)) + '</strong><span class="when">' + nowLabel() + '</span></div><canvas class="pix" aria-label="Received pixel postcard"></canvas><div class="noterow"><span class="notestat">' + esc(status) + '</span>' + (sig ? '<span class="sig">' + esc(sig) + '</span>' : '') + '</div>' + pkDetail(n); wireDetail(n);
     paintCanvas(n.li.querySelector('canvas'), img.size, img.px);
   }
 
@@ -11073,6 +11141,29 @@ if (typeof module !== 'undefined') {
     n.rank = r.rank;
     if (r.data) for (var i = 0; i < c.total; i++) if (!n.asm.parts[i]) { n.asm.add(i, r.data[i].subarray(0, dataLen(c.fec.len, c.total, i))); n.recovered = (n.recovered || 0) + 1; }
   }
+  /* ---------- Receiving detail ---------- */
+  function noteArrival(n, c, meta) {
+    n.t0 = n.t0 || Date.now(); n.arr = n.arr || [];
+    if (n.arr.some(function (x) { return x.idx === c.idx; })) { n.dups = (n.dups || 0) + 1; return; }
+    n.arr.push({ idx: c.idx, spare: !!(c.fec && c.idx >= c.total), t: Date.now() - n.t0, snr: meta && meta.snr, rssi: meta && meta.rssi, hops: meta && meta.hops, relay: meta && meta.relay });
+  }
+  function recvStatus(n, doneLabel) {
+    var arr = n.arr || [], last = arr.length ? arr[arr.length - 1].t / 1000 : 0, spares = arr.filter(function (x) { return x.spare; }).length, miss = [], i;
+    for (i = 0; i < n.total; i++) if (!n.asm.parts[i]) miss.push(i + 1);
+    if (!miss.length) return doneLabel + ': all ' + n.total + (n.total === 1 ? ' packet' : ' packets') + ' in ' + last.toFixed(1) + ' s' + (spares ? ', plus ' + spares + (spares === 1 ? ' spare' : ' spares') : '') + (n.dups ? ', ' + n.dups + ' duplicate' + (n.dups === 1 ? '' : 's') + ' ignored' : '');
+    return n.asm.got() + ' of ' + n.total + ' packets after ' + last.toFixed(1) + ' s, waiting for ' + (miss.length === 1 ? 'packet ' : 'packets ') + miss.join(', ') + (n.stalled ? '. Nothing new for 45 s, so they were probably lost' : '');
+  }
+  function pkDetail(n) {
+    var rows = (n.arr || []).slice().sort(function (x, y) { return x.t - y.t; }).map(function (x) {
+      var nm = x.spare ? 'Spare ' + (x.idx - n.total + 1) : 'Packet ' + (x.idx + 1);
+      var info = (x.t / 1000).toFixed(1) + ' s' + (x.hops !== null && x.hops !== undefined ? ', ' + x.hops + (x.hops === 1 ? ' hop' : ' hops') : '') + (x.hops === 0 ? ' (direct)' : (x.relay !== undefined && x.relay !== null ? ', via ' + relayName(x.relay) : '')) + (x.snr !== null && x.snr !== undefined ? ', SNR ' + x.snr.toFixed(1) : '') + (x.rssi ? ', ' + x.rssi + ' dBm' : '');
+      return '<li><span>' + nm + '</span><span>' + esc(info) + '</span></li>';
+    }).join('');
+    var seen = {}; (n.arr || []).forEach(function (x) { if (!x.spare) seen[x.idx] = 1; });
+    for (var i = 0; i < n.total; i++) if (!seen[i]) rows += '<li class="' + (n.asm.parts[i] ? 'fix' : 'miss') + '"><span>Packet ' + (i + 1) + '</span><span>' + (n.asm.parts[i] ? 'rebuilt from spares' : (n.stalled ? 'lost' : 'not here yet')) + '</span></li>';
+    return '<details class="pkd"' + (n.open ? ' open' : '') + '><summary>Packet details</summary><ul class="pklist">' + rows + '</ul></details>';
+  }
+  function wireDetail(n) { var d = n.li.querySelector('.pkd'); if (d) d.addEventListener('toggle', function () { n.open = d.open; }); }
   function fecNote(n) {
     var s = '';
     if (n.recovered) s += ', rebuilt ' + n.recovered + (n.recovered === 1 ? ' lost packet' : ' lost packets') + ' with ' + (n.fec.mode === FEC.RS ? 'Reed-Solomon' : 'the fountain code');
@@ -11141,7 +11232,7 @@ if (typeof module !== 'undefined') {
     S.view = name;
     Array.prototype.forEach.call(document.querySelectorAll('.view'), function (v) { v.hidden = v.id !== 'v-' + name; });
     Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (t) { t.setAttribute('aria-selected', t.dataset.view === name ? 'true' : 'false'); });
-    if (name === 'log') renderHw();
+    if (name === 'log') { renderHw(); askNodes(); fillTraceNodes(); }
     if (name === 'chat') { var th = S.threads.get(S.thread); if (th) { th.unread = 0; updateBadge(); } else renderThreadList(); }
     window.scrollTo(0, 0);
   }
@@ -11201,7 +11292,7 @@ if (typeof module !== 'undefined') {
       S.connected = true; S.ready = false; S.channels = [];
       setLink('busy', host, 'Reading the board’s settings…');
       await drain();
-      clearInterval(S.poll); S.poll = setInterval(drain, 1500);
+      clearInterval(S.poll); S.poll = setInterval(drain, 2000);
       setTimeout(function () { if (S.connected && !S.ready) setReady(true); }, 12000);
     } catch (e) {
       console.warn(e);
@@ -11380,6 +11471,7 @@ if (typeof module !== 'undefined') {
   function toName(to) { return to === MESH.BROADCAST ? 'everyone' : nodeName(to); }
   function describeApp(port, p) {
     if (port === MESH.PORT_TEXT) return ', text “' + utf8(p).slice(0, 40) + '”';
+    if (port === 70) return ', traceroute';
     if (port === 5) { var er = routingError(p); return ', ' + (ROUTING_ERRORS[er] || 'routing code ' + er); }
     if (port !== MESH.PORT_PRIVATE || !p.length) return '';
     var m = p[0], id = ' msg ' + hex2(p[1]);
@@ -11399,15 +11491,21 @@ if (typeof module !== 'undefined') {
       var own = m.from === S.myNum, pn = m.port === null ? 'ENCRYPTED, ' + m.encLen + ' B, key not held here' : (PORT_NAMES[m.port] || 'port ' + m.port) + ' ' + m.payload.length + ' B';
       var hops = m.hopStart ? (m.hopStart - m.hopLimit) + ' of ' + m.hopStart + ' hops used' : 'hop limit ' + m.hopLimit;
       var sig = (m.snr !== null && m.snr !== undefined ? ', SNR ' + m.snr.toFixed(1) + ' dB' : '') + (m.rssi ? ', RSSI ' + m.rssi + ' dBm' : '');
-      var txt = (own ? 'RX (echo of this board) ' : 'RX ') + '#' + hex8(m.id) + ' from ' + nodeName(m.from) + ' to ' + toName(m.to) + ', ' + pn + (m.port !== null ? describeApp(m.port, m.payload) : '') + ', ' + hops + sig + (m.relay !== undefined ? ', last relay …' + hex2(m.relay) : '') + (m.viaMqtt ? ', via MQTT' : '');
+      var txt = (own ? 'RX (echo of this board) ' : 'RX ') + '#' + hex8(m.id) + ' from ' + nodeName(m.from) + ' to ' + toName(m.to) + ', ' + pn + (m.port !== null ? describeApp(m.port, m.payload) : '') + ', ' + hops + sig + (m.relay !== undefined ? (m.hopStart && m.hopStart === m.hopLimit ? ', direct from the sender' : ', last relayed by ' + relayName(m.relay)) : '') + (m.viaMqtt ? ', via MQTT' : '');
       var cls = (m.port === MESH.PORT_PRIVATE || m.port === MESH.PORT_TEXT || m.port === 5) ? 'ours' : '', bad = false;
       if (m.port === 5 && m.requestId) {
         var er = routingError(m.payload), pend = S.pending.get(m.requestId), lat = pend ? ' after ' + (Date.now() - pend.t) + ' ms' : '';
-        txt = (er === 0 ? 'ACK: the mesh confirmed TX #' + hex8(m.requestId) + lat + ' (from ' + nodeName(m.from) + ')' : 'FAILED: TX #' + hex8(m.requestId) + ' ' + (ROUTING_ERRORS[er] || 'routing error ' + er));
+        var viaSelf = m.from === S.myNum, who = viaSelf ? 'a neighbour' : nodeName(m.from);
+        var direct = !!(pend && pend.to !== MESH.BROADCAST), isTarget = !!(direct && m.from === pend.to), rid = hex8(m.requestId);
+        if (er === 0) txt = direct
+          ? (isTarget ? 'ACK from the target itself, ' + nodeName(m.from) + ': TX #' + rid + ' delivered' + lat : 'RELAY ACK for TX #' + rid + ' from ' + who + '. ' + nodeName(pend.to) + ' has NOT confirmed yet')
+          : 'ACK for TX #' + rid + ' from ' + who + lat + ' (broadcast: shows a neighbour repeated it, not that anyone received it)';
+        else txt = 'FAILED: TX #' + rid + ' ' + (ROUTING_ERRORS[er] || 'routing error ' + er);
         if (er === 0) S.stats.acks++; else { bad = true; S.stats.fails++; }
-        if (pend && pend.cb) pend.cb(er);
-        if (pend && pend.li) pend.li.querySelector('.lm').textContent = pend.base + (er === 0 ? '. Confirmed' + lat + '.' : '. FAILED: ' + (ROUTING_ERRORS[er] || er) + '.');
+        if (pend && pend.cb) pend.cb(er, { from: m.from, isTarget: isTarget, who: who });
+        if (pend && pend.li) pend.li.querySelector('.lm').textContent = pend.base + (er === 0 ? (isTarget ? '. Confirmed by the target' : direct ? '. Relay ack only, target not confirmed' : '. A neighbour repeated it') + lat + '.' : '. FAILED: ' + (ROUTING_ERRORS[er] || er) + '.');
       }
+      if (m.port === 70 && m.payload) { try { var rd = parseRouteDiscovery(m.payload); txt += ', ' + routeSummary(rd); handleTrace(m, rd); } catch (e) { /* not a route reply */ } }
       if (!own) { S.stats.rx++; S.stats.rxB += m.payload ? m.payload.length : 0; }
       logEvt('rx', txt, m.payload, cls + (bad ? ' bad' : ''));
       renderHwSoon(); return;
@@ -11471,10 +11569,10 @@ if (typeof module !== 'undefined') {
     var times = [], i, put = null, putErr = '';
     logEvt('sys', 'Wi-Fi test: five polls, then one small send…');
     try {
-      for (i = 0; i < 5; i++) { var t0 = performance.now(), r = await fetch(S.http.base + '/api/v1/fromradio?all=false'); await r.arrayBuffer(); times.push(Math.round(performance.now() - t0)); await sleep(300); }
+      for (i = 0; i < 5; i++) { var t0 = performance.now(), r = await httpFetch(S.http.base + '/api/v1/fromradio?all=false'); times.push(Math.round(performance.now() - t0)); await sleep(300); }
     } catch (e) { logEvt('err', 'Wi-Fi test poll failed: ' + (e.message || e.name), null, 'bad'); }
     try {
-      var p0 = performance.now(), pr = await fetch(S.http.base + '/api/v1/toradio', { method: 'PUT', headers: { 'Content-Type': 'application/x-protobuf' }, body: Uint8Array.from(pb.bytes(7, [])) });
+      var p0 = performance.now(), pr = await httpFetch(S.http.base + '/api/v1/toradio', { method: 'PUT', headers: { 'Content-Type': 'application/x-protobuf' }, body: Uint8Array.from(pb.bytes(7, [])) });
       put = Math.round(performance.now() - p0); if (!pr.ok) putErr = ' (the board answered ' + pr.status + ')';
     } catch (e) { putErr = ' failed: ' + (e.message || e.name); }
     var s = times.slice().sort(function (x, y) { return x - y; }), med = s[Math.floor(s.length / 2)] || 0, worst = s[s.length - 1] || 0;
@@ -11493,6 +11591,7 @@ if (typeof module !== 'undefined') {
       if (navigator.clipboard) navigator.clipboard.writeText(txt).then(function () { done(true); }, function () { done(false); }); else done(false);
     });
     $('logTest').addEventListener('click', wifiTest);
+    $('trGo').addEventListener('click', function () { var v = parseInt($('trNode').value, 10); if (v) runTrace(v, null); else $('trMsg').textContent = 'Pick a node first.'; });
     $('chkAck').addEventListener('change', function (e) { S.wantAck = e.target.checked; logEvt('sys', 'Delivery confirmations ' + (S.wantAck ? 'requested' : 'not requested') + ' from now on.'); });
     renderHw();
   }
@@ -11540,7 +11639,7 @@ if (typeof module !== 'undefined') {
   }
   function updateThreadHead() {
     var th = S.threads.get(S.thread); if (!th) return;
-    $('thTitle').textContent = thTitle(th);
+    $('thTitle').textContent = thTitle(th); $('thTrace').hidden = !th.dm;
     var c = S.channels.filter(function (x) { return x.index === th.ch; })[0];
     $('thSub').textContent = th.dm ? 'Direct message. Only they receive it.' : (c && c.pskLen <= 1 ? 'Default key: anyone in range can read this channel.' : (c ? 'Private channel. Everyone with the key sees it.' : 'Channel ' + th.ch));
   }
@@ -11596,8 +11695,13 @@ if (typeof module !== 'undefined') {
     var stat = li.querySelector('.ostat'), settled = false;
     function say(t, bad) { stat.textContent = t; li.classList.toggle('bad', !!bad); }
     try {
-      await sendPacket(MESH.PORT_TEXT, bytes, { wantAck: true, onAck: function (er) { settled = true; say(er === 0 ? (th.dm ? 'Delivered' : 'Sent, and a neighbour repeated it') : 'Not delivered: ' + (ROUTING_ERRORS[er] || 'error ' + er), er !== 0); } });
-      if (!settled) say('Sent. Waiting for confirmation…');
+      await sendPacket(MESH.PORT_TEXT, bytes, { wantAck: true, onAck: function (er, info) {
+        if (er !== 0) { settled = true; say('Not delivered: ' + (ROUTING_ERRORS[er] || 'error ' + er), true); }
+        else if (!th.dm) { settled = true; say('Sent, and a neighbour repeated it'); }
+        else if (info.isTarget) { settled = true; say('Delivered: ' + thTitle(th) + ' confirmed it'); }
+        else if (!settled) say('Repeated by ' + info.who + '. Waiting for ' + thTitle(th) + ' to confirm…');
+      } });
+      if (!settled && stat.textContent === 'Sending…') say('Sent. Waiting for confirmation…');
     } catch (e) { say('Could not send: ' + (e.message || e.name), true); }
   }
 
@@ -11611,7 +11715,7 @@ if (typeof module !== 'undefined') {
   }
   function closeSheet(id) { var d = $(id); if (d.open) { if (d.close) d.close(); else d.removeAttribute('open'); } S.sheet = null; }
   function openNodePicker() {
-    if (S.connected && S.mode === 'http' && !S.nodesAsked) { S.nodesAsked = true; logEvt('sys', 'Asking the board for its node list…'); writeToRadio(buildWantConfig(69421)).then(drain, function () {}); }
+    askNodes();
     fillNodeList();
     openSheet('dlgNode', 'node');
   }
@@ -11651,6 +11755,7 @@ if (typeof module !== 'undefined') {
     mkThread('ch:0', false, null, 0); renderThreadList();
     $('btnNew').addEventListener('click', openNodePicker);
     $('thBack').addEventListener('click', closeThread);
+    $('thTrace').addEventListener('click', function () { var th = S.threads.get(S.thread); if (th && th.dm) runTrace(th.node, th); });
     $('atVoice').addEventListener('click', function () { openSheet('shVoice', 'voice'); });
     $('atPic').addEventListener('click', function () { openSheet('shPic', 'pic'); });
     $('atFile').addEventListener('click', function () { openSheet('shFile', 'file'); });
@@ -11663,6 +11768,67 @@ if (typeof module !== 'undefined') {
     $('photoIn').addEventListener('change', function (e) { if (e.target.files[0]) loadPhoto(e.target.files[0]); });
     $('btnToPic').addEventListener('click', function () { var f = F.file; closeSheet('shFile'); openSheet('shPic', 'pic'); if (f) loadPhoto(f); });
     refreshMsg();
+  }
+
+
+  /* ---------- Traceroute ---------- */
+  var trLast = 0, TR_WAIT = 90000;
+  function askNodes() { if (S.connected && S.mode === 'http' && !S.nodesAsked) { S.nodesAsked = true; logEvt('sys', 'Asking the board for its node list…'); writeToRadio(buildWantConfig(69421)).then(drain, function () {}); } }
+  function relayName(b) {
+    if (b === undefined || b === null) return '';
+    var c = []; S.nodes.forEach(function (n, num) { if ((num & 255) === b) c.push(nodeName(num)); });
+    return c.length === 1 ? c[0] : (c.length ? 'one of ' + c.slice(0, 3).join(', ') : '…' + hex2(b));
+  }
+  function routeSummary(rd) { return 'route ' + (rd.route.length ? 'via ' + rd.route.map(nodeName).join(' then ') : 'direct') + (rd.routeBack.length ? ', back via ' + rd.routeBack.map(nodeName).join(' then ') : ''); }
+  function chainHtml(names, snrs) {
+    var h = '<div class="trpath">';
+    names.forEach(function (n, i) {
+      h += '<span class="trn' + (i === 0 || i === names.length - 1 ? ' end' : '') + '">' + esc(n) + '</span>';
+      if (i < names.length - 1) { var v = snrs[i]; h += '<span class="trl">' + (v === undefined || v === -128 ? '→' : '→ ' + (v / 4).toFixed(1) + ' dB →') + '</span>'; }
+    });
+    return h + '</div>';
+  }
+  function renderTrace(t) {
+    var tn = nodeName(t.node), h = '<div class="notehead"><strong>Route to ' + esc(tn) + '</strong><span class="when">' + nowLabel() + '</span></div>';
+    if (t.error) h += '<p class="hint">' + esc(t.error) + '</p>';
+    else if (t.done) {
+      var rd = t.rd, n = rd.route.length;
+      h += '<p class="hint">There</p>' + chainHtml(['You'].concat(rd.route.map(nodeName), [tn]), rd.snrTowards);
+      h += '<p class="hint">Back</p>' + ((rd.routeBack.length || rd.snrBack.length) ? chainHtml([tn].concat(rd.routeBack.map(nodeName), ['You']), rd.snrBack) : '<p class="hint">The reply carried no return path.</p>');
+      h += '<p class="notestat">' + (n ? n + (n === 1 ? ' repeater' : ' repeaters') + ' between you and ' + esc(tn) : 'Direct, nothing repeated it') + '. ' +
+        (t.from === t.node ? 'The reply came from ' + esc(tn) + ' itself after ' + (t.dt / 1000).toFixed(1) + ' s, so the target really received the request.' : 'The reply came from ' + esc(nodeName(t.from)) + ', not from ' + esc(tn) + '.') + '</p>';
+    } else if (t.timeout) h += '<p class="hint">No reply after ' + Math.round(TR_WAIT / 1000) + ' s. The target may be out of range, the path may need more hops than the limit (' + t.hops + '), or a packet was lost. A traceroute is one packet with no retries, so try again before concluding.</p>';
+    else h += '<p class="hint">Request sent. Waiting for the reply, up to ' + Math.round(TR_WAIT / 1000) + ' s…</p>';
+    t.els.forEach(function (el) { el.innerHTML = h; });
+  }
+  function runTrace(node, th) {
+    var t = { id: randomId(), node: node, t0: Date.now(), done: false, timeout: false, els: [], hops: S.hops, error: '' };
+    var li = document.createElement('li'); li.className = 'trcard';
+    $('trList').insertBefore(li, $('trList').firstChild); t.els.push(li);
+    if (th) { var b = document.createElement('li'); b.className = 'bubble sys'; t.els.push(b); place(b, th, 'Trace route', false); }
+    var wait = Math.ceil((30000 - (Date.now() - trLast)) / 1000);
+    if (!S.ready) t.error = 'Connect a board first.';
+    else if (wait > 0) t.error = 'Wait ' + wait + ' more seconds. Traceroutes are limited to one every 30 s to spare the airwaves.';
+    if (t.error) { renderTrace(t); return; }
+    trLast = Date.now(); askNodes();
+    S.traces.set(t.id, t); renderTrace(t);
+    t.timer = setTimeout(function () { if (!t.done) { t.timeout = true; renderTrace(t); } }, TR_WAIT);
+    sendPacket(70, new Uint8Array(0), { to: node, ch: 0, id: t.id, wantResponse: true, wantAck: false }).catch(function (e) { t.error = 'Could not send the request: ' + (e.message || e.name); clearTimeout(t.timer); renderTrace(t); });
+  }
+  function handleTrace(m, rd) {
+    if (m.from === S.myNum) return;
+    var t = S.traces.get(m.requestId);
+    if (!t) S.traces.forEach(function (x) { if (!x.done && x.node === m.from) t = x; });
+    if (!t || t.done) return;
+    t.done = true; clearTimeout(t.timer); t.rd = rd; t.from = m.from; t.dt = Date.now() - t.t0; renderTrace(t);
+  }
+  function fillTraceNodes() {
+    var sel = $('trNode'), keep = sel.value, list = [];
+    S.nodes.forEach(function (n, num) { if (num !== S.myNum) list.push([num, nodeName(num)]); });
+    list.sort(function (x, y) { return x[1].localeCompare(y[1]); });
+    sel.innerHTML = list.length ? list.map(function (x) { return '<option value="' + x[0] + '">' + esc(x[1]) + '</option>'; }).join('') : '<option value="">No nodes heard yet</option>';
+    var th = S.threads.get(S.thread), want = th && th.dm ? String(th.node) : keep;
+    if (want) sel.value = want;
   }
 
   /* ---------- Environment checks ---------- */
@@ -11705,7 +11871,6 @@ if (typeof module !== 'undefined') {
     $('selMax').addEventListener('change', function (e) { S.maxSec = parseInt(e.target.value, 10); if (!S.clip && !S.recording) { renderIdleStrip(); $('stripMeta').textContent = idleHint(); } });
     $('selHops').addEventListener('change', function (e) { S.hops = parseInt(e.target.value, 10); });
     $('chkAuto').addEventListener('change', function (e) { S.autoplay = e.target.checked; });
-    $('chkText').addEventListener('change', function (e) { S.textNotice = e.target.checked; });
     initShell();
     initChat();
     initLog();
