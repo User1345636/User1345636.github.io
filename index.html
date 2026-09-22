@@ -144,6 +144,23 @@ footer{padding:16px 20px 30px;color:var(--faint);font-size:11.5px;text-align:cen
 .blocks i.full{background:var(--acc2);border-color:var(--acc2)}
 .blocks i.full>b{display:none}
 .blocks i.sending{outline:2px solid var(--warn);outline-offset:1px}
+.mixwarn{background:#2a1515;border:1px solid #5c2b2b;color:#f2c2c2;border-radius:7px;padding:9px 11px;line-height:1.55}
+.mixwarn b{color:#ffdada}
+.mixwarn code{font:11.5px var(--mono);background:#1a0e0e;padding:1px 4px;border-radius:3px;color:#ffb0b0}
+/* diagnosis */
+#diag{margin:10px 0 2px;border:1px solid var(--line);border-radius:7px;background:var(--bg3);overflow:hidden}
+#diag .dh{padding:7px 11px;background:#101823;border-bottom:1px solid var(--line);font:11px var(--mono);color:var(--dim);
+  display:flex;gap:8px;align-items:center}
+#diag .dh button{margin-left:auto;padding:2px 9px;font-size:11px}
+#diag .st{padding:8px 11px;border-bottom:1px solid #202a37;display:flex;gap:9px;align-items:flex-start;font-size:12.5px}
+#diag .st:last-child{border-bottom:none}
+#diag .st .m{width:15px;flex:0 0 15px;text-align:center;font-weight:700;line-height:1.5}
+#diag .st.ok .m{color:var(--acc2)}
+#diag .st.fail .m{color:var(--bad)}
+#diag .st.warn .m{color:var(--warn)}
+#diag .st b{display:block;color:var(--fg);font-weight:600;font-size:11.5px;margin-bottom:1px}
+#diag .st span{color:var(--dim);line-height:1.5}
+#diag .st.fail span{color:#f2c2c2}
 @keyframes blink{50%{opacity:.25}}
 </style>
 </head>
@@ -174,7 +191,9 @@ footer{padding:16px 20px 30px;color:var(--faint);font-size:11.5px;text-align:cen
       </label>
       <button id="btnConnect" class="pri" style="align-self:flex-end;padding:7px 16px">Connect</button>
       <button id="btnDisconnect" style="align-self:flex-end" disabled>Disconnect</button>
+      <button id="btnDiagnose" style="align-self:flex-end;display:none">Diagnose</button>
     </div>
+    <div id="diag" style="display:none"></div>
     <div id="transportHint" class="faint" style="font-size:11.5px;margin:-2px 0 8px;display:none"></div>
     <div id="nodeInfo" class="mono faint" style="font-size:11.5px">No node. Pick a transport and connect &mdash; or stay on <b>Simulated mesh</b> to exercise the whole stack against a modelled lossy channel.</div>
     <div class="gov">
@@ -980,6 +999,32 @@ class BleTransport {
    against the page's own origin, so it quietly hits this app's own server,
    gets a 404 — which is not a network error — and everything looks fine while
    nothing whatsoever has reached a node. Normalise first, then probe. */
+/* fetch() has no timeout of its own. On a desktop a wrong address fails fast
+   with connection-refused, but on a phone — different subnet, captive portal,
+   firewall that drops rather than rejects — the socket can hang for minutes,
+   and the app just looks frozen. Every request gets a deadline. */
+function fetchT(url, opts, ms) {
+  const ac = new AbortController();
+  const timer = setTimeout(() => ac.abort(), ms);
+  return fetch(url, Object.assign({}, opts, { signal: ac.signal }))
+    .catch(e => {
+      if (e && e.name === 'AbortError') throw new Error('timed out after ' + Math.round(ms / 1000) + ' s with no reply');
+      throw e;
+    })
+    .finally(() => clearTimeout(timer));
+}
+
+/* RFC1918 and friends — used to explain why a browser may refuse to talk to a
+   local address from a public page. */
+function isPrivateHost(h) {
+  h = String(h || '').toLowerCase().replace(/^\[|\]$/g, '');
+  if (h === 'localhost' || h === '::1' || /\.local$/.test(h)) return true;
+  if (/^127\./.test(h) || /^10\./.test(h) || /^192\.168\./.test(h)) return true;
+  if (/^172\.(1[6-9]|2\d|3[01])\./.test(h)) return true;
+  if (/^169\.254\./.test(h) || /^f[cd][0-9a-f]{2}:/.test(h) || /^fe80:/.test(h)) return true;
+  return false;
+}
+
 function normalizeNodeUrl(input) {
   const raw = String(input == null ? '' : input).trim();
   if (!raw) throw new Error('enter the node address, e.g. 192.168.1.50 or meshtastic.local');
@@ -1012,7 +1057,7 @@ class HttpTransport {
     // "right address, wrong kind of server" from "node is not answering".
     let r;
     try {
-      r = await fetch(this.base + '/api/v1/fromradio?all=true', { headers: { 'Accept': 'application/x-protobuf' } });
+      r = await fetchT(this.base + '/api/v1/fromradio?all=true', { headers: { 'Accept': 'application/x-protobuf' } }, 8000);
     } catch (e) {
       throw new Error('could not reach ' + this.base + ' — no response at all. Check the address, that you are on the same network, and that the node has WiFi enabled. (' + e.message + ')');
     }
@@ -1031,7 +1076,7 @@ class HttpTransport {
     let fails = 0;
     while (this.alive) {
       try {
-        const r = await fetch(this.base + '/api/v1/fromradio?all=false', { headers: { 'Accept': 'application/x-protobuf' } });
+        const r = await fetchT(this.base + '/api/v1/fromradio?all=false', { headers: { 'Accept': 'application/x-protobuf' } }, 10000);
         if (!r.ok) throw new Error('HTTP ' + r.status);
         fails = 0;
         const b = new Uint8Array(await r.arrayBuffer());
@@ -1044,12 +1089,116 @@ class HttpTransport {
     }
   }
   async write(b) {
-    const r = await fetch(this.base + '/api/v1/toradio', {
+    const r = await fetchT(this.base + '/api/v1/toradio', {
       method: 'PUT', headers: { 'Content-Type': 'application/x-protobuf' }, body: b
-    });
+    }, 8000);
     if (!r.ok) throw new Error('node rejected the write: HTTP ' + r.status + ' ' + r.statusText);
   }
   async close() { this.alive = false; }
+}
+
+/* ───────────────────────── HTTP diagnosis ─────────────────────────
+   "It works on my machine but not on their phone" needs an answer, not a
+   guess. This walks the same path a connection takes and reports which step
+   broke, so whoever is holding the failing device can read it off and act.
+   Injectable fetch/location so it can be tested without a radio.           */
+async function diagnoseHttp(rawUrl, o) {
+  o = o || {};
+  const F = o.fetch || ((typeof fetch !== 'undefined') ? fetch : null);
+  const loc = o.location || (typeof location !== 'undefined' ? location : { protocol: 'http:' });
+  const wait = o.timeoutMs || 8000;
+  const steps = [];
+  const add = (name, state, detail) => { steps.push({ name, state, detail }); return state === 'ok'; };
+  const get = (u, opts) => (o.fetch ? F(u, opts) : fetchT(u, opts, wait));
+
+  let base;
+  try { base = normalizeNodeUrl(rawUrl); }
+  catch (e) { add('Address', 'fail', e.message); return steps; }
+  add('Address', 'ok', base);
+
+  const u = new URL(base);
+  const priv = isPrivateHost(u.hostname);
+
+  if (loc.protocol === 'https:' && u.protocol === 'http:') {
+    add('Page vs node protocol', 'fail',
+      'This page is served over https and the node speaks plain http. Every browser blocks that as mixed content, ' +
+      'and no setting in the page can override it. Either open Meshvox from an http address (a local copy, or a plain-http host) ' +
+      'or enable https on the node. On a phone this is the single most common cause.');
+    return steps;
+  }
+  add('Page vs node protocol', 'ok', loc.protocol + ' page to ' + u.protocol.replace(':', '') + ' node');
+
+  if (/\.local$/i.test(u.hostname))
+    add('Hostname', 'warn', '"' + u.hostname + '" is an mDNS name. Windows and iOS usually resolve these; ' +
+      'Android often does not. If this device is Android, use the node\'s numeric IP instead.');
+  else if (priv) add('Hostname', 'ok', u.hostname + ' (private address)');
+  else add('Hostname', 'warn', u.hostname + ' is not a private address — check it is really the node.');
+
+  // 1. can we read from it at all?
+  let r = null;
+  try {
+    r = await get(base + '/api/v1/fromradio?all=true', { headers: { 'Accept': 'application/x-protobuf' } });
+  } catch (e) {
+    add('Read from node (GET)', 'fail',
+      'No usable response: ' + e.message + '. Check the device is on the same WiFi as the node (not mobile data), ' +
+      'that the node has WiFi enabled and is not in AP-only mode, and that the IP is current — DHCP leases move. ' +
+      'Important: the phone app reaches the node over TCP port 4403, which a browser cannot use. Meshvox needs the node\'s ' +
+      'HTTP web server, which is a separate setting — the app working over WiFi does not prove the web server is on. ' +
+      'Open ' + base + ' directly in this device\'s browser: if that does not load either, the web server is off or unreachable.' +
+      (priv && loc.protocol !== 'file:' && !isPrivateHost(loc.hostname || '')
+        ? ' Browsers also block requests from a public page to a private address (Private Network Access), which fails exactly like this.'
+        : ''));
+    return steps;
+  }
+  if (!r.ok) {
+    add('Read from node (GET)', 'fail', 'answered HTTP ' + r.status + ' ' + r.statusText +
+      ' — something is listening, but it is not serving /api/v1/fromradio. Note that the phone app talks to the node over ' +
+      'TCP port 4403, which is a different service: a browser cannot open a raw socket, so Meshvox needs the node\'s ' +
+      'HTTP web server, which is enabled separately in the node\'s network settings.');
+    return steps;
+  }
+  const ct = (r.headers.get && (r.headers.get('content-type') || '') || '').toLowerCase();
+  if (ct.includes('text/html')) { add('Read from node (GET)', 'fail', 'returned a web page, not protobuf — that is a web server, not a node API'); return steps; }
+  let firstLen = 0;
+  try { firstLen = (await r.arrayBuffer()).byteLength; } catch (e) {}
+  add('Read from node (GET)', 'ok', 'HTTP ' + r.status + (ct ? ', ' + ct : '') + ', ' + firstLen + ' bytes');
+
+  // 2. can we write to it? PUT with a custom content-type needs a CORS
+  //    preflight, which is a separate thing that can fail on its own.
+  try {
+    const w = await get(base + '/api/v1/toradio', {
+      method: 'PUT', headers: { 'Content-Type': 'application/x-protobuf' },
+      body: new PB().vint(3, 0x0d1a6e05).out()
+    });
+    if (!w.ok) { add('Write to node (PUT)', 'fail', 'node answered HTTP ' + w.status + ' ' + w.statusText); return steps; }
+    add('Write to node (PUT)', 'ok', 'HTTP ' + w.status);
+  } catch (e) {
+    add('Write to node (PUT)', 'fail',
+      'The read worked but the write did not: ' + e.message + '. A PUT with a custom content type needs a CORS preflight, ' +
+      'so this usually means the node firmware is not answering OPTIONS. Updating the node firmware is the fix; ' +
+      'USB or Bluetooth avoids it entirely.');
+    return steps;
+  }
+
+  // 3. does an actual node answer?
+  const deadline = Date.now() + (o.answerMs || 9000);
+  let bytes = 0, sawNode = false;
+  while (Date.now() < deadline && !sawNode) {
+    let rr;
+    try { rr = await get(base + '/api/v1/fromradio?all=false', { headers: { 'Accept': 'application/x-protobuf' } }); }
+    catch (e) { break; }
+    if (!rr.ok) break;
+    const b = new Uint8Array(await rr.arrayBuffer());
+    bytes += b.length;
+    if (b.length) {
+      try { pbFields(b, f => { if (f === 3 || f === 4 || f === 5 || f === 7) sawNode = true; }); } catch (e) {}
+    } else await sleep(400);
+  }
+  if (sawNode) add('Node replies', 'ok', 'config received — this address is a working Meshtastic node');
+  else add('Node replies', 'fail',
+    'The HTTP server accepted both requests but no node config came back' + (bytes ? ' (' + bytes + ' bytes of other traffic)' : '') +
+    '. Something is serving the API path, but there is no radio behind it.');
+  return steps;
 }
 
 /* ───────────────────────── Simulated mesh ─────────────────────────
@@ -2815,17 +2964,74 @@ client.onPacket = m => {
 const TRANSPORT_HINTS = {
   serial: 'Most reliable option on desktop. Close any other app holding the port (the Meshtastic web client, a serial monitor) first.',
   ble: 'Pair the node in your <b>operating system</b> Bluetooth settings first &mdash; its characteristics are encrypted and only the OS can do the PIN (default <code>123456</code>). Only one app can hold a BLE link, so disconnect the phone app. Web Bluetooth on desktop is genuinely flaky; USB serial is the safer path.',
-  http: 'Node must be on WiFi with the web server enabled. Enter a hostname or IP &mdash; a bare number is not an address. Meshvox verifies the node answers before reporting success.',
+  http: 'Needs the node&rsquo;s <b>HTTP web server</b>, which is a different service from the TCP port 4403 the phone app uses &mdash; a browser cannot open a raw socket, so the app working over WiFi does not mean this will. Enter a hostname or IP; a bare number is not an address. Use <b>Diagnose</b> if it fails.',
   sim: 'No hardware. Your packets loop back through a modelled lossy channel so you can watch loss, repair and reassembly end to end.',
 };
 function showTransportHint() {
   const k = $('#transport').value;
   $('#httpWrap').style.display = k === 'http' ? '' : 'none';
+  $('#btnDiagnose').style.display = k === 'http' ? '' : 'none';
   const h = $('#transportHint');
-  h.innerHTML = TRANSPORT_HINTS[k] || '';
-  h.style.display = TRANSPORT_HINTS[k] ? '' : 'none';
+  const blocked = k === 'http' && mixedContentBlocked();
+  h.innerHTML = blocked ? MIXED_WARNING : (TRANSPORT_HINTS[k] || '');
+  h.className = blocked ? 'mixwarn' : 'faint';
+  h.style.display = h.innerHTML ? '' : 'none';
+  $('#btnConnect').title = blocked ? 'blocked by the browser: https page cannot reach an http node' : '';
+}
+/* An https page can never reach an http node, and nothing in this app can
+   change that. Say so up front rather than after a failed attempt — it is the
+   usual reason a phone on the published site fails where a laptop on
+   http://localhost works. */
+const MIXED_WARNING =
+  '<b>This page is loaded over https, so your browser will refuse to contact an <code>http://</code> node.</b> ' +
+  'No setting here can override it. This is the usual reason a phone fails where a computer on <code>http://localhost</code> works. ' +
+  'Three ways round it: <b>(1)</b> open Meshvox over plain http instead &mdash; serve the folder from a machine on the same WiFi and use that address; ' +
+  '<b>(2)</b> turn on HTTPS on the node, visit <code>https://&lt;node-ip&gt;</code> once in this browser to accept its self-signed certificate, ' +
+  'then enter the <code>https://</code> address here; <b>(3)</b> on Android, use Bluetooth instead, which has no such restriction.';
+
+function mixedContentBlocked() {
+  if (typeof location === 'undefined' || location.protocol !== 'https:') return false;
+  try { return normalizeNodeUrl($('#httpUrl').value).startsWith('http:'); }
+  catch (e) { return true; }
 }
 $('#transport').onchange = showTransportHint;
+$('#httpUrl').addEventListener('input', showTransportHint);
+
+const MARK = { ok: '✓', fail: '✗', warn: '!' };
+function renderDiag(steps, running) {
+  const d = $('#diag');
+  d.style.display = '';
+  const plain = steps.map(s => (s.state === 'ok' ? '[ok]  ' : s.state === 'warn' ? '[warn]' : '[FAIL]') +
+    ' ' + s.name + ': ' + s.detail).join('\n');
+  d.innerHTML = '<div class="dh"><span>' + (running ? 'testing…' : 'diagnosis') + '</span>' +
+    '<span class="faint">' + (navigator.userAgent.length > 60 ? navigator.userAgent.slice(0, 60) + '…' : navigator.userAgent) + '</span>' +
+    '<button id="diagCopy">copy</button><button id="diagHide">hide</button></div>' +
+    steps.map(s => '<div class="st ' + s.state + '"><span class="m">' + MARK[s.state] + '</span>' +
+      '<span><b>' + s.name + '</b>' + String(s.detail).replace(/[<>&]/g, '') + '</span></div>').join('');
+  $('#diagHide').onclick = () => { d.style.display = 'none'; };
+  $('#diagCopy').onclick = async () => {
+    const text = 'Meshvox diagnosis\n' + navigator.userAgent + '\npage: ' + location.href + '\n\n' + plain;
+    try { await navigator.clipboard.writeText(text); $('#diagCopy').textContent = 'copied'; }
+    catch (e) { log(text, 'a'); $('#diagCopy').textContent = 'in log'; }
+    setTimeout(() => { const b = $('#diagCopy'); if (b) b.textContent = 'copy'; }, 2000);
+  };
+}
+
+$('#btnDiagnose').onclick = async () => {
+  const b = $('#btnDiagnose');
+  b.disabled = true; b.textContent = 'Testing…';
+  renderDiag([{ name: 'Running', state: 'warn', detail: 'probing ' + $('#httpUrl').value + ' — this can take up to 20 s' }], true);
+  try {
+    const steps = await diagnoseHttp($('#httpUrl').value);
+    renderDiag(steps, false);
+    const bad = steps.find(s => s.state === 'fail');
+    log(bad ? 'diagnosis: ' + bad.name + ' — ' + bad.detail : 'diagnosis: everything passed, this address is a working node',
+      bad ? 'e' : 'g');
+  } catch (e) {
+    renderDiag([{ name: 'Diagnosis crashed', state: 'fail', detail: e.message }], false);
+  }
+  b.disabled = false; b.textContent = 'Diagnose';
+};
 $('#btnConnect').onclick = async () => {
   const kind = $('#transport').value;
   $('#btnConnect').disabled = true;
@@ -2844,6 +3050,7 @@ $('#btnConnect').onclick = async () => {
       String(e.message).replace(/[<>&]/g, '');
     $('#btnConnect').disabled = false; $('#btnDisconnect').disabled = true;
     $('#btnSend').disabled = true; $('#btnFileSend').disabled = true;
+    if (kind === 'http') log('run Diagnose to see which step is failing — it tests the address, the read, the write and whether a node actually answers.', 'a');
   }
 };
 $('#btnDisconnect').onclick = async () => { await client.disconnect(); log('disconnected'); };
