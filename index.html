@@ -175,6 +175,7 @@ footer{padding:16px 20px 30px;color:var(--faint);font-size:11.5px;text-align:cen
       <button id="btnConnect" class="pri" style="align-self:flex-end;padding:7px 16px">Connect</button>
       <button id="btnDisconnect" style="align-self:flex-end" disabled>Disconnect</button>
     </div>
+    <div id="transportHint" class="faint" style="font-size:11.5px;margin:-2px 0 8px;display:none"></div>
     <div id="nodeInfo" class="mono faint" style="font-size:11.5px">No node. Pick a transport and connect &mdash; or stay on <b>Simulated mesh</b> to exercise the whole stack against a modelled lossy channel.</div>
     <div class="gov">
       <div class="govrow"><b>Airtime budget</b><span id="govText" class="mono">idle</span></div>
@@ -680,22 +681,70 @@ class MeshClient {
     this.onPacket = () => {};
     this.onState = () => {};
     this.nodes = new Map();
+    this.ready = false;
   }
-  get connected() { return !!this.transport && this.transport.alive; }
+  /* An open channel is not a connection. `ready` is only set once the node has
+     actually answered, so nothing starts transmitting into a handshake. */
+  get connected() { return !!this.transport && this.transport.alive && this.ready; }
 
+  /* "Connected" has to mean the node answered, not merely that we opened a
+     channel to something. Opening a serial port, a GATT session or an HTTP
+     endpoint proves nothing: the port may be a different device, the address
+     may be a web server that happily returns 404. So every transport that
+     speaks the config protocol must complete a handshake before we claim to
+     be connected, and a failed handshake tears the transport back down. */
   async connect(kind, opts) {
-    const T = { serial: SerialTransport, ble: BleTransport, http: HttpTransport, sim: SimTransport }[kind];
+    const T = TRANSPORTS[kind];
     if (!T) throw new Error('unknown transport');
-    this.transport = new T(opts || {});
-    this.transport.onFrame = b => this._fromRadio(b);
-    this.transport.onClose = () => { this.onState('closed'); };
-    await this.transport.open();
-    if (this.transport.needsConfig) {
-      await this.send(new PB().vint(3, (Math.random() * 0xfffffff) >>> 0).out());  // want_config_id
+    const t = new T(opts || {});
+    this.transport = t;
+    this.ready = false;
+    this.myNodeNum = 0; this.myName = ''; this.nodes.clear();
+    this.queueFree = 8; this.queueKnown = false;
+    t.onFrame = b => this._fromRadio(b);
+    t.onClose = () => { this.ready = false; this.onState('closed'); };
+    try {
+      await t.open();
+      if (t.needsConfig) {
+        this.onState('handshake');
+        await this._handshake((opts && opts.handshakeMs) || 12000);
+      }
+    } catch (e) {
+      this._onHandshake = null;
+      this.ready = false;
+      try { await t.close(); } catch (_) {}
+      if (this.transport === t) this.transport = null;
+      throw e;
     }
+    this.ready = true;
     this.onState('open');
   }
-  async disconnect() { if (this.transport) { await this.transport.close(); this.transport = null; } this.onState('closed'); }
+
+  _handshake(timeoutMs) {
+    return new Promise((resolve, reject) => {
+      let done = false, timer = null;
+      const finish = err => {
+        if (done) return;
+        done = true;
+        clearTimeout(timer);
+        this._onHandshake = null;
+        err ? reject(err) : resolve();
+      };
+      this._onHandshake = () => finish(null);
+      timer = setTimeout(() => finish(new Error(
+        'the node never answered. We asked for its config and heard nothing back in ' +
+        Math.round(timeoutMs / 1000) + ' s — the address or port is reachable but there is no Meshtastic node behind it.'
+      )), timeoutMs);
+      // want_config_id makes the node dump my_info, node_info and config
+      this.send(new PB().vint(3, ((Math.random() * 0xfffffff) >>> 0) || 1).out())
+        .catch(e => finish(new Error('could not send to the node: ' + e.message)));
+    });
+  }
+  async disconnect() {
+    this.ready = false;
+    if (this.transport) { await this.transport.close(); this.transport = null; }
+    this.onState('closed');
+  }
   async send(toRadioBytes) { return this.transport.write(toRadioBytes); }
 
   /* Build ToRadio{ packet: MeshPacket{ decoded: Data{ portnum, payload } } } */
@@ -721,6 +770,9 @@ class MeshClient {
       if (f === 2) pkt = raw; else if (f === 3) myInfo = raw;
       else if (f === 4) nodeInfo = raw; else if (f === 5) cfg = raw;
       else if (f === 11) qs = raw; else if (f === 7) this.onState('configured');
+      // my_info / node_info / config / config_complete_id can only come from a
+      // real node, so any of them settles the handshake.
+      if ((f === 3 || f === 4 || f === 5 || f === 7) && this._onHandshake) this._onHandshake();
     });
     if (myInfo) pbFields(myInfo, (f, v) => { if (f === 1) { this.myNodeNum = v >>> 0; this.onState('info'); } });
     if (nodeInfo) {
@@ -824,26 +876,88 @@ const BLE_TORADIO  = 'f75c76d2-129e-4dad-a1dd-7866124401e7';
 const BLE_FROMRADIO= '2c55e69e-4993-11ed-b878-0242ac120002';
 const BLE_FROMNUM  = 'ed9da18c-a800-4f66-a670-aa7547e34453';
 
+/* Chrome's "NetworkError: Connection attempt failed" from gatt.connect() is
+   almost never a bug in the page. The usual causes, in order of likelihood:
+   another central already holds the link, the node is not bonded with the OS
+   yet (Meshtastic's characteristics are encrypted, and only the OS can do the
+   PIN), or the adapter is simply being flaky — in which case a retry works.
+   So: retry with backoff, then explain rather than parroting the raw error. */
+function bleHint(e) {
+  const msg = (e && e.message) || String(e);
+  const name = (e && e.name) || '';
+  const base = 'Bluetooth connection failed (' + (name || 'error') + ': ' + msg + ').';
+  if (/connection attempt failed|NetworkError/i.test(name + ' ' + msg))
+    return base + ' Most likely one of: the phone app is still connected to this node (only one app can hold a BLE link — close it), ' +
+      'or the node is not paired with this computer yet. Meshtastic BLE characteristics are encrypted, and only the operating system can do the PIN, ' +
+      'so pair the node in your OS Bluetooth settings first (default PIN 123456), then try again. Power-cycling the node also clears a stuck link. ' +
+      'USB serial avoids all of this and is the more reliable path on desktop.';
+  if (/SecurityError|not permitted|authenticat/i.test(name + ' ' + msg))
+    return base + ' The node requires pairing before these characteristics can be read. Pair it in your OS Bluetooth settings (default PIN 123456), then reconnect.';
+  if (/NotSupportedError|GATT operation/i.test(name + ' ' + msg))
+    return base + ' The operating system refused the GATT operation. On Windows this usually means the device must be paired in Settings before Chrome can use it.';
+  return base;
+}
+
 class BleTransport {
   constructor() { this.alive = false; this.needsConfig = true; this.draining = false; }
   async open() {
-    if (!navigator.bluetooth) throw new Error('Web Bluetooth unavailable');
-    this.dev = await navigator.bluetooth.requestDevice({ filters: [{ services: [BLE_SVC] }], optionalServices: [BLE_SVC] });
+    if (typeof navigator === 'undefined' || !navigator.bluetooth)
+      throw new Error('Web Bluetooth is not available here. It needs Chrome or Edge, on desktop or Android, over https (or localhost) — it does not exist on iOS or Firefox.');
+    if (navigator.bluetooth.getAvailability) {
+      let ok = true;
+      try { ok = await navigator.bluetooth.getAvailability(); } catch (e) {}
+      if (!ok) throw new Error('no Bluetooth adapter is available — check that Bluetooth is switched on.');
+    }
+    try {
+      this.dev = await navigator.bluetooth.requestDevice({ filters: [{ services: [BLE_SVC] }], optionalServices: [BLE_SVC] });
+    } catch (e) {
+      if (e && e.name === 'NotFoundError') {
+        // Either the chooser was dismissed, or nothing advertised the service.
+        // Some builds advertise only a name, so offer the wider list once.
+        log('no node advertised the Meshtastic BLE service — showing all nearby devices instead', 'w');
+        try {
+          this.dev = await navigator.bluetooth.requestDevice({ acceptAllDevices: true, optionalServices: [BLE_SVC] });
+        } catch (e2) {
+          throw new Error('no device selected. If your node is not listed, check that Bluetooth is enabled on it and that no phone app is currently connected to it.');
+        }
+      } else throw e;
+    }
     this.dev.addEventListener('gattserverdisconnected', () => { this.alive = false; this.onClose && this.onClose(); });
-    const srv = await (await this.dev.gatt.connect()).getPrimaryService(BLE_SVC);
-    this.cTo = await srv.getCharacteristic(BLE_TORADIO);
-    this.cFrom = await srv.getCharacteristic(BLE_FROMRADIO);
-    this.cNum = await srv.getCharacteristic(BLE_FROMNUM);
-    await this.cNum.startNotifications();
-    this.cNum.addEventListener('characteristicvaluechanged', () => this._drain());
-    this.alive = true;
-    this._drain();
+    await this._connectGatt();
+  }
+  async _connectGatt() {
+    const attempts = 4;
+    let last = null;
+    for (let i = 0; i < attempts; i++) {
+      try {
+        if (!this.dev.gatt.connected) await this.dev.gatt.connect();
+        const srv = await this.dev.gatt.getPrimaryService(BLE_SVC);
+        this.cTo = await srv.getCharacteristic(BLE_TORADIO);
+        this.cFrom = await srv.getCharacteristic(BLE_FROMRADIO);
+        this.cNum = await srv.getCharacteristic(BLE_FROMNUM);
+        await this.cNum.startNotifications();
+        this.cNum.addEventListener('characteristicvaluechanged', () => this._drain());
+        this.alive = true;
+        this._drain();
+        if (i) log('Bluetooth connected on attempt ' + (i + 1), 'g');
+        return;
+      } catch (e) {
+        last = e;
+        try { this.dev.gatt.disconnect(); } catch (_) {}
+        if (i < attempts - 1) {
+          log('Bluetooth attempt ' + (i + 1) + '/' + attempts + ' failed: ' + e.message + ' — retrying', 'w');
+          await sleep(700 * (i + 1));
+        }
+      }
+    }
+    throw new Error(bleHint(last));
   }
   async _drain() {
     if (this.draining) { this.again = true; return; }
     this.draining = true;
     try {
       for (let n = 0; n < 200 && this.alive; n++) {
+        if (!this.dev.gatt.connected) break;
         const v = await this.cFrom.readValue();
         if (!v || v.byteLength === 0) break;
         try { this.onFrame(new Uint8Array(v.buffer)); } catch (e) { log('ble parse: ' + e.message, 'e'); }
@@ -852,31 +966,88 @@ class BleTransport {
     this.draining = false;
     if (this.again) { this.again = false; this._drain(); }
   }
-  async write(b) { await this.cTo.writeValue(b); setTimeout(() => this._drain(), 60); }
+  async write(b) {
+    if (!this.dev || !this.dev.gatt.connected) throw new Error('Bluetooth link dropped');
+    if (this.cTo.writeValueWithResponse) await this.cTo.writeValueWithResponse(b);
+    else await this.cTo.writeValue(b);
+    setTimeout(() => this._drain(), 60);
+  }
   async close() { this.alive = false; try { this.dev.gatt.disconnect(); } catch (e) {} }
 }
 
-/* ───────────────────────── HTTP (node on WiFi) ───────────────────────── */
+/* ───────────────────────── HTTP (node on WiFi) ─────────────────────────
+   A bare "192.168.1.50" is not a URL. fetch() resolves it as a *relative path*
+   against the page's own origin, so it quietly hits this app's own server,
+   gets a 404 — which is not a network error — and everything looks fine while
+   nothing whatsoever has reached a node. Normalise first, then probe. */
+function normalizeNodeUrl(input) {
+  const raw = String(input == null ? '' : input).trim();
+  if (!raw) throw new Error('enter the node address, e.g. 192.168.1.50 or meshtastic.local');
+  let s = raw;
+  if (!/^https?:\/\//i.test(s)) {
+    if (/^[a-z][a-z0-9+.-]*:\/\//i.test(s)) throw new Error('only http:// and https:// addresses are supported, not "' + raw + '"');
+    s = 'http://' + s;
+  }
+  // Check the host the user typed, not the parsed one: the URL spec turns an
+  // all-digit host into an IPv4 address ("12345" becomes 0.0.48.57), so by the
+  // time it is parsed a typo looks like a perfectly good address.
+  const typedHost = s.replace(/^https?:\/\//i, '').split(/[/?#]/)[0].split('@').pop().replace(/:\d+$/, '');
+  if (/^\d+$/.test(typedHost)) throw new Error('"' + raw + '" is a number, not a hostname or IP address');
+  let u;
+  try { u = new URL(s); } catch (e) { throw new Error('"' + raw + '" is not a valid address'); }
+  if (!u.hostname) throw new Error('"' + raw + '" has no hostname');
+  return u.origin + u.pathname.replace(/\/+$/, '');
+}
+
 class HttpTransport {
-  constructor(o) { this.base = (o.url || '').replace(/\/+$/, ''); this.alive = false; this.needsConfig = true; }
+  constructor(o) {
+    this.base = normalizeNodeUrl(o.url);
+    this.alive = false; this.needsConfig = true; this.first = true;
+  }
   async open() {
-    if (location.protocol === 'https:' && this.base.startsWith('http:'))
+    if (typeof location !== 'undefined' && location.protocol === 'https:' && this.base.startsWith('http:'))
       throw new Error('mixed content: an https page cannot call an http node. Serve Meshvox over http, or enable https on the node.');
+
+    // Probe before claiming anything. This separates "wrong address" from
+    // "right address, wrong kind of server" from "node is not answering".
+    let r;
+    try {
+      r = await fetch(this.base + '/api/v1/fromradio?all=true', { headers: { 'Accept': 'application/x-protobuf' } });
+    } catch (e) {
+      throw new Error('could not reach ' + this.base + ' — no response at all. Check the address, that you are on the same network, and that the node has WiFi enabled. (' + e.message + ')');
+    }
+    if (!r.ok) throw new Error(this.base + ' answered HTTP ' + r.status + ' ' + r.statusText +
+      '. Something is there, but it is not serving the Meshtastic API at /api/v1/fromradio.');
+    const ct = (r.headers.get('content-type') || '').toLowerCase();
+    if (ct.includes('text/html')) throw new Error(this.base +
+      ' returned a web page, not protobuf. That is a web server, but not a Meshtastic node API.');
+
     this.alive = true;
+    const b = new Uint8Array(await r.arrayBuffer());
+    if (b.length) { try { this.onFrame(b); } catch (e) {} }
     this._poll();
   }
   async _poll() {
+    let fails = 0;
     while (this.alive) {
       try {
         const r = await fetch(this.base + '/api/v1/fromradio?all=false', { headers: { 'Accept': 'application/x-protobuf' } });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        fails = 0;
         const b = new Uint8Array(await r.arrayBuffer());
         if (b.length) { this.onFrame(b); continue; }
-      } catch (e) { log('http poll: ' + e.message, 'e'); await sleep(2000); }
+      } catch (e) {
+        if (++fails === 1 || fails % 10 === 0) log('http poll: ' + e.message + (fails > 1 ? ' (x' + fails + ')' : ''), 'e');
+        await sleep(2000);
+      }
       await sleep(400);
     }
   }
   async write(b) {
-    await fetch(this.base + '/api/v1/toradio', { method: 'PUT', headers: { 'Content-Type': 'application/x-protobuf' }, body: b });
+    const r = await fetch(this.base + '/api/v1/toradio', {
+      method: 'PUT', headers: { 'Content-Type': 'application/x-protobuf' }, body: b
+    });
+    if (!r.ok) throw new Error('node rejected the write: HTTP ' + r.status + ' ' + r.statusText);
   }
   async close() { this.alive = false; }
 }
@@ -908,7 +1079,9 @@ class GilbertElliott {
 }
 
 class SimTransport {
-  constructor(o) { this.alive = false; this.needsConfig = false; this.cfg = o.cfg; }
+  // Goes through the same handshake as a real node, so that path is exercised
+  // every time someone runs the simulator.
+  constructor(o) { this.alive = false; this.needsConfig = true; this.cfg = o.cfg; }
   async open() {
     this.alive = true;
     this.ge = new GilbertElliott(this.cfg().loss, this.cfg().burst);
@@ -944,6 +1117,10 @@ class SimTransport {
   async close() { this.alive = false; }
 }
 const simStats = { sent: 0, dropped: 0 };
+
+/* Registry rather than an inline map, so the connection logic can be exercised
+   against a stub transport without a radio attached. */
+const TRANSPORTS = { serial: SerialTransport, ble: BleTransport, http: HttpTransport, sim: SimTransport };
 
 /* ═══════════════════════════════════════════════════════════════════════════
    §5  Audio — capture, conditioning, Opus encode/decode, playback
@@ -2570,9 +2747,14 @@ client.onState = (what, d) => {
     $('#btnSend').disabled = !state.symbols;
     $('#btnFileSend').disabled = !(typeof fileState !== 'undefined' && fileState.stored);
   }
+  if (what === 'handshake') {
+    t.textContent = 'waiting for the node…'; t.style.color = 'var(--warn)';
+    $('#nodeInfo').innerHTML = 'channel open — asking the node for its config. Nothing is confirmed until it answers.';
+  }
   if (what === 'closed') {
     t.textContent = 'offline'; t.style.color = '';
     $('#btnConnect').disabled = false; $('#btnDisconnect').disabled = true;
+    $('#btnSend').disabled = true; $('#btnFileSend').disabled = true;
   }
   if (what === 'lora' && d) {
     if (d.usePreset && PRESET_BY_ENUM[d.preset]) $('#preset').value = PRESET_BY_ENUM[d.preset];
@@ -2630,7 +2812,20 @@ client.onPacket = m => {
 };
 
 /* ── transport ── */
-$('#transport').onchange = () => { $('#httpWrap').style.display = $('#transport').value === 'http' ? '' : 'none'; };
+const TRANSPORT_HINTS = {
+  serial: 'Most reliable option on desktop. Close any other app holding the port (the Meshtastic web client, a serial monitor) first.',
+  ble: 'Pair the node in your <b>operating system</b> Bluetooth settings first &mdash; its characteristics are encrypted and only the OS can do the PIN (default <code>123456</code>). Only one app can hold a BLE link, so disconnect the phone app. Web Bluetooth on desktop is genuinely flaky; USB serial is the safer path.',
+  http: 'Node must be on WiFi with the web server enabled. Enter a hostname or IP &mdash; a bare number is not an address. Meshvox verifies the node answers before reporting success.',
+  sim: 'No hardware. Your packets loop back through a modelled lossy channel so you can watch loss, repair and reassembly end to end.',
+};
+function showTransportHint() {
+  const k = $('#transport').value;
+  $('#httpWrap').style.display = k === 'http' ? '' : 'none';
+  const h = $('#transportHint');
+  h.innerHTML = TRANSPORT_HINTS[k] || '';
+  h.style.display = TRANSPORT_HINTS[k] ? '' : 'none';
+}
+$('#transport').onchange = showTransportHint;
 $('#btnConnect').onclick = async () => {
   const kind = $('#transport').value;
   $('#btnConnect').disabled = true;
@@ -2644,7 +2839,11 @@ $('#btnConnect').onclick = async () => {
     if (kind === 'sim') log('simulated mesh: your own packets are fed back through a Gilbert-Elliott channel, so you receive your own message and can watch it repair itself.', 'a');
   } catch (e) {
     log('connect failed: ' + e.message, 'e');
-    $('#btnConnect').disabled = false;
+    $('#connTag').textContent = 'offline'; $('#connTag').style.color = '';
+    $('#nodeInfo').innerHTML = '<span style="color:var(--bad)">not connected</span> &mdash; ' +
+      String(e.message).replace(/[<>&]/g, '');
+    $('#btnConnect').disabled = false; $('#btnDisconnect').disabled = true;
+    $('#btnSend').disabled = true; $('#btnFileSend').disabled = true;
   }
 };
 $('#btnDisconnect').onclick = async () => { await client.disconnect(); log('disconnected'); };
@@ -2940,7 +3139,7 @@ $('#btnFileClear').onclick = () => {
   $('#capbar').innerHTML = caps.join(' &nbsp; ');
   if (typeof AudioEncoder === 'undefined')
     log('WebCodecs AudioEncoder is missing — you can still explore the coding maths, but recording will not encode. Use Chrome or Edge.', 'e');
-  $('#httpWrap').style.display = 'none';
+  showTransportHint();
   drawWave(null); renderEstimate(); drawChart(); renderInbox(); renderTx(null);
   addEventListener('resize', () => { drawWave(state.pcm); drawChart(); });
   if ('serviceWorker' in navigator && location.protocol === 'https:')
