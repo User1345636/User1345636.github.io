@@ -148,19 +148,19 @@ footer{padding:16px 20px 30px;color:var(--faint);font-size:11.5px;text-align:cen
 .mixwarn b{color:#ffdada}
 .mixwarn code{font:11.5px var(--mono);background:#1a0e0e;padding:1px 4px;border-radius:3px;color:#ffb0b0}
 /* diagnosis */
-#diag{margin:10px 0 2px;border:1px solid var(--line);border-radius:7px;background:var(--bg3);overflow:hidden}
-#diag .dh{padding:7px 11px;background:#101823;border-bottom:1px solid var(--line);font:11px var(--mono);color:var(--dim);
+.diagbox{margin:10px 0 2px;border:1px solid var(--line);border-radius:7px;background:var(--bg3);overflow:hidden}
+.diagbox .dh{padding:7px 11px;background:#101823;border-bottom:1px solid var(--line);font:11px var(--mono);color:var(--dim);
   display:flex;gap:8px;align-items:center}
-#diag .dh button{margin-left:auto;padding:2px 9px;font-size:11px}
-#diag .st{padding:8px 11px;border-bottom:1px solid #202a37;display:flex;gap:9px;align-items:flex-start;font-size:12.5px}
-#diag .st:last-child{border-bottom:none}
-#diag .st .m{width:15px;flex:0 0 15px;text-align:center;font-weight:700;line-height:1.5}
-#diag .st.ok .m{color:var(--acc2)}
-#diag .st.fail .m{color:var(--bad)}
-#diag .st.warn .m{color:var(--warn)}
-#diag .st b{display:block;color:var(--fg);font-weight:600;font-size:11.5px;margin-bottom:1px}
-#diag .st span{color:var(--dim);line-height:1.5}
-#diag .st.fail span{color:#f2c2c2}
+.diagbox .dh button{margin-left:auto;padding:2px 9px;font-size:11px}
+.diagbox .st{padding:8px 11px;border-bottom:1px solid #202a37;display:flex;gap:9px;align-items:flex-start;font-size:12.5px}
+.diagbox .st:last-child{border-bottom:none}
+.diagbox .st .m{width:15px;flex:0 0 15px;text-align:center;font-weight:700;line-height:1.5}
+.diagbox .st.ok .m{color:var(--acc2)}
+.diagbox .st.fail .m{color:var(--bad)}
+.diagbox .st.warn .m{color:var(--warn)}
+.diagbox .st b{display:block;color:var(--fg);font-weight:600;font-size:11.5px;margin-bottom:1px}
+.diagbox .st span{color:var(--dim);line-height:1.5}
+.diagbox .st.fail span{color:#f2c2c2}
 @keyframes blink{50%{opacity:.25}}
 </style>
 </head>
@@ -215,6 +215,21 @@ footer{padding:16px 20px 30px;color:var(--faint);font-size:11.5px;text-align:cen
       <label class="chk"><input type="checkbox" id="lowPrio" checked> send at BACKGROUND priority</label>
       <label class="chk"><input type="checkbox" id="wantAck"> request Meshtastic ACK (DM only)</label>
     </div>
+    <details class="exp" id="pathPanel"><summary>Mesh reachability test &mdash; is my packet reaching the far node?</summary><div class="body">
+      <p style="margin-top:4px"><b>Meshvox packets are invisible in the stock Meshtastic app.</b> That is deliberate &mdash;
+      they travel on a private portnum so they never appear in anybody&rsquo;s chat. So &ldquo;nothing arrived&rdquo; measured by
+      looking at the Meshtastic app on the far node tells you nothing. This test settles it properly.</p>
+      <div class="row" style="margin:10px 0 0">
+        <label class="f" style="flex:1 1 170px"><span>Far node id</span>
+          <input id="pathTarget" class="mono" placeholder="!a1b2c3d4" spellcheck="false"></label>
+        <button id="btnPathTest" style="align-self:flex-end">Run mesh test</button>
+      </div>
+      <div id="pathOut" style="display:none"></div>
+      <p>It sends a <b>traceroute</b> (portnum 70, which every repeater relays) to map the path, then a direct packet on the
+      Meshvox portnum with <code>want_ack</code>. The far node&rsquo;s <i>firmware</i> answers that acknowledgement itself, so it
+      proves physical delivery even with nothing running at that end. If that fails, it repeats the probe on the text portnum:
+      if the text gets through and Meshvox does not, a repeater on the path is relaying only core portnums.</p>
+    </div></details>
     <details class="exp"><summary>Why port 260 instead of a text message?</summary><div class="body">
       <p>Meshtastic reserves portnums <code>256&ndash;511</code> for private applications. Stock firmware routes and
       rebroadcasts purely on the mesh header &mdash; it never inspects the portnum &mdash; so a private-port packet
@@ -238,7 +253,12 @@ footer{padding:16px 20px 30px;color:var(--faint);font-size:11.5px;text-align:cen
     </div>
     <canvas id="wave" height="68"></canvas>
     <div class="grid4" style="margin-top:10px">
-      <label class="f"><span>Bitrate</span>
+      <label class="f"><span>Codec</span>
+        <select id="codec">
+          <option value="1" selected>MVX-LPC &middot; 1.4&ndash;2.8 kbps</option>
+          <option value="0">Opus &middot; 6 kbps floor</option>
+        </select></label>
+      <label class="f" id="bitrateWrap"><span>Bitrate</span>
         <select id="bitrate">
           <option value="6000" selected>6.0 kbps (floor)</option>
           <option value="8000">8.0 kbps</option>
@@ -248,7 +268,7 @@ footer{padding:16px 20px 30px;color:var(--faint);font-size:11.5px;text-align:cen
           <option value="24000">24 kbps</option>
         </select></label>
       <label class="f"><span>Frame size</span>
-        <select id="frameMs"><option value="20">20 ms</option><option value="40">40 ms</option><option value="60" selected>60 ms</option></select></label>
+        <select id="frameMs"></select></label>
       <label class="f"><span>Silence (DTX)</span>
         <select id="dtx"><option value="1" selected>strip silence</option><option value="0">keep</option></select></label>
       <label class="f"><span>Opus in-band FEC</span>
@@ -689,6 +709,14 @@ function onAirBytes(vmpLen, portnum) {
    look at FromRadio.packet / my_info / node_info / config / queueStatus.
    ═══════════════════════════════════════════════════════════════════════════ */
 const BROADCAST = 0xffffffff;
+const PORT_TEXT = 1, PORT_ROUTING = 5, PORT_TRACEROUTE = 70;
+/* meshtastic Routing.Error */
+const ROUTING_ERR = {
+  0: 'ok', 1: 'no route to that node', 2: 'a relay sent a NAK', 3: 'timed out in the mesh',
+  4: 'no interface', 5: 'gave up after max retransmits', 6: 'the node has no such channel',
+  7: 'packet too large', 8: 'no response', 9: 'blocked by the duty-cycle limiter',
+  10: 'not authorized', 32: 'bad request', 33: 'not authorized', 34: 'PKI failed',
+};
 
 class MeshClient {
   constructor() {
@@ -701,6 +729,8 @@ class MeshClient {
     this.onState = () => {};
     this.nodes = new Map();
     this.ready = false;
+    this._acks = new Map();        // our packet id -> resolver, for routing ACK/NAK
+    this._replies = new Map();     // our packet id -> resolver, for want_response replies
   }
   /* An open channel is not a connection. `ready` is only set once the node has
      actually answered, so nothing starts transmitting into a handshake. */
@@ -769,6 +799,7 @@ class MeshClient {
   /* Build ToRadio{ packet: MeshPacket{ decoded: Data{ portnum, payload } } } */
   async sendData(payload, o) {
     const data = new PB().vint(1, o.portnum).bytes(2, payload);
+    if (o.wantResponse) data.bool(3, true);
     const id = (Math.random() * 0xfffffffe + 1) >>> 0;
     const pkt = new PB()
       .fix32(2, o.to)                 // to
@@ -781,6 +812,24 @@ class MeshClient {
     await this.send(new PB().sub(1, pkt).out());
     if (this.queueKnown && this.queueFree > 0) this.queueFree--;
     return id;
+  }
+
+  /* Send a direct message and wait for the firmware's routing ACK.
+     ---------------------------------------------------------------
+     This is the only way to prove a packet physically reached a node without
+     anything running at the far end: the receiving *firmware* answers any
+     direct packet carrying want_ack, whatever portnum it is on and whether or
+     not an app there understands it. */
+  sendAcked(payload, o, timeoutMs) {
+    return new Promise(async (resolve) => {
+      let id = 0, done = false;
+      const finish = r => { if (done) return; done = true; clearTimeout(timer); this._acks.delete(id); resolve(r); };
+      const timer = setTimeout(() => finish({ ok: false, reason: 'timeout' }), timeoutMs || 30000);
+      try {
+        id = await this.sendData(payload, Object.assign({}, o, { wantAck: true }));
+        this._acks.set(id, finish);
+      } catch (e) { finish({ ok: false, reason: 'send failed: ' + e.message }); }
+    });
   }
 
   _fromRadio(buf) {
@@ -828,12 +877,31 @@ class MeshClient {
       if (f === 1) m.from = v >>> 0; else if (f === 2) m.to = v >>> 0;
       else if (f === 3) m.channel = v; else if (f === 4) decoded = raw;
       else if (f === 6) m.id = v >>> 0; else if (f === 8) m.snr = f32le(raw);
-      else if (f === 9) m.hopLimit = v;
+      else if (f === 9) m.hopLimit = v; else if (f === 15) m.hopStart = v;
     });
     if (!decoded) return;                                      // encrypted / not for us
     pbFields(decoded, (f, v, raw) => {
       if (f === 1) m.portnum = v; else if (f === 2) m.payload = raw;
+      else if (f === 6) m.requestId = v >>> 0;      // Data.request_id — matches an id we sent
     });
+    // ROUTING_APP carries the firmware's ACK/NAK for a packet we sent with
+    // want_ack. It is generated by the far node's router, so it proves physical
+    // delivery even when nothing at that end understands our portnum.
+    if (m.portnum === PORT_ROUTING && m.requestId && this._acks.has(m.requestId)) {
+      let err = 0;
+      if (m.payload) pbFields(m.payload, (f, v) => { if (f === 3) err = v; });
+      const fn = this._acks.get(m.requestId);
+      this._acks.delete(m.requestId);
+      fn({ ok: err === 0, reason: err === 0 ? 'ack' : (ROUTING_ERR[err] || 'error ' + err),
+           code: err, from: m.from, hopsAway: m.hopStart ? m.hopStart - m.hopLimit : null });
+      return;
+    }
+    if (m.requestId && this._replies.has(m.requestId)) {
+      const fn = this._replies.get(m.requestId);
+      this._replies.delete(m.requestId);
+      fn(m);
+      return;
+    }
     if (m.payload) this.onPacket(m);
   }
 }
@@ -902,9 +970,17 @@ const BLE_FROMNUM  = 'ed9da18c-a800-4f66-a670-aa7547e34453';
    PIN), or the adapter is simply being flaky — in which case a retry works.
    So: retry with backoff, then explain rather than parroting the raw error. */
 function bleHint(e) {
-  const msg = (e && e.message) || String(e);
+  const msg = (e && e.message) || String(e) || '(no message)';
   const name = (e && e.name) || '';
   const base = 'Bluetooth connection failed (' + (name || 'error') + ': ' + msg + ').';
+  // Chrome on Windows reports a bare "Unknown error" / "GATT Error Unknown" for
+  // almost every failure to read an encrypted characteristic on an unbonded
+  // device. It is not informative, but it is diagnostic.
+  if (/unknown error|gatt error unknown|unknown gatt/i.test(msg))
+    return base + ' On Windows this specific message nearly always means the node is not bonded with this computer. ' +
+      'Chrome cannot do the pairing itself: open Windows Settings → Bluetooth & devices → Add device, pair the node ' +
+      '(PIN 123456 unless you changed it), then come back and connect. If it is already listed there, remove it and pair it again — ' +
+      'a stale bond produces exactly this error. Also make sure the phone app is not holding the link.';
   if (/connection attempt failed|NetworkError/i.test(name + ' ' + msg))
     return base + ' Most likely one of: the phone app is still connected to this node (only one app can hold a BLE link — close it), ' +
       'or the node is not paired with this computer yet. Meshtastic BLE characteristics are encrypted, and only the operating system can do the PIN, ' +
@@ -949,11 +1025,19 @@ class BleTransport {
     let last = null;
     for (let i = 0; i < attempts; i++) {
       try {
+        // Track which GATT step failed — "unknown error" at connect means
+        // something very different from "unknown error" at startNotifications.
+        this._stage = 'gatt.connect';
         if (!this.dev.gatt.connected) await this.dev.gatt.connect();
+        this._stage = 'getPrimaryService';
         const srv = await this.dev.gatt.getPrimaryService(BLE_SVC);
+        this._stage = 'getCharacteristic(toRadio)';
         this.cTo = await srv.getCharacteristic(BLE_TORADIO);
+        this._stage = 'getCharacteristic(fromRadio)';
         this.cFrom = await srv.getCharacteristic(BLE_FROMRADIO);
+        this._stage = 'getCharacteristic(fromNum)';
         this.cNum = await srv.getCharacteristic(BLE_FROMNUM);
+        this._stage = 'startNotifications';
         await this.cNum.startNotifications();
         this.cNum.addEventListener('characteristicvaluechanged', () => this._drain());
         this.alive = true;
@@ -963,13 +1047,13 @@ class BleTransport {
       } catch (e) {
         last = e;
         try { this.dev.gatt.disconnect(); } catch (_) {}
-        if (i < attempts - 1) {
-          log('Bluetooth attempt ' + (i + 1) + '/' + attempts + ' failed: ' + e.message + ' — retrying', 'w');
-          await sleep(700 * (i + 1));
-        }
+        log('Bluetooth attempt ' + (i + 1) + '/' + attempts + ' failed at "' + this._stage + '" — ' +
+            (e.name || 'Error') + ': ' + (e.message || '(no message)') +
+            (e.code !== undefined ? ' [code ' + e.code + ']' : ''), 'w');
+        if (i < attempts - 1) await sleep(700 * (i + 1));
       }
     }
-    throw new Error(bleHint(last));
+    throw new Error(bleHint(last) + ' It failed at the "' + this._stage + '" step.');
   }
   async _drain() {
     if (this.draining) { this.again = true; return; }
@@ -1198,6 +1282,112 @@ async function diagnoseHttp(rawUrl, o) {
   else add('Node replies', 'fail',
     'The HTTP server accepted both requests but no node config came back' + (bytes ? ' (' + bytes + ' bytes of other traffic)' : '') +
     '. Something is serving the API path, but there is no radio behind it.');
+  return steps;
+}
+
+/* ───────────────────────── Mesh reachability ─────────────────────────
+   "I sent packets through a repeater and none arrived" has several possible
+   causes that look identical from the sending end. This separates them.
+
+   The trick is want_ack on a direct message: the receiving node's *firmware*
+   answers it, whatever portnum the packet is on and whether or not anything
+   at that end understands it. So a probe on the Meshvox portnum and a probe
+   on the text portnum, compared, say precisely where a packet is being lost.  */
+function parseNodeId(s) {
+  const t = String(s == null ? '' : s).trim();
+  if (!t || t === '^all') throw new Error('this test needs one specific node, not a broadcast');
+  const v = parseInt(t.replace(/^!/, ''), 16);
+  if (isNaN(v)) throw new Error('"' + t + '" is not a node id — they look like !a1b2c3d4');
+  return v >>> 0;
+}
+function parseRouteDiscovery(b) {
+  const grab = raw => {
+    const a = [];
+    if (raw) for (let i = 0; i + 4 <= raw.length; i += 4)
+      a.push((raw[i] | (raw[i + 1] << 8) | (raw[i + 2] << 16) | (raw[i + 3] << 24)) >>> 0);
+    return a;
+  };
+  const out = { route: [], routeBack: [] };
+  pbFields(b, (f, v, raw) => {
+    if (f === 1) out.route = grab(raw);
+    else if (f === 3) out.routeBack = grab(raw);
+  });
+  return out;
+}
+
+async function meshPathTest(targetInput, opt) {
+  opt = opt || {};
+  const c = opt.client || client;
+  const o = opt.opts || currentOpts();
+  const wait = opt.timeoutMs || 35000;
+  const steps = [];
+  const add = (name, state, detail) => { steps.push({ name, state, detail }); return state === 'ok'; };
+  const nodeName = n => { const x = c.nodes.get(n); return x && (x.longName || x.shortName) ? hex8(n) + ' (' + (x.longName || x.shortName) + ')' : hex8(n); };
+
+  let target;
+  try { target = parseNodeId(targetInput); } catch (e) { add('Target node', 'fail', e.message); return steps; }
+  if (target === c.myNodeNum) { add('Target node', 'fail', 'that is this node — pick the node at the other end'); return steps; }
+  add('Target node', 'ok', nodeName(target));
+
+  if (!o.hopLimit) {
+    add('Hop limit', 'fail', 'Hop limit is 0, so no node will ever relay this packet — it can only reach radios in direct range. ' +
+      'A path through one repeater needs at least 1; give yourself 2–3 while testing.');
+    return steps;
+  }
+  add('Hop limit', o.hopLimit >= 2 ? 'ok' : 'warn', o.hopLimit + (o.hopLimit === 1
+    ? ' — enough for exactly one relay. If the far node is two or more repeaters away, nothing will arrive. Raise it to 3 while testing.'
+    : ' relay hops allowed'));
+
+  const probe = async (portnum, label) => {
+    const r = await c.sendAcked(new Uint8Array([0x4d, 0x56, 0x58]), {
+      to: target, channel: o.channel, portnum, hopLimit: o.hopLimit, priority: 70
+    }, wait);
+    return r;
+  };
+
+  // 1. traceroute — a core portnum every repeater relays, so it tests the path
+  //    itself without anything Meshvox-specific in the way.
+  let tr = null;
+  try {
+    const id = await c.sendData(new Uint8Array(0), {
+      to: target, channel: o.channel, portnum: PORT_TRACEROUTE,
+      hopLimit: o.hopLimit, wantResponse: true, priority: 70
+    });
+    tr = await new Promise(res => {
+      const t = setTimeout(() => { c._replies.delete(id); res(null); }, wait);
+      c._replies.set(id, m => { clearTimeout(t); res(m); });
+    });
+  } catch (e) { tr = null; }
+  if (tr && tr.payload) {
+    const rd = parseRouteDiscovery(tr.payload);
+    const hops = rd.route.length;
+    add('Traceroute (core portnum 70)', 'ok', hops
+      ? 'reached via ' + hops + ' relay' + (hops === 1 ? '' : 's') + ': ' +
+        [c.myNodeNum].concat(rd.route).concat([target]).map(nodeName).join(' → ')
+      : 'reached directly, no relays involved');
+  } else {
+    add('Traceroute (core portnum 70)', 'fail',
+      'No traceroute reply within ' + Math.round(wait / 1000) + ' s. The mesh itself is not carrying packets to that node ' +
+      'at hop limit ' + o.hopLimit + '. Raise the hop limit, check both ends share the same channel (name and key, same slot), ' +
+      'and confirm the repeater is powered and in range of both. Nothing Meshvox-specific is involved in this step.');
+  }
+
+  // 2. does a packet on our private portnum physically arrive?
+  const mine = await probe(o.portnum, 'meshvox');
+  if (mine.ok) add('Meshvox portnum ' + o.portnum, 'ok', 'the far node\'s firmware acknowledged it — packets on this portnum do arrive');
+  else add('Meshvox portnum ' + o.portnum, 'fail', 'no acknowledgement (' + mine.reason + ')');
+
+  // 3. only worth asking if step 2 failed: does a core portnum get through?
+  if (!mine.ok) {
+    const txt = await probe(PORT_TEXT, 'text');
+    if (txt.ok) add('Text portnum 1 (comparison)', 'ok',
+      'A text-portnum packet to the same node was acknowledged, but the Meshvox one was not. ' +
+      'Something on the path is relaying only core portnums — a repeater set to rebroadcast_mode ' +
+      'CORE_PORTNUMS_ONLY or KNOWN_ONLY will do exactly this. Set that repeater to ALL, or route around it.');
+    else add('Text portnum 1 (comparison)', 'fail',
+      'A plain text packet was not acknowledged either, so this is not about the portnum — ' +
+      'the packet is not reaching that node at all.');
+  }
   return steps;
 }
 
@@ -1494,8 +1684,13 @@ function wavBlob(pcm) {
      0xFF        one frame of silence, no bytes follow (DTX)
    ═══════════════════════════════════════════════════════════════════════════ */
 const MAGIC = 0xa1, T_SYM = 1, T_REQ = 2, T_ACK = 3;
-const FRAME_CODE = { 20: 0, 40: 1, 60: 2 }, FRAME_MS = [20, 40, 60, 60];
 const NO_OFFSET = 0xff;
+/* flags byte: bits 7-6 codec, bits 5-4 frame size, bit 3 in-band FEC.
+   The frame-size table is per codec, so each gets sizes that suit it. */
+const CODEC_OPUS = 0, CODEC_MVX = 1;
+const FRAME_TABLE = { 0: [20, 40, 60, 60], 1: [20, 30, 40, 40] };
+const frameCode = (codec, ms) => Math.max(0, FRAME_TABLE[codec].indexOf(ms));
+const frameMsOf = (codec, code) => (FRAME_TABLE[codec] || FRAME_TABLE[0])[code & 3];
 
 function packFrames(items, symSize) {
   if (symSize > NO_OFFSET) throw new Error('symSize must be < 255 so the offset byte can address it');
@@ -1557,7 +1752,7 @@ function unpackSymbol(sym, off) {
 function buildSym(meta, idx, body, off) {
   const p = new Uint8Array(body.length + 13);
   p[0] = MAGIC; p[1] = T_SYM;
-  p[2] = (FRAME_CODE[meta.frameMs] << 4) | (meta.fec ? 8 : 0);
+  p[2] = ((meta.codec || 0) << 6) | (frameCode(meta.codec || 0, meta.frameMs) << 4) | (meta.fec ? 8 : 0);
   p[3] = meta.k; p[4] = idx; p[5] = body.length;
   p[6] = Math.min(255, meta.nPlanned); p[7] = Math.min(255, Math.round(meta.durMs / 100));
   p[8] = (meta.msgId >> 8) & 255; p[9] = meta.msgId & 255;
@@ -1592,7 +1787,7 @@ function parseVmp(b) {
     const c = crc16(b, 0, b.length - 2);
     if (((b[b.length - 2] << 8) | b[b.length - 1]) !== c) return null;
     return {
-      type: T_SYM, frameMs: FRAME_MS[(b[2] >> 4) & 3], fec: !!(b[2] & 8),
+      type: T_SYM, codec: (b[2] >> 6) & 3, frameMs: frameMsOf((b[2] >> 6) & 3, (b[2] >> 4) & 3), fec: !!(b[2] & 8),
       k: b[3], idx: b[4], symSize: b[5], nPlanned: b[6], durMs: b[7] * 100,
       msgId: (b[8] << 8) | b[9], off: b[10], body: b.slice(11, 11 + b[5])
     };
@@ -1606,6 +1801,345 @@ function parseVmp(b) {
     return { type: T_ACK, msgId: (b[2] << 8) | b[3], origin: ((b[4] << 24) | (b[5] << 16) | (b[6] << 8) | b[7]) >>> 0 };
   }
   return null;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   §5b  MVX-LPC — a low-bitrate LPC vocoder
+   ---------------------------------------------------------------------------
+   Opus bottoms out around 6 kbps, which is still far more than a LoRa mesh
+   wants to carry. Codec2 gets speech into 1.2–3.2 kbps by giving up on
+   waveform coding entirely and transmitting a *model* of the vocal tract
+   instead. This is that same idea, implemented here directly.
+
+   It is NOT bit-compatible with libcodec2 — that would need the C library
+   compiled to WASM. It does not need to be: both ends of a Meshvox link run
+   this code. What it borrows is the approach and the bitrate.
+
+   Per 7-byte frame (56 bits):
+     10th-order LPC as line spectral frequencies   44 bits
+     pitch period, 0 meaning unvoiced               7 bits
+     frame gain, log quantised                      5 bits
+
+   At 20/30/40 ms frames that is 2800/1867/1400 bps, against Opus at 6000.
+   LSFs are quantised with an enforced minimum spacing, which makes the
+   reconstructed synthesis filter unconditionally stable — a vocoder that can
+   produce an unstable filter will eventually produce a very loud noise.
+   ═══════════════════════════════════════════════════════════════════════════ */
+const MVX_RATE = 8000, LPC_ORDER = 10, MVX_BYTES = 7;
+const LSF_BITS = [6, 6, 5, 5, 4, 4, 4, 4, 3, 3];        // 44
+const PITCH_BITS = 7, GAIN_BITS = 5;                     // 56 bits total
+const PITCH_MIN = 20, PITCH_MAX = 146;                   // 55–400 Hz at 8 kHz
+const LSF_GAP = 0.012;                                   // radians
+const PREEMPH = 0.94;
+/* per-index LSF ranges as a fraction of pi, from speech statistics */
+const LSF_LO = [0.02, 0.05, 0.11, 0.18, 0.26, 0.34, 0.42, 0.51, 0.60, 0.70];
+const LSF_HI = [0.20, 0.32, 0.45, 0.56, 0.66, 0.75, 0.83, 0.90, 0.95, 0.99];
+
+class BitW {
+  constructor(n) { this.b = new Uint8Array(n); this.p = 0; }
+  put(v, bits) { for (let i = bits - 1; i >= 0; i--) { if ((v >> i) & 1) this.b[this.p >> 3] |= 0x80 >> (this.p & 7); this.p++; } }
+}
+class BitR {
+  constructor(b) { this.b = b; this.p = 0; }
+  get(bits) { let v = 0; for (let i = 0; i < bits; i++) { v = (v << 1) | ((this.b[this.p >> 3] >> (7 - (this.p & 7))) & 1); this.p++; } return v; }
+}
+
+function autocorr(x, order) {
+  const r = new Float64Array(order + 1);
+  for (let k = 0; k <= order; k++) {
+    let s = 0;
+    for (let i = k; i < x.length; i++) s += x[i] * x[i - k];
+    r[k] = s;
+  }
+  r[0] *= 1.0001; r[0] += 1e-9;                  // white-noise correction
+  for (let k = 1; k <= order; k++) {             // lag window, conditions the matrix
+    const f = Math.exp(-0.5 * Math.pow(2 * Math.PI * 60 * k / MVX_RATE, 2));
+    r[k] *= f;
+  }
+  return r;
+}
+
+function levinson(r, p) {
+  const a = new Float64Array(p + 1), tmp = new Float64Array(p + 1);
+  a[0] = 1;
+  let err = r[0];
+  if (!(err > 0)) return { a, err: 1e-9, ok: false };
+  for (let i = 1; i <= p; i++) {
+    let acc = r[i];
+    for (let j = 1; j < i; j++) acc += a[j] * r[i - j];
+    const k = -acc / err;
+    if (!isFinite(k) || Math.abs(k) >= 0.9999) return { a, err, ok: false };
+    for (let j = 1; j < i; j++) tmp[j] = a[j] + k * a[i - j];
+    for (let j = 1; j < i; j++) a[j] = tmp[j];
+    a[i] = k;
+    err *= 1 - k * k;
+    if (!(err > 0)) return { a, err: 1e-9, ok: false };
+  }
+  return { a, err, ok: true };
+}
+
+/* A(z) -> line spectral frequencies.
+   P = A + z^-(p+1)A(1/z) and Q = A - z^-(p+1)A(1/z) have all their roots on the
+   unit circle. Strip the known roots at z=-1 and z=+1, and both remainders are
+   palindromic, so each evaluates on the unit circle as a real cosine series.
+   The LSFs are where those two series cross zero, and they interleave. */
+function lpcToLsf(a, p) {
+  const P = new Float64Array(p + 2), Q = new Float64Array(p + 2);
+  for (let i = 0; i <= p + 1; i++) {
+    const ai = i <= p ? a[i] : 0, ar = (p + 1 - i) >= 0 && (p + 1 - i) <= p ? a[p + 1 - i] : 0;
+    P[i] = ai + ar; Q[i] = ai - ar;
+  }
+  const pp = new Float64Array(p + 1), qq = new Float64Array(p + 1);
+  pp[0] = P[0]; qq[0] = Q[0];
+  for (let i = 1; i <= p; i++) { pp[i] = P[i] - pp[i - 1]; qq[i] = Q[i] + qq[i - 1]; }
+  const half = p >> 1;
+  const ev = (c, w) => { let s = c[half]; for (let k = 1; k <= half; k++) s += 2 * c[half - k] * Math.cos(k * w); return s; };
+  const roots = c => {
+    const out = [];
+    const N = 512;
+    let prevW = 0, prev = ev(c, 0);
+    for (let n = 1; n <= N && out.length < half; n++) {
+      const w = Math.PI * n / N, cur = ev(c, w);
+      if ((prev <= 0) !== (cur <= 0)) {
+        let lo = prevW, hi = w, flo = prev;
+        for (let it = 0; it < 40; it++) {
+          const mid = 0.5 * (lo + hi), fm = ev(c, mid);
+          if ((flo <= 0) !== (fm <= 0)) hi = mid; else { lo = mid; flo = fm; }
+        }
+        out.push(0.5 * (lo + hi));
+      }
+      prevW = w; prev = cur;
+    }
+    return out;
+  };
+  const rp = roots(pp), rq = roots(qq);
+  if (rp.length !== half || rq.length !== half) return null;
+  const lsf = new Float64Array(p);
+  for (let i = 0; i < half; i++) { lsf[2 * i] = rp[i]; lsf[2 * i + 1] = rq[i]; }
+  for (let i = 1; i < p; i++) if (lsf[i] <= lsf[i - 1]) return null;
+  return lsf;
+}
+
+function polyMul(a, b) {
+  const o = new Float64Array(a.length + b.length - 1);
+  for (let i = 0; i < a.length; i++) for (let j = 0; j < b.length; j++) o[i + j] += a[i] * b[j];
+  return o;
+}
+function lsfToLpc(lsf, p) {
+  const half = p >> 1;
+  let pp = new Float64Array([1]), qq = new Float64Array([1]);
+  for (let i = 0; i < half; i++) {
+    pp = polyMul(pp, new Float64Array([1, -2 * Math.cos(lsf[2 * i]), 1]));
+    qq = polyMul(qq, new Float64Array([1, -2 * Math.cos(lsf[2 * i + 1]), 1]));
+  }
+  const P = polyMul(pp, new Float64Array([1, 1])), Q = polyMul(qq, new Float64Array([1, -1]));
+  const a = new Float64Array(p + 1);
+  for (let i = 0; i <= p; i++) a[i] = 0.5 * (P[i] + Q[i]);
+  a[0] = 1;
+  return a;
+}
+
+function quantLsf(lsf) {
+  const idx = new Int32Array(LPC_ORDER);
+  for (let i = 0; i < LPC_ORDER; i++) {
+    const lo = LSF_LO[i] * Math.PI, hi = LSF_HI[i] * Math.PI;
+    const levels = (1 << LSF_BITS[i]) - 1;
+    idx[i] = Math.round(clamp((lsf[i] - lo) / (hi - lo), 0, 1) * levels);
+  }
+  return idx;
+}
+/* Rebuilding always enforces the minimum spacing, so the decoder can never be
+   handed a set of LSFs that yields an unstable filter — even from a corrupt or
+   hostile bitstream. */
+function dequantLsf(idx) {
+  const q = new Float64Array(LPC_ORDER);
+  for (let i = 0; i < LPC_ORDER; i++) {
+    const lo = LSF_LO[i] * Math.PI, hi = LSF_HI[i] * Math.PI;
+    const levels = (1 << LSF_BITS[i]) - 1;
+    q[i] = lo + (clamp(idx[i], 0, levels) / levels) * (hi - lo);
+  }
+  for (let i = 0; i < LPC_ORDER; i++) {
+    const floor_ = i === 0 ? LSF_GAP : q[i - 1] + LSF_GAP;
+    if (q[i] < floor_) q[i] = floor_;
+  }
+  for (let i = LPC_ORDER - 1; i >= 0; i--) {
+    const ceil_ = Math.PI - (LPC_ORDER - 1 - i) * LSF_GAP;
+    if (q[i] > ceil_) q[i] = ceil_;
+  }
+  for (let i = 1; i < LPC_ORDER; i++) if (q[i] <= q[i - 1]) q[i] = q[i - 1] + LSF_GAP * 0.5;
+  return q;
+}
+
+/* Normalised autocorrelation pitch search with a bias against picking a
+   multiple of the true period, which is the classic vocoder failure. */
+function detectPitch(x) {
+  let best = 0, bestR = 0;
+  const energy = k => { let s = 0; for (let i = 0; i < x.length - k; i++) s += x[i + k] * x[i + k]; return s; };
+  let e0 = 0; for (let i = 0; i < x.length; i++) e0 += x[i] * x[i];
+  if (e0 < 1e-9) return { lag: 0, corr: 0 };
+  for (let lag = PITCH_MIN; lag <= Math.min(PITCH_MAX, x.length - 1); lag++) {
+    let s = 0;
+    for (let i = 0; i + lag < x.length; i++) s += x[i] * x[i + lag];
+    const d = Math.sqrt(e0 * energy(lag)) + 1e-12;
+    const r = s / d;
+    if (r > bestR) { bestR = r; best = lag; }
+  }
+  // prefer a half-lag if it is nearly as good (undo octave errors)
+  for (let div = 2; div <= 4; div++) {
+    const cand = Math.round(best / div);
+    if (cand < PITCH_MIN) break;
+    let s = 0;
+    for (let i = 0; i + cand < x.length; i++) s += x[i] * x[i + cand];
+    const d = Math.sqrt(e0 * energy(cand)) + 1e-12;
+    if (s / d > bestR * 0.85) { best = cand; bestR = s / d; }
+  }
+  return { lag: best, corr: bestR };
+}
+
+class MvxEncoder {
+  constructor(frameMs) {
+    this.n = Math.round(MVX_RATE * frameMs / 1000);
+    this.hist = new Float64Array(80);
+    this.pre = 0;
+  }
+  encode(frame) {                                  // frame: Float32Array of n samples at 8 kHz
+    const n = this.n;
+    const win = new Float64Array(this.hist.length + n);
+    win.set(this.hist, 0);
+    let pre = this.pre;
+    for (let i = 0; i < n; i++) { const s = frame[i]; win[this.hist.length + i] = s - PREEMPH * pre; pre = s; }
+    this.pre = pre;
+    this.hist.set(win.subarray(win.length - this.hist.length));
+
+    const w = new Float64Array(win.length);
+    for (let i = 0; i < win.length; i++) w[i] = win[i] * (0.54 - 0.46 * Math.cos(2 * Math.PI * i / (win.length - 1)));
+
+    const { a, ok } = levinson(autocorr(w, LPC_ORDER), LPC_ORDER);
+    let lsf = ok ? lpcToLsf(a, LPC_ORDER) : null;
+    if (!lsf) lsf = this.lastLsf || dequantLsf(new Int32Array(LPC_ORDER).fill(8));
+    this.lastLsf = lsf;
+
+    // residual energy drives the gain, measured through the quantised filter
+    const aq = lsfToLpc(dequantLsf(quantLsf(lsf)), LPC_ORDER);
+    let acc = 0;
+    const body = win.subarray(win.length - n);
+    for (let i = 0; i < n; i++) {
+      let e = body[i];
+      for (let k = 1; k <= LPC_ORDER; k++) e += aq[k] * (i - k >= 0 ? body[i - k] : win[win.length - n + i - k]);
+      acc += e * e;
+    }
+    const rms = Math.sqrt(acc / n);
+    const gq = clamp(Math.round((Math.log2(rms + 1e-7) + 14) * 2), 0, (1 << GAIN_BITS) - 1);
+
+    const p = detectPitch(body);
+    const voiced = p.corr > 0.30 && p.lag >= PITCH_MIN;
+    const idx = quantLsf(lsf);
+    const bw = new BitW(MVX_BYTES);
+    for (let i = 0; i < LPC_ORDER; i++) bw.put(idx[i], LSF_BITS[i]);
+    bw.put(voiced ? clamp(p.lag - PITCH_MIN + 1, 1, 127) : 0, PITCH_BITS);
+    bw.put(gq, GAIN_BITS);
+    return bw.b;
+  }
+}
+
+class MvxDecoder {
+  constructor(frameMs) {
+    this.n = Math.round(MVX_RATE * frameMs / 1000);
+    this.mem = new Float64Array(LPC_ORDER);
+    this.prevLsf = null;
+    this.phase = 0;
+    this.deemph = 0;
+    this.seed = 22222;
+  }
+  rnd() { this.seed = (this.seed * 1103515245 + 12345) & 0x7fffffff; return this.seed / 0x3fffffff - 1; }
+  decode(bytes) {                                  // -> Float32Array(n) at 8 kHz
+    const n = this.n, out = new Float32Array(n);
+    const br = new BitR(bytes);
+    const idx = new Int32Array(LPC_ORDER);
+    for (let i = 0; i < LPC_ORDER; i++) idx[i] = br.get(LSF_BITS[i]);
+    const pRaw = br.get(PITCH_BITS), gq = br.get(GAIN_BITS);
+    const lsf = dequantLsf(idx);
+    const voiced = pRaw > 0;
+    const lag = voiced ? pRaw - 1 + PITCH_MIN : 0;
+    const gain = Math.pow(2, gq / 2 - 14);
+    if (!this.prevLsf) this.prevLsf = lsf;
+
+    const SUB = 2, sn = Math.floor(n / SUB);
+    let o = 0;
+    for (let s = 0; s < SUB; s++) {
+      const t = (s + 1) / SUB;
+      const il = new Float64Array(LPC_ORDER);
+      for (let i = 0; i < LPC_ORDER; i++) il[i] = this.prevLsf[i] * (1 - t) + lsf[i] * t;
+      const a = lsfToLpc(il, LPC_ORDER);
+      const len = (s === SUB - 1) ? n - o : sn;
+      for (let i = 0; i < len; i++) {
+        let ex;
+        if (voiced) {
+          // impulse train, amplitude scaled so RMS matches the coded gain,
+          // with a little noise so it does not sound like a buzzer
+          this.phase -= 1;
+          if (this.phase <= 0) { this.phase += lag; ex = Math.sqrt(lag); } else ex = 0;
+          ex = ex * 0.92 + this.rnd() * 0.12;
+        } else ex = this.rnd();
+        let y = ex * gain;
+        for (let k = 1; k <= LPC_ORDER; k++) y -= a[k] * this.mem[k - 1];
+        for (let k = LPC_ORDER - 1; k > 0; k--) this.mem[k] = this.mem[k - 1];
+        this.mem[0] = y;
+        this.deemph = y + PREEMPH * this.deemph;
+        out[o + i] = clamp(this.deemph, -1, 1);
+      }
+      o += len;
+    }
+    this.prevLsf = lsf;
+    return out;
+  }
+  silence() {                                      // a dropped or DTX frame
+    const out = new Float32Array(this.n);
+    this.phase = 0; this.deemph *= 0.5;
+    for (let i = 0; i < LPC_ORDER; i++) this.mem[i] *= 0.7;
+    return out;
+  }
+}
+
+async function resampleTo(data, fromRate, toRate) {
+  if (fromRate === toRate) return data;
+  const len = Math.max(1, Math.round(data.length * toRate / fromRate));
+  const off = new OfflineAudioContext(1, len, toRate);
+  const buf = off.createBuffer(1, data.length, fromRate);
+  buf.copyToChannel(data instanceof Float32Array ? data : Float32Array.from(data), 0);
+  const s = off.createBufferSource(); s.buffer = buf; s.connect(off.destination); s.start();
+  return (await off.startRendering()).getChannelData(0).slice();
+}
+
+/* One entry point per direction, so the rest of the app never needs to know
+   which codec produced a frame — the codec id travels in the packet header. */
+async function encodeAudio(pcm48, o) {
+  return o.codec === CODEC_MVX ? encodeMvx(pcm48, o) : encodeOpus(pcm48, o);
+}
+async function decodeAudio(codec, items, frameMs) {
+  return codec === CODEC_MVX ? decodeMvx(items, frameMs) : decodeOpus(items, frameMs);
+}
+
+async function encodeMvx(pcm48, opt) {
+  const pcm = await resampleTo(pcm48, SR, MVX_RATE);
+  const enc = new MvxEncoder(opt.frameMs);
+  const n = enc.n, items = [];
+  for (let off = 0; off + 1 <= pcm.length; off += n) {
+    const f = new Float32Array(n);
+    f.set(pcm.subarray(off, Math.min(pcm.length, off + n)));
+    let peak = 0;
+    for (let i = 0; i < n; i++) peak = Math.max(peak, Math.abs(f[i]));
+    items.push(opt.dtx && peak < 0.006 ? null : enc.encode(f));
+  }
+  return items;
+}
+
+async function decodeMvx(items, frameMs) {
+  const dec = new MvxDecoder(frameMs);
+  const n = dec.n;
+  const out = new Float32Array(items.length * n);
+  items.forEach((b, i) => out.set(b && b.length >= MVX_BYTES ? dec.decode(b) : dec.silence(), i * n));
+  return await resampleTo(out, MVX_RATE, SR);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -1932,7 +2466,7 @@ const rxMsgs = new Map();
 class RxMessage {
   constructor(from, h) {
     this.from = from; this.msgId = h.msgId; this.k = h.k; this.symSize = h.symSize;
-    this.frameMs = h.frameMs; this.durMs = h.durMs; this.nPlanned = h.nPlanned;
+    this.codec = h.codec || 0; this.frameMs = h.frameMs; this.durMs = h.durMs; this.nPlanned = h.nPlanned;
     this.syms = new Map(); this.offs = new Map();
     this.state = 'receiving'; this.attempts = 0;
     this.t0 = Date.now(); this.last = Date.now(); this.gaps = [];
@@ -2014,7 +2548,7 @@ class RxMessage {
     if (!src) { this.state = 'receiving'; this.arm(); renderInbox(); return; }
     const items = unpackStream(src);
     this.items = items;
-    this.pcm = await decodeOpus(items, this.frameMs);
+    this.pcm = await decodeAudio(this.codec, items, this.frameMs);
     this.state = 'done'; this.complete = true;
     log('msg ' + this.msgId + ' from ' + hex8(this.from) + ' recovered from ' + this.syms.size + '/' + this.k +
         ' packets (' + [...this.syms.keys()].filter(i => i >= this.k).length + ' repairs used) — ' +
@@ -2057,7 +2591,7 @@ class RxMessage {
         slot++;
       }
     }
-    this.salvagePcm = await decodeOpus(items, this.frameMs);
+    this.salvagePcm = await decodeAudio(this.codec, items, this.frameMs);
     log('salvage: ' + parsed.size + '/' + this.k + ' source packets present, ' + placed + ' of ~' + slots +
         ' frames real (' + Math.round(100 * placed / slots) + '% of the clip); the rest plays as gaps', 'w');
     return this.salvagePcm;
@@ -2078,7 +2612,7 @@ function currentOpts() {
     preset: $('#preset').value, region: $('#region').value, polite: $('#polite').value,
     symSize: +$('#symSize').value, redundancy: +$('#redundancy').value / 100,
     portnum: +$('#portnum').value, hopLimit: +$('#hopLimit').value, channel: +$('#channelIdx').value,
-    bitrate: +$('#bitrate').value, frameMs: +$('#frameMs').value,
+    codec: +$('#codec').value, bitrate: +$('#bitrate').value, frameMs: +$('#frameMs').value,
     dtx: $('#dtx').value === '1', fec: $('#fec').value === '1',
     lowPrio: $('#lowPrio').checked, wantAck: $('#wantAck').checked, dest
   };
@@ -2093,7 +2627,7 @@ function estimate() {
   } else if (state.pcm) {
     durMs = state.pcm.length / SR * 1000;
     frames = Math.ceil(durMs / o.frameMs);
-    const bpf = Math.ceil(o.bitrate * o.frameMs / 8000);
+    const bpf = o.codec === CODEC_MVX ? MVX_BYTES : Math.ceil(o.bitrate * o.frameMs / 8000);
     coded = frames * (bpf + 1);                            // 1 length byte per frame
     k = Math.max(1, Math.ceil(coded / o.symSize));
   } else return null;
@@ -2998,24 +3532,43 @@ $('#transport').onchange = showTransportHint;
 $('#httpUrl').addEventListener('input', showTransportHint);
 
 const MARK = { ok: '✓', fail: '✗', warn: '!' };
-function renderDiag(steps, running) {
-  const d = $('#diag');
+function renderDiag(steps, running, elId, title) {
+  const d = $(elId || '#diag');
+  d.classList.add('diagbox');
   d.style.display = '';
   const plain = steps.map(s => (s.state === 'ok' ? '[ok]  ' : s.state === 'warn' ? '[warn]' : '[FAIL]') +
     ' ' + s.name + ': ' + s.detail).join('\n');
-  d.innerHTML = '<div class="dh"><span>' + (running ? 'testing…' : 'diagnosis') + '</span>' +
-    '<span class="faint">' + (navigator.userAgent.length > 60 ? navigator.userAgent.slice(0, 60) + '…' : navigator.userAgent) + '</span>' +
-    '<button id="diagCopy">copy</button><button id="diagHide">hide</button></div>' +
+  d.innerHTML = '<div class="dh"><span>' + (running ? 'testing…' : (title || 'diagnosis')) + '</span>' +
+    '<button class="dcopy">copy</button><button class="dhide">hide</button></div>' +
     steps.map(s => '<div class="st ' + s.state + '"><span class="m">' + MARK[s.state] + '</span>' +
       '<span><b>' + s.name + '</b>' + String(s.detail).replace(/[<>&]/g, '') + '</span></div>').join('');
-  $('#diagHide').onclick = () => { d.style.display = 'none'; };
-  $('#diagCopy').onclick = async () => {
-    const text = 'Meshvox diagnosis\n' + navigator.userAgent + '\npage: ' + location.href + '\n\n' + plain;
-    try { await navigator.clipboard.writeText(text); $('#diagCopy').textContent = 'copied'; }
-    catch (e) { log(text, 'a'); $('#diagCopy').textContent = 'in log'; }
-    setTimeout(() => { const b = $('#diagCopy'); if (b) b.textContent = 'copy'; }, 2000);
+  d.querySelector('.dhide').onclick = () => { d.style.display = 'none'; };
+  d.querySelector('.dcopy').onclick = async ev => {
+    const text = 'Meshvox ' + (title || 'diagnosis') + '\n' + navigator.userAgent +
+      '\npage: ' + location.href + '\n\n' + plain;
+    const b = ev.target;
+    try { await navigator.clipboard.writeText(text); b.textContent = 'copied'; }
+    catch (e) { log(text, 'a'); b.textContent = 'in log'; }
+    setTimeout(() => { b.textContent = 'copy'; }, 2000);
   };
 }
+
+$('#btnPathTest').onclick = async () => {
+  const b = $('#btnPathTest');
+  if (!client.connected) { log('connect to a node first', 'w'); return; }
+  b.disabled = true; b.textContent = 'Testing…';
+  renderDiag([{ name: 'Running', state: 'warn', detail: 'probing the mesh — allow up to a minute on a slow preset' }],
+    true, '#pathOut', 'mesh test');
+  try {
+    const steps = await meshPathTest($('#pathTarget').value);
+    renderDiag(steps, false, '#pathOut', 'mesh test');
+    const bad = steps.find(s => s.state === 'fail');
+    log(bad ? 'mesh test: ' + bad.name + ' — ' + bad.detail : 'mesh test: the far node is reachable on the Meshvox portnum', bad ? 'e' : 'g');
+  } catch (e) {
+    renderDiag([{ name: 'Mesh test crashed', state: 'fail', detail: e.message }], false, '#pathOut', 'mesh test');
+  }
+  b.disabled = false; b.textContent = 'Run mesh test';
+};
 
 $('#btnDiagnose').onclick = async () => {
   const b = $('#btnDiagnose');
@@ -3096,7 +3649,7 @@ async function reencode() {
   if (!state.pcm) return;
   const o = currentOpts();
   try {
-    const items = await encodeOpus(state.pcm, o);
+    const items = await encodeAudio(state.pcm, o);
     state.items = items;
     const packed = packFrames(items, o.symSize);
     state.symbols = packed.syms; state.offs = packed.offs;
@@ -3116,6 +3669,23 @@ async function reencode() {
 function scheduleReencode() { clearTimeout(encTimer); encTimer = setTimeout(reencode, 350); }
 
 /* ── settings ── */
+/* Frame sizes and the bitrate control are codec-specific: Opus is told a
+   bitrate, MVX has a fixed 7-byte frame so the frame length *is* the bitrate. */
+function syncCodecUi(keep) {
+  const codec = +$('#codec').value;
+  const want = keep ? +$('#frameMs').value : null;
+  const opts = FRAME_TABLE[codec].filter((v, i, a) => a.indexOf(v) === i);
+  $('#frameMs').innerHTML = opts.map(ms => {
+    const label = codec === CODEC_MVX
+      ? ms + ' ms &middot; ' + Math.round(MVX_BYTES * 8000 / ms) + ' bps'
+      : ms + ' ms';
+    return '<option value="' + ms + '">' + label + '</option>';
+  }).join('');
+  $('#frameMs').value = (want && opts.includes(want)) ? want : (codec === CODEC_MVX ? 30 : 60);
+  $('#bitrateWrap').style.display = codec === CODEC_MVX ? 'none' : '';
+  $('#fec').closest('label').style.display = codec === CODEC_MVX ? 'none' : '';
+}
+$('#codec').onchange = () => { syncCodecUi(false); scheduleReencode(); };
 for (const id of ['#bitrate', '#frameMs', '#dtx', '#fec']) $(id).onchange = scheduleReencode;
 $('#symSize').oninput = () => { $('#symSizeV').textContent = $('#symSize').value; scheduleReencode(); };
 $('#redundancy').oninput = () => { $('#redundancyV').textContent = $('#redundancy').value + '%'; renderEstimate(); drawChart(); };
@@ -3153,7 +3723,7 @@ $('#btnSend').onclick = async () => {
   const e = estimate();
   const meta = {
     msgId: (Math.random() * 65535) | 0, k: state.symbols.length, symSize: o.symSize,
-    frameMs: o.frameMs, fec: o.fec, durMs: state.durMs, nPlanned: state.symbols.length + e.r
+    codec: o.codec, frameMs: o.frameMs, fec: o.fec, durMs: state.durMs, nPlanned: state.symbols.length + e.r
   };
   const job = new TxJob(state.symbols, state.offs, meta, o, e);
   state.job = job;
@@ -3346,6 +3916,7 @@ $('#btnFileClear').onclick = () => {
   $('#capbar').innerHTML = caps.join(' &nbsp; ');
   if (typeof AudioEncoder === 'undefined')
     log('WebCodecs AudioEncoder is missing — you can still explore the coding maths, but recording will not encode. Use Chrome or Edge.', 'e');
+  syncCodecUi(false);
   showTransportHint();
   drawWave(null); renderEstimate(); drawChart(); renderInbox(); renderTx(null);
   addEventListener('resize', () => { drawWave(state.pcm); drawChart(); });
